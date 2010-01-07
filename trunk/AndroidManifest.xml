@@ -12,7 +12,7 @@
             </intent-filter>
         </activity>
         
-        <activity android:name=".tutorial.Code1" android:label="@string/app_name">
+        <activity android:name=".tools.GameActivity" android:label="@string/app_name">
             <intent-filter>  
             	 <action android:name="android.intent.action.VIEW" />              
                 <category android:name="android.intent.category.DEFAULT" />
