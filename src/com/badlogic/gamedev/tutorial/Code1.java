@@ -7,7 +7,6 @@ import android.app.Activity;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 
-
 public class Code1 extends Activity implements GLSurfaceView.Renderer
 {
 	/** GLSurfaceView **/
@@ -56,11 +55,37 @@ public class Code1 extends Activity implements GLSurfaceView.Renderer
 		// we ignore this for now
 	}
 	
+	/**
+	 * Called when the application is paused. We need to
+	 * also pause the GLSurfaceView.
+	 */
+	@Override
+	protected void onPause() {
+		super.onPause();
+		glSurface.onPause();		
+	}
+
+	/**
+	 * Called when the application is resumed. We need to
+	 * also resume the GLSurfaceView.
+	 */
+	@Override
+	protected void onResume() {
+		super.onResume();
+		glSurface.onResume();		
+	}
+	
+	/**
+	 * @return the viewport width in pixels
+	 */
 	public int getViewportWidth( )
 	{
 		return width;
 	}
 	
+	/**
+	 * @return the viewport height in pixels
+	 */
 	public int getViewportHeight( )
 	{
 		return height;
