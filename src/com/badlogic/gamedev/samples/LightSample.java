@@ -54,8 +54,7 @@ public class LightSample extends GameActivity implements GameListener
 	
 	@Override
 	public void mainLoopIteration(GameActivity activity, GL10 gl) 
-	{	
-		gl.glClearColor( 1, 0, 0, 1 );
+	{			
 		gl.glClear( GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT );
 		gl.glViewport( 0, 0, activity.getViewportWidth(), activity.getViewportHeight() );
 		
