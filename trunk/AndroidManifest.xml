@@ -12,10 +12,26 @@
             </intent-filter>
         </activity>
         
-        <activity android:name=".tools.GameActivity" android:label="Game Activity"/>                    
-        <activity android:name=".samples.InputSample" android:label="Input Sample"/>                    
-        <activity android:name=".samples.TriangleSample" android:label="Triangle Sample"/>
-        <activity android:name=".samples.TextureSample" android:label="Texture Sample"/>
+        <activity android:name=".tools.GameActivity" android:label="Game Activity">
+        <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+        </intent-filter>
+        </activity>                    
+        <activity android:name=".samples.InputSample" android:label="Input Sample">
+        <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+        </intent-filter>
+        </activity>                    
+        <activity android:name=".samples.TriangleSample" android:label="Triangle Sample">
+        <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+        </intent-filter>
+        </activity>
+        <activity android:name=".samples.TextureSample" android:label="Texture Sample">
+        <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+        </intent-filter>
+        </activity>
 
     </application>
     <uses-sdk android:minSdkVersion="3" />

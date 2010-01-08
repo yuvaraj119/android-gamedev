@@ -77,7 +77,7 @@ public class GameActivity extends Activity implements GLSurfaceView.Renderer, On
 	 */
 	@Override
 	public void onDrawFrame(GL10 gl) 
-	{		
+	{						
 		long currentFrameStart = System.nanoTime();
 		deltaTime = (currentFrameStart-lastFrameStart) / 1000000000.0f;
 		lastFrameStart = currentFrameStart;

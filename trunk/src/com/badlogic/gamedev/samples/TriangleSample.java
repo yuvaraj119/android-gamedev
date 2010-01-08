@@ -48,12 +48,13 @@ public class TriangleSample extends GameActivity implements GameListener
 		vertices.put( 0.5f );
 		vertices.put( 0 );
 		
-		vertices.rewind();
+		vertices.position(0);			
 	}
 	
 	@Override
 	public void mainLoopIteration(GameActivity activity, GL10 gl) 
 	{	
+		gl.glViewport(0, 0, getViewportWidth(), getViewportHeight());		
 		gl.glEnableClientState(GL10.GL_VERTEX_ARRAY );    
 		gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertices);
 		gl.glDrawArrays(GL10.GL_TRIANGLES, 0, 3);
