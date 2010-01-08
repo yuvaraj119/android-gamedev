@@ -47,8 +47,9 @@ public class ColorSample extends GameActivity implements GameListener
 	@Override
 	public void mainLoopIteration(GameActivity activity, GL10 gl) 
 	{	
+		gl.glViewport( 0, 0, activity.getViewportWidth(), activity.getViewportHeight() );
 		gl.glLoadIdentity();
-		gl.glColor4f( 1, 0, 0, 1 );
+		gl.glColor4f( 1, 0, 1, 1 );
 		gl.glEnableClientState(GL10.GL_VERTEX_ARRAY );    
 		gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertices);
 		gl.glDrawArrays(GL10.GL_TRIANGLES, 0, 3);
