@@ -532,9 +532,9 @@ Die Texture Klasse ist noch einfacher:
 
 Beim Instanzieren geben wir wieder die GL10 Instanz an, gleich wie beim Mesh. Außerdem übergeben wir die Bitmap, die gewünschten Vergrößerungs- und Verkleinerungs-Filter sowie die Wrap Modi für die s und t Texture-Koordinaten. Diese haben wir ja oben ganz kurz angerissen. Auch Mip-Mapping ist hier schon implementiert, einfach den minFilter auf TextureFilter.MipMap setzen. Des weiteren gibt es eine Methode ''bind()'' die die Texture bindet, gleich wie ''glBindTexture''. Die Methode ''dispose'' löscht die Texture und gibt alle Resourcen frei. Die Methode ''draw()'' ist ein sehr nettes Feature: Sie erlaubt es im Nachhinein eine andere Bitmap an eine bestimmte x, y Position in der Texture zu zeichnen. Die Koordinaten werden dabei in Pixel angegeben, der Ursprung ist das obere linke Eck, die positive y-Achse geht nach unten. Intern bindet die Methode die Texture vor dem zeichnen, man muss hier also auf den Seiteneffekt achten. 
 
-Was die Klasse nicht macht ist das Einschalten von Texturierung über ''glEnable''. Darauf also nicht vergessen. Ein Beispiel für die Verwendung der Texture Klasse in Zusammenhang mit der Mesh Klasse findet ihr unter [
+Was die Klasse nicht macht ist das Einschalten von Texturierung über ''glEnable''. Darauf also nicht vergessen. Ein Beispiel für die Verwendung der Texture Klasse in Zusammenhang mit der Mesh Klasse findet ihr unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/TextureMeshSample.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/TextureMeshSample.java] anschaun. Das Mesh dort verwendet Colors und Texture-Coordinates was einen hübschen Effekt hat :)
 
-Damit haben wir jetzt zwei sehr 
+Damit haben wir jetzt zwei sehr kleine und feine Klassen die uns viel Arbeit und Code abnehmen. 
 
 == SoundPool und MediaPlayer ==
 = Space Invaders =
