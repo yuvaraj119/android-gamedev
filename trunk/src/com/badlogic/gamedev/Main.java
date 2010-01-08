@@ -11,6 +11,7 @@ import com.badlogic.gamedev.samples.ColorSample;
 import com.badlogic.gamedev.samples.ColorSample2;
 import com.badlogic.gamedev.samples.InputSample;
 import com.badlogic.gamedev.samples.MeshSample;
+import com.badlogic.gamedev.samples.TextureMeshSample;
 import com.badlogic.gamedev.samples.TextureSample;
 import com.badlogic.gamedev.samples.TriangleSample;
 import com.badlogic.gamedev.tools.GameActivity;
@@ -22,7 +23,7 @@ public class Main extends ListActivity
 	{
 		super.onCreate(savedInstanceState); 
 		String[] items = new String[]{"GameActivity", "Input Sample", "Triangle Sample",  "Color Sample",
-									  "Color Sample 2","Texture Sample", "Mesh Sample"
+									  "Color Sample 2","Texture Sample", "Mesh Sample", "Texture & Mesh Sample"
 									 };
 		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));        
 	}
@@ -49,7 +50,9 @@ public class Main extends ListActivity
 			intent = new Intent( this, TextureSample.class );
 		if( keyword.equals( "Mesh Sample" ) )
 			intent = new Intent( this, MeshSample.class );
-		
+		if( keyword.equals( "Texture & Mesh Sample" ) )
+			intent = new Intent( this, TextureMeshSample.class );
+			
 		startActivity( intent );
 	}
 }
