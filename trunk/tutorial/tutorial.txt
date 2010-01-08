@@ -1,11 +1,11 @@
 = Einleitung =
 
-Dieser Artikel soll in mehreren Etappen an das Thema Spieleentwicklung heranführen. Eine allgemeine Einführung in die Thematik bildet dabei den Grundstock. Diese soll Grundbegriffe und Mechanismen überlicksartig erklären. Anschließend werden die einzelnen Teilaufgaben bei der Entwicklung eines Spiels erklärt. Die so erarbeiteten Themen werden abschließend in eine kleine Space Invaders Variante gegossen.
+Dieser Artikel soll in mehreren Etappen an das Thema Spieleentwicklung heranfÃ¼hren. Eine allgemeine EinfÃ¼hrung in die Thematik bildet dabei den Grundstock. Diese soll Grundbegriffe und Mechanismen Ã¼berlicksartig erklÃ¤ren. AnschlieÃŸend werden die einzelnen Teilaufgaben bei der Entwicklung eines Spiels erklÃ¤rt. Die so erarbeiteten Themen werden abschlieÃŸend in eine kleine Space Invaders Variante gegossen.
 
-Als kleine Vorwarnung: Ich schreibe seit ca. 10 Jahren kleinere und größere Spiele. Meine Herangehensweise ist sicher nicht die optimalste. Auch können mir im Rahmen dieses Artikels faktische Fehler unterlaufen, ich werde aber versuchen diese zu minimieren. Auch werde ich wo angebracht Anglizismen verwenden da diese das googlen nach weiterführendem Material erleichtern. Auch werde ich einige Wikipedia Links einbauen für Begriffe die man eventuel Nachschlagen möchte. Los geht's. 
+Als kleine Vorwarnung: Ich schreibe seit ca. 10 Jahren kleinere und grÃ¶ÃŸere Spiele. Meine Herangehensweise ist sicher nicht die optimalste. Auch kÃ¶nnen mir im Rahmen dieses Artikels faktische Fehler unterlaufen, ich werde aber versuchen diese zu minimieren. Auch werde ich wo angebracht Anglizismen verwenden da diese das googlen nach weiterfÃ¼hrendem Material erleichtern. Auch werde ich einige Wikipedia Links einbauen fÃ¼r Begriffe die man eventuel Nachschlagen mÃ¶chte. Los geht's. 
 
 = Was muss ich vorab wissen? =
-In diesem Artikel setze ich ein paar Dinge als Minimum vorraus. Keine Angst, höhere Mathematik gehört nicht dazu :)
+In diesem Artikel setze ich ein paar Dinge als Minimum vorraus. Keine Angst, hÃ¶here Mathematik gehÃ¶rt nicht dazu :)
 
 * [http://www.mindview.net/Books/TIJ/ Java]
 * Handhabung von [http://www.eclipse.org/ Eclipse]
@@ -13,12 +13,12 @@ In diesem Artikel setze ich ein paar Dinge als Minimum vorraus. Keine Angst, höh
 * [http://developer.android.com/reference/android/app/Activity.html#ActivityLifecycle Activity Life Cycle]
 * [http://developer.android.com/guide/developing/eclipse-adt.html Erstellen eines neuen Android Projekts in Eclipse]
 
-Den Code zu diesem Tutorial könnt ihr euch per SVN von der Addresse http://android-gamedev.googlecode.com/svn/trunk/ holen. Im Projekt gibt es eine Main Activity die euch gleich wie in den SDK Demos eine Liste an Applikationen zeigt. Einfach das Projekt aus dem SVN auschecken, in Eclipse importieren und eine Run Configuration anlegen und die Default Launch Activity starten. 
+Den Code zu diesem Tutorial kÃ¶nnt ihr euch per SVN von der Addresse http://android-gamedev.googlecode.com/svn/trunk/ holen. Im Projekt gibt es eine Main Activity die euch gleich wie in den SDK Demos eine Liste an Applikationen zeigt. Einfach das Projekt aus dem SVN auschecken, in Eclipse importieren und eine Run Configuration anlegen und die Default Launch Activity starten. 
 
 = Wo fang ich an? =
-Am Anfang jedes Spiels steht eine Idee. Wird es ein Puzzler? Ein Rundenstrategiespiel? Ein First-Person-Shooter? Auch wenn diese Genres unterschiedlicher nicht sein könnten, so unterscheiden sie sich im Grunde ihres Daseins oft wenig. Ein Spiel kann in mehrere  Module zur Erledigung diverser Aufgaben eingeteilt werden:
+Am Anfang jedes Spiels steht eine Idee. Wird es ein Puzzler? Ein Rundenstrategiespiel? Ein First-Person-Shooter? Auch wenn diese Genres unterschiedlicher nicht sein kÃ¶nnten, so unterscheiden sie sich im Grunde ihres Daseins oft wenig. Ein Spiel kann in mehrere  Module zur Erledigung diverser Aufgaben eingeteilt werden:
 
-* '''Applikationsgerüst'''
+* '''ApplikationsgerÃ¼st'''
 * '''Eingabe Modul'''
 * '''Datei I/O Modul'''
 * '''Grafik Modul'''
@@ -26,10 +26,10 @@ Am Anfang jedes Spiels steht eine Idee. Wird es ein Puzzler? Ein Rundenstrategie
 * '''Netzwerk Modul'''
 * '''Simulations Modul'''
 
-Im folgenden wollen wir uns mit diesen 6 Modulen etwas genauer beschäftigen.
+Im folgenden wollen wir uns mit diesen 6 Modulen etwas genauer beschÃ¤ftigen.
 
-== Applikationsgerüst ==
-Das Applikationsgerüst stellt die Basis für das Spiel dar. In der Regel ähnelt dieses herkömmlichen Applikationsgerüsten nicht. Spiele sind in den meisten Fällen nicht Event-basiert, d.h. sie laufen ständig, zeichnen dabei die Spielwelt permanent neu, holen sich dauernd neuen User Input und simulieren die Welt (für Kartenspiele und Ähnliches muss dies natürlich nicht gelten). So man nicht gerade für eine Konsole programmiert, stellt sich einem jedoch das Problem, dass die meisten Betriebssystem Event-basierte Programmierung als Paradigma gewählt haben. So auch auf Android. Applikationen werden dabei nur bei Bedarf neu gezeichnet, zum Beispiel wenn der User Text eingibt, einen Button drückt und so weiter, beziehungsweise wird Code nur dann ausgeführt wenn es eine User-Eingabe gibt. Im Allgemeinen hebelt man dies aus, indem man einen seperaten Thread startet der das Betriebssystem veranlasst die Applikation permanent neu zu zeichnen. In diesem Thread befindet sich so gut wie immer eine Schleife, auch Main Loop genannt, innerhalb derer sich immer das selbe abspielt (stark vereinfacht):
+== ApplikationsgerÃ¼st ==
+Das ApplikationsgerÃ¼st stellt die Basis fÃ¼r das Spiel dar. In der Regel Ã¤hnelt dieses herkÃ¶mmlichen ApplikationsgerÃ¼sten nicht. Spiele sind in den meisten FÃ¤llen nicht Event-basiert, d.h. sie laufen stÃ¤ndig, zeichnen dabei die Spielwelt permanent neu, holen sich dauernd neuen User Input und simulieren die Welt (fÃ¼r Kartenspiele und Ã„hnliches muss dies natÃ¼rlich nicht gelten). So man nicht gerade fÃ¼r eine Konsole programmiert, stellt sich einem jedoch das Problem, dass die meisten Betriebssystem Event-basierte Programmierung als Paradigma gewÃ¤hlt haben. So auch auf Android. Applikationen werden dabei nur bei Bedarf neu gezeichnet, zum Beispiel wenn der User Text eingibt, einen Button drÃ¼ckt und so weiter, beziehungsweise wird Code nur dann ausgefÃ¼hrt wenn es eine User-Eingabe gibt. Im Allgemeinen hebelt man dies aus, indem man einen seperaten Thread startet der das Betriebssystem veranlasst die Applikation permanent neu zu zeichnen. In diesem Thread befindet sich so gut wie immer eine Schleife, auch Main Loop genannt, innerhalb derer sich immer das selbe abspielt (stark vereinfacht):
 
  while( !done )
  {
@@ -38,75 +38,75 @@ Das Applikationsgerüst stellt die Basis für das Spiel dar. In der Regel ähnelt d
     renderWorld( )   
  }  
 
-Wie genau dieser Main Loop ausschaut hängt von vielerlei Faktoren ab, zum Beispiel dem verwendeten Betriebssystem, dem Spiel selbst und so weiter. 
+Wie genau dieser Main Loop ausschaut hÃ¤ngt von vielerlei Faktoren ab, zum Beispiel dem verwendeten Betriebssystem, dem Spiel selbst und so weiter. 
 
-Im Rahmen dieses Artikels werden wir sehen wir man dieses Konzept äußerst einfach auf Android implementieren kann. 
+Im Rahmen dieses Artikels werden wir sehen wir man dieses Konzept Ã¤uÃŸerst einfach auf Android implementieren kann. 
 
 == Eingabe Modul ==
-Um dem Spieler die Möglichkeit zu geben in das Spielsystem einzugreifen müssen dessen Eingaben irgendwie gelesen werden. Diese Aufgabe übernimmt das Eingabe Modul. Tastaturen, Mäuse, Touch-Screens, Joysticks, Gamepads und einige andere exotische Möglichkeiten stehen hier zur Verfügung. Wie man an die Eingabe kommt ist dabei wieder Betriebssystem-abhängig. 
+Um dem Spieler die MÃ¶glichkeit zu geben in das Spielsystem einzugreifen mÃ¼ssen dessen Eingaben irgendwie gelesen werden. Diese Aufgabe Ã¼bernimmt das Eingabe Modul. Tastaturen, MÃ¤use, Touch-Screens, Joysticks, Gamepads und einige andere exotische MÃ¶glichkeiten stehen hier zur VerfÃ¼gung. Wie man an die Eingabe kommt ist dabei wieder Betriebssystem-abhÃ¤ngig. 
 
-Android verfügt über einige Eingabe Möglichkeiten. Wir werden uns mit den wichtigsten zwei beschäftigen: dem Touch-Screen sowie dem Accelerometer.
+Android verfÃ¼gt Ã¼ber einige Eingabe MÃ¶glichkeiten. Wir werden uns mit den wichtigsten zwei beschÃ¤ftigen: dem Touch-Screen sowie dem Accelerometer.
 
 == Datei I/O Modul ==
-Alle Resourcen eines Spieles müssen in irgendeiner Form der Applikation zugänglich gemacht werden. In speziellen Fällen kann das Spiel diese On-the-fly zur Laufzeit prozedural selbst erstellen, meistens liegen diese aber in Form von Dateien auf einem Datenträger vor. Auch hier gibt es verschiedene Möglichkeiten der Ablage: Dateien können schön geordnet in Ordnern abgelegt werden, wild in einem einzigen Ordner gespeichert sein oder gar in einem Zip-File fein säuberlich gepackt vorliegen. Das Datei I/O Modul soll dies abstrahieren damit im Programmcode der Zugriff auf die Resourcen erleichtert wird. 
+Alle Resourcen eines Spieles mÃ¼ssen in irgendeiner Form der Applikation zugÃ¤nglich gemacht werden. In speziellen FÃ¤llen kann das Spiel diese On-the-fly zur Laufzeit prozedural selbst erstellen, meistens liegen diese aber in Form von Dateien auf einem DatentrÃ¤ger vor. Auch hier gibt es verschiedene MÃ¶glichkeiten der Ablage: Dateien kÃ¶nnen schÃ¶n geordnet in Ordnern abgelegt werden, wild in einem einzigen Ordner gespeichert sein oder gar in einem Zip-File fein sÃ¤uberlich gepackt vorliegen. Das Datei I/O Modul soll dies abstrahieren damit im Programmcode der Zugriff auf die Resourcen erleichtert wird. 
 
-Android bietet hier schon einen netten Ansatz mit seinem Resourcen und Asset System auf das wir später noch zu sprechen kommen werden.
+Android bietet hier schon einen netten Ansatz mit seinem Resourcen und Asset System auf das wir spÃ¤ter noch zu sprechen kommen werden.
 
 == Grafik Modul ==
-In unseren modernen Zeiten ist für viele Spieleentwickler dieser Teil eines Spiels wohl der wichtigste (teils zu Lasten des Spielspaßes). Dieses Modul übernimmt die Darstellung sämtlicher grafischen Inhalte des Spieles, sei dies das User Interface, welches in der Regel zweidimensional ist oder die Spielewelt selbst, meist in der dritten Dimension. Da letzteres oft rechenintensiv ist, wird spezielle Hardware verwendet um das ganze zu beschleunigen. Die Kommunikation mit dieser Hardware, ihr klar zu machen wie wo was gezeichnet werden soll, sowie die Verwaltung von grafischen Resourcen wie [http://en.wikipedia.org/wiki/Bitmap Bitmaps] und Geometry (auch [http://en.wikipedia.org/wiki/Polygon_mesh Meshes] genannt) ist die Hauptaufgabe dieses System. Hierunter fallen auch Dinge wie das Zeichnen von [http://en.wikipedia.org/wiki/Particle_system Partikel-Effekten] oder der Einsatz von sogenannten [http://en.wikipedia.org/wiki/Shader Shadern] (auf Android noch nicht möglich). Ganz allgemein kann festgehalten werden das die meisten Objekte die simuliert werden auch eine grafische Entsprechung haben. Meiner Erfahrung nach ist es äußerst hilfreich die simulierte Welt komplett unabhängig von der grafischen Darstellung zu machen. Das Grafikmodul holt sich lediglich Information von der Welt-Simulation, hat aber auf diese keinen Einfluss. Wem das etwas zu wage ist: keine Angst der Zusammenhang sollte spätestens beim Entwickeln des Space Invader Clones erkenntlich werden. Es sei jedoch gesagt, dass dieser Ansatz es erlaubt das Grafik Modul beliebig aus zu tauschen, zum Beispiel statt einer 2D Darstellung das ganze auf 3D zu portieren, ohne dass dabei der Simulationsteil geändert werden müsste.
+In unseren modernen Zeiten ist fÃ¼r viele Spieleentwickler dieser Teil eines Spiels wohl der wichtigste (teils zu Lasten des SpielspaÃŸes). Dieses Modul Ã¼bernimmt die Darstellung sÃ¤mtlicher grafischen Inhalte des Spieles, sei dies das User Interface, welches in der Regel zweidimensional ist oder die Spielewelt selbst, meist in der dritten Dimension. Da letzteres oft rechenintensiv ist, wird spezielle Hardware verwendet um das ganze zu beschleunigen. Die Kommunikation mit dieser Hardware, ihr klar zu machen wie wo was gezeichnet werden soll, sowie die Verwaltung von grafischen Resourcen wie [http://en.wikipedia.org/wiki/Bitmap Bitmaps] und Geometry (auch [http://en.wikipedia.org/wiki/Polygon_mesh Meshes] genannt) ist die Hauptaufgabe dieses System. Hierunter fallen auch Dinge wie das Zeichnen von [http://en.wikipedia.org/wiki/Particle_system Partikel-Effekten] oder der Einsatz von sogenannten [http://en.wikipedia.org/wiki/Shader Shadern] (auf Android noch nicht mÃ¶glich). Ganz allgemein kann festgehalten werden das die meisten Objekte die simuliert werden auch eine grafische Entsprechung haben. Meiner Erfahrung nach ist es Ã¤uÃŸerst hilfreich die simulierte Welt komplett unabhÃ¤ngig von der grafischen Darstellung zu machen. Das Grafikmodul holt sich lediglich Information von der Welt-Simulation, hat aber auf diese keinen Einfluss. Wem das etwas zu wage ist: keine Angst der Zusammenhang sollte spÃ¤testens beim Entwickeln des Space Invader Clones erkenntlich werden. Es sei jedoch gesagt, dass dieser Ansatz es erlaubt das Grafik Modul beliebig aus zu tauschen, zum Beispiel statt einer 2D Darstellung das ganze auf 3D zu portieren, ohne dass dabei der Simulationsteil geÃ¤ndert werden mÃ¼sste.
 
-Aufmerksamen Lesern ist vielleicht der Zusammenhang zwischen dem Grafik Modul und dem Main Loop bereits aufgefallen. Neuste Grafikkarten wird meist mit Benchmarks zu Leibe gerückt die die sogenannten Frames per Second (kurz FPS) oder [http://en.wikipedia.org/wiki/Frames_per_second#Frame_rates_in_video_games Frame Rate] messen. Diese geben an wie oft der Main Loop in einer Sekunde durchlaufen wurde. Es wird also gezählt wie oft der Main Loop (Input verarbeiten, Welt simulieren und das ganze dann zu zeichnen) in einer Sekunde durchlaufen wird. Im Zuge unserer Unternehmung werden wir immer ein Auge auf die Frame Rate werfen um etwaige Bottlenecks in unserem Spiel identifizieren zu können. 
+Aufmerksamen Lesern ist vielleicht der Zusammenhang zwischen dem Grafik Modul und dem Main Loop bereits aufgefallen. Neuste Grafikkarten wird meist mit Benchmarks zu Leibe gerÃ¼ckt die die sogenannten Frames per Second (kurz FPS) oder [http://en.wikipedia.org/wiki/Frames_per_second#Frame_rates_in_video_games Frame Rate] messen. Diese geben an wie oft der Main Loop in einer Sekunde durchlaufen wurde. Es wird also gezÃ¤hlt wie oft der Main Loop (Input verarbeiten, Welt simulieren und das ganze dann zu zeichnen) in einer Sekunde durchlaufen wird. Im Zuge unserer Unternehmung werden wir immer ein Auge auf die Frame Rate werfen um etwaige Bottlenecks in unserem Spiel identifizieren zu kÃ¶nnen. 
 
-Später werden wir sehen wie wir Android 2D und 3D Grafiken über [http://en.wikipedia.org/wiki/OpenGL OpenGL ES] entlocken können.
+SpÃ¤ter werden wir sehen wie wir Android 2D und 3D Grafiken Ã¼ber [http://en.wikipedia.org/wiki/OpenGL OpenGL ES] entlocken kÃ¶nnen.
 
 == Sound Modul ==
-Soundeffekte und Musik gehören zu jedem guten Spiel. Dementsprechend kümmert sich das Sound Modul um das Abspielen solcher Resourcen. Dabei gibt es zwischen Soundeffekten und Musik einen wichtigen Unterschied: Soundeffekte sind in der Regel sehr klein (Kilobyte Bereich) und werden direkt im Hauptspeicher gehalten da sie oft verwendet werden, zum Beispiel das Feuergeräusch einer Kannone. Musik wiederum liegt oft in komprimierter Form vor (mp3, ogg) und braucht unkomprimiert (und damit abspielbar) massig Speicher. Sie wird daher meist gestreamed, das heißt bei Bedarf stückweise von der Festplatte oder einem anderen Medium (DVD,Internet) nachgeladen. Auf Implementationsebene macht dies oft einen Unterschied da dieser Nachlademechanismus meist selbst implementiert werden muss. 
+Soundeffekte und Musik gehÃ¶ren zu jedem guten Spiel. Dementsprechend kÃ¼mmert sich das Sound Modul um das Abspielen solcher Resourcen. Dabei gibt es zwischen Soundeffekten und Musik einen wichtigen Unterschied: Soundeffekte sind in der Regel sehr klein (Kilobyte Bereich) und werden direkt im Hauptspeicher gehalten da sie oft verwendet werden, zum Beispiel das FeuergerÃ¤usch einer Kannone. Musik wiederum liegt oft in komprimierter Form vor (mp3, ogg) und braucht unkomprimiert (und damit abspielbar) massig Speicher. Sie wird daher meist gestreamed, das heiÃŸt bei Bedarf stÃ¼ckweise von der Festplatte oder einem anderen Medium (DVD,Internet) nachgeladen. Auf Implementationsebene macht dies oft einen Unterschied da dieser Nachlademechanismus meist selbst implementiert werden muss. 
 
-In Zeiten von Surround Sound Heimsystemen legen Spieleentwickler auch wert auf dreidimensionalen Klang, meist gleich wie bei der Grafik Hardware-beschleunigt. Android bietet diese Möglichkeit noch nicht erlaubt aber relativ schmerzlos das Abspielen von Soundeffekten und das streamen von Musik wie wir später noch sehen werden.
+In Zeiten von Surround Sound Heimsystemen legen Spieleentwickler auch wert auf dreidimensionalen Klang, meist gleich wie bei der Grafik Hardware-beschleunigt. Android bietet diese MÃ¶glichkeit noch nicht erlaubt aber relativ schmerzlos das Abspielen von Soundeffekten und das streamen von Musik wie wir spÃ¤ter noch sehen werden.
 
 == Netzwerk Modul ==
-Seit World of Warcraft und Counter Strike ist klar: an Multiplayer-Möglichkeiten kommt kein modernes Spiel vorbei. Das Netzwerk Modul hat dabei gleich mehrere Aufgaben zu stemmen. Auf der einen Seite handhabt es die Kommunikation mit etwaigen Servern, sendet Mitteilungen von Spielern herum, lädt von Spielern gebastelte Levels ins Netz und so weiter. Dies sind quasi administrative Aufgaben und haben nur indirekt mit dem Spielgeschehen selbst zu tun. Auf der anderen Seite gilt es Spieledaten wie aktuelle Positionen, das Abfeuern von Kugeln, das entsenden von Truppen und vieles mehr den anderen an der Partie teilhabenden Rechnern im Netz mit zu teilen. Abhängig vom Genre des Spiels kommen hier verschiedene Methoden zum Einsatz um das Spielgeschehen zu synchronisieren. Dieser Themenbereich ist so groß und komplex das ihm am besten ein eigener Artikel gewidmet werden sollte. Im Rahmen dieses Textes werde ich nicht weiter auf diese Komponente eingehen. 
+Seit World of Warcraft und Counter Strike ist klar: an Multiplayer-MÃ¶glichkeiten kommt kein modernes Spiel vorbei. Das Netzwerk Modul hat dabei gleich mehrere Aufgaben zu stemmen. Auf der einen Seite handhabt es die Kommunikation mit etwaigen Servern, sendet Mitteilungen von Spielern herum, lÃ¤dt von Spielern gebastelte Levels ins Netz und so weiter. Dies sind quasi administrative Aufgaben und haben nur indirekt mit dem Spielgeschehen selbst zu tun. Auf der anderen Seite gilt es Spieledaten wie aktuelle Positionen, das Abfeuern von Kugeln, das entsenden von Truppen und vieles mehr den anderen an der Partie teilhabenden Rechnern im Netz mit zu teilen. AbhÃ¤ngig vom Genre des Spiels kommen hier verschiedene Methoden zum Einsatz um das Spielgeschehen zu synchronisieren. Dieser Themenbereich ist so groÃŸ und komplex das ihm am besten ein eigener Artikel gewidmet werden sollte. Im Rahmen dieses Textes werde ich nicht weiter auf diese Komponente eingehen. 
 
 == Simulations Modul ==
-Damit sich die Dinge im Spiel bewegen muss man sie auch irgendwie antreiben. Das ist die Aufgabe des Simulationsmoduls. Es beinhaltet sämtliche Informationen zum Spielgeschehen selbst wie die Position von Spielfiguren, deren aktuelle Aktion, wieviel Munition noch über ist und so weiter. Auf Basis der User Eingaben sowie der Entscheidungen einer etwaig implementierten Künstlichen Intelligenz wird das Verhalten der Spielobjekte simuliert. Die Simulation läuft dabei immer Schrittweise ab. In jedem Durchgang des Main Loops wird die Simulation um einen Schritt vorangetrieben. Dies passiert zumeist Zeit-basiert, das heißt man simuliert eine bestimmte Zeitspanne. Für ein weiches Ablaufen wird als Zeitspanne meist die Zeit die seit dem zeichnen des letzten Frames vergangen ist herangezogen. Als kleines Beispiel: gegeben einer Kanonenkugel die mit 10m/s nach rechts fliegt schreiten wir einen Schritt in der Simulation weiter. Die Zeitspanne seit dem letzten Frame beträgt 0.016s (16 Millisekunden, entspricht einer Frame Rate von 60fps). 10ms/s * 0.016s = 0.16m, das heißt die Kannonenkugel ist nach Abschluss dieses Simulationsschrittes um 16 Zentimeter weiter links im Vergleich zum letzten Frame. Diese Art des Simulationsschrittes nennt man [http://www.gamedev.net/reference/articles/article1604.asp Frame Independent Movement] und sollte Bestandteil jedes Simulations Modules sein. Wie der Name schon sagt ist es egal wieviel FPS das Spiel schafft, die Kanonenkugel wird sich auf allen Systemen gleich verhalten (wenn auch die Zwischenschritte andere sein mögen). Es sei angemerkt dass bei Verwendung von Physik Systemen man meist fixe Zeitschritte verwendet da die kleinen Schwankungen beim Messen der Zeitspanne zwischen dem aktuellen und dem letzten Frame viele Physik Systeme instabil machen können. Wir werden in unserem Space Invaders Clone keine grandiosen Physikspielereien implementieren, daher bleiben wir bei der herkömmlichen Zeit-basierten Methode die die Frame Zeitspanne heranzieht.
+Damit sich die Dinge im Spiel bewegen muss man sie auch irgendwie antreiben. Das ist die Aufgabe des Simulationsmoduls. Es beinhaltet sÃ¤mtliche Informationen zum Spielgeschehen selbst wie die Position von Spielfiguren, deren aktuelle Aktion, wieviel Munition noch Ã¼ber ist und so weiter. Auf Basis der User Eingaben sowie der Entscheidungen einer etwaig implementierten KÃ¼nstlichen Intelligenz wird das Verhalten der Spielobjekte simuliert. Die Simulation lÃ¤uft dabei immer Schrittweise ab. In jedem Durchgang des Main Loops wird die Simulation um einen Schritt vorangetrieben. Dies passiert zumeist Zeit-basiert, das heiÃŸt man simuliert eine bestimmte Zeitspanne. FÃ¼r ein weiches Ablaufen wird als Zeitspanne meist die Zeit die seit dem zeichnen des letzten Frames vergangen ist herangezogen. Als kleines Beispiel: gegeben einer Kanonenkugel die mit 10m/s nach rechts fliegt schreiten wir einen Schritt in der Simulation weiter. Die Zeitspanne seit dem letzten Frame betrÃ¤gt 0.016s (16 Millisekunden, entspricht einer Frame Rate von 60fps). 10ms/s * 0.016s = 0.16m, das heiÃŸt die Kannonenkugel ist nach Abschluss dieses Simulationsschrittes um 16 Zentimeter weiter links im Vergleich zum letzten Frame. Diese Art des Simulationsschrittes nennt man [http://www.gamedev.net/reference/articles/article1604.asp Frame Independent Movement] und sollte Bestandteil jedes Simulations Modules sein. Wie der Name schon sagt ist es egal wieviel FPS das Spiel schafft, die Kanonenkugel wird sich auf allen Systemen gleich verhalten (wenn auch die Zwischenschritte andere sein mÃ¶gen). Es sei angemerkt dass bei Verwendung von Physik Systemen man meist fixe Zeitschritte verwendet da die kleinen Schwankungen beim Messen der Zeitspanne zwischen dem aktuellen und dem letzten Frame viele Physik Systeme instabil machen kÃ¶nnen. Wir werden in unserem Space Invaders Clone keine grandiosen Physikspielereien implementieren, daher bleiben wir bei der herkÃ¶mmlichen Zeit-basierten Methode die die Frame Zeitspanne heranzieht.
 
-Abhängig vom Spieletyp gehört auch die künstliche Intelligenz zum Simulations Modul. Diese kann sehr simpel Ausfallen, zum Beispiel das Verhalten der Goombas in Super Mario die nur dumm nach rechts und links laufen. In Echtzeitstrategiespielen kann diese schon um einiges komplexer werden. Der Terminus künstliche Intelligenz ist hier streng gesehen auch nicht ganz korrekt, in Ermangelung eines besseren Begriffs bleiben wir aber einfach dabei. 
+AbhÃ¤ngig vom Spieletyp gehÃ¶rt auch die kÃ¼nstliche Intelligenz zum Simulations Modul. Diese kann sehr simpel Ausfallen, zum Beispiel das Verhalten der Goombas in Super Mario die nur dumm nach rechts und links laufen. In Echtzeitstrategiespielen kann diese schon um einiges komplexer werden. Der Terminus kÃ¼nstliche Intelligenz ist hier streng gesehen auch nicht ganz korrekt, in Ermangelung eines besseren Begriffs bleiben wir aber einfach dabei. 
 
 = Und auf Android? =
-Wir wollen nur für all die oben genannten Module eine Entsprechung auf Android entwickeln. Wir beginnen mit der Activity selbst und versuchen das Main Loop Muster dort zu implementieren. Das Managen von Dateien über Resourcen und Assets werden wir uns als nächster anschaun. Anschließend werden wir uns näher mit OpenGL ES beschäftigen und Android zwingen für uns interessante Dinge zu zeichnen. Die Ausgabe von Soundeffekten und Musik bildet den Abschluss dieses Kapitels womit wir dann für unseren Space Invaders Clone gerüstet sind. 
+Wir wollen nur fÃ¼r all die oben genannten Module eine Entsprechung auf Android entwickeln. Wir beginnen mit der Activity selbst und versuchen das Main Loop Muster dort zu implementieren. Das Managen von Dateien Ã¼ber Resourcen und Assets werden wir uns als nÃ¤chster anschaun. AnschlieÃŸend werden wir uns nÃ¤her mit OpenGL ES beschÃ¤ftigen und Android zwingen fÃ¼r uns interessante Dinge zu zeichnen. Die Ausgabe von Soundeffekten und Musik bildet den Abschluss dieses Kapitels womit wir dann fÃ¼r unseren Space Invaders Clone gerÃ¼stet sind. 
 
-Im Zuge dieses Kapitels werden wir wiederverwendbare Komponenten bauen. Schließlich wäre es nicht sinnvoll jedes mal das Rad neu zu erfinden. Alle Codes könnt ihr unter [http://code.google.com/p/android-gamedev/ http://code.google.com/p/android-gamedev/] finden und per SVN auschecken. Das Projekt beinhaltet ein paar Beispielprogramme zu den einzelnen Abschnitten sowie den Space Invaders Clone selbst.
+Im Zuge dieses Kapitels werden wir wiederverwendbare Komponenten bauen. SchlieÃŸlich wÃ¤re es nicht sinnvoll jedes mal das Rad neu zu erfinden. Alle Codes kÃ¶nnt ihr unter [http://code.google.com/p/android-gamedev/ http://code.google.com/p/android-gamedev/] finden und per SVN auschecken. Das Projekt beinhaltet ein paar Beispielprogramme zu den einzelnen Abschnitten sowie den Space Invaders Clone selbst.
 
 == Android Activity ==
-Das Grundgerüst unseres Spiels bildet eine simple Activity. Dabei ergibt sich ein klassisches Henne/Ei Problem: wir müssen hier schon mit OpenGL ES beginnen ohne uns schon damit aus zu kennen. Aber keine Angst, das ganze erweist sich als relativ einfach. 
+Das GrundgerÃ¼st unseres Spiels bildet eine simple Activity. Dabei ergibt sich ein klassisches Henne/Ei Problem: wir mÃ¼ssen hier schon mit OpenGL ES beginnen ohne uns schon damit aus zu kennen. Aber keine Angst, das ganze erweist sich als relativ einfach. 
 
-Ziel in diesem Kapitel wird es sein eine Lauffähige OpenGL ES Activity zu bauen, die den grundlegenden Activity Life Cycle respektiert. Seit SDK 1.5 gibt es die sogenannten [http://developer.android.com/reference/android/opengl/GLSurfaceView.html GLSurfaceView]. Sie ist ein GUI Baustein ähnlich zum Beispiel einer List View die man einfach in die Activity einhängt und die das initialisieren von OpenGL mit halbwegs guten Parametern für uns übernimmt. Des weiteren startet sie einen zweiten Thread neben dem GUI Thread der Activity der das Neuzeichnen des Geschehens permanent anstößt. Hier sieht man schon erste paralleln zum Main Loop Konzept. Wir werden dies ausnützen.
+Ziel in diesem Kapitel wird es sein eine LauffÃ¤hige OpenGL ES Activity zu bauen, die den grundlegenden Activity Life Cycle respektiert. Seit SDK 1.5 gibt es die sogenannten [http://developer.android.com/reference/android/opengl/GLSurfaceView.html GLSurfaceView]. Sie ist ein GUI Baustein Ã¤hnlich zum Beispiel einer List View die man einfach in die Activity einhÃ¤ngt und die das initialisieren von OpenGL mit halbwegs guten Parametern fÃ¼r uns Ã¼bernimmt. Des weiteren startet sie einen zweiten Thread neben dem GUI Thread der Activity der das Neuzeichnen des Geschehens permanent anstÃ¶ÃŸt. Hier sieht man schon erste paralleln zum Main Loop Konzept. Wir werden dies ausnÃ¼tzen.
 
-Damit wir eine Möglichkeit haben das Neuzeichnen selbst zu übernehmen bietet die GLSurfaceView ein Listener Konzept (auch [http://en.wikipedia.org/wiki/Observer_pattern Observer Design Pattern] genannt). Eine Applikation die sich in den Rendering-Thread der GLSurfaceView einhängen möchte registriert bei dieser eine Implementierung des Interface [http://developer.android.com/reference/android/opengl/GLSurfaceView.Renderer.html Renderer]. Dieses Interface hat drei Methoden die abhängig vom Status der GLSurfaceView aufgerufen werden:
+Damit wir eine MÃ¶glichkeit haben das Neuzeichnen selbst zu Ã¼bernehmen bietet die GLSurfaceView ein Listener Konzept (auch [http://en.wikipedia.org/wiki/Observer_pattern Observer Design Pattern] genannt). Eine Applikation die sich in den Rendering-Thread der GLSurfaceView einhÃ¤ngen mÃ¶chte registriert bei dieser eine Implementierung des Interface [http://developer.android.com/reference/android/opengl/GLSurfaceView.Renderer.html Renderer]. Dieses Interface hat drei Methoden die abhÃ¤ngig vom Status der GLSurfaceView aufgerufen werden:
 
  public abstract void onDrawFrame(GL10 gl)
  public abstract void onSurfaceCreated(GL10 gl, EGLConfig config)
  public abstract void onSurfaceChanged(GL10 gl, int width, int height)
  
-Die Methode [http://developer.android.com/reference/android/opengl/GLSurfaceView.Renderer.html#onDrawFrame(javax.microedition.khronos.opengles.GL10) onDrawFrame] ist jene die die GLSurfaceView jedesmal beim Neuzeichnen aufruft. Den Parameter ''gl'' den wir dabei erhalten werden wir später genauer Besprechen. 
+Die Methode [http://developer.android.com/reference/android/opengl/GLSurfaceView.Renderer.html#onDrawFrame(javax.microedition.khronos.opengles.GL10) onDrawFrame] ist jene die die GLSurfaceView jedesmal beim Neuzeichnen aufruft. Den Parameter ''gl'' den wir dabei erhalten werden wir spÃ¤ter genauer Besprechen. 
 
 Die Methode [http://developer.android.com/reference/android/opengl/GLSurfaceView.Renderer.html#onSurfaceCreated(javax.microedition.khronos.opengles.GL10,%20javax.microedition.khronos.egl.EGLConfig) onSurfaceCreated] wird aufgerufen sobald die GLSurfaceView das fertig initialisiert ist. Hier kann man verschiedene Setup Aufgaben erledigen wie zum Beispiel das laden von Resourcen. 
 
-Die Methode [http://developer.android.com/reference/android/opengl/GLSurfaceView.Renderer.html#onSurfaceChanged(javax.microedition.khronos.opengles.GL10,%20int,%20int) onSurfaceChanged] wird aufgerufen wenn sich die Abmessungen der GLSurfaceView ändern. Dies passiert wenn der User das Android Device kippt und so in den Portrait oder Landscape Modus schaltet. Die Parameter ''width'' und ''height'' geben uns dabei die Breite und Höhe des Bereiches an auf den wir zeichnen und zwar in Pixel. Diese Information werden wir später noch benötigen. 
+Die Methode [http://developer.android.com/reference/android/opengl/GLSurfaceView.Renderer.html#onSurfaceChanged(javax.microedition.khronos.opengles.GL10,%20int,%20int) onSurfaceChanged] wird aufgerufen wenn sich die Abmessungen der GLSurfaceView Ã¤ndern. Dies passiert wenn der User das Android Device kippt und so in den Portrait oder Landscape Modus schaltet. Die Parameter ''width'' und ''height'' geben uns dabei die Breite und HÃ¶he des Bereiches an auf den wir zeichnen und zwar in Pixel. Diese Information werden wir spÃ¤ter noch benÃ¶tigen. 
 
 Unsere erste Activity hat also ein paar Aufgaben:
 
-* Erstellen einer GLSurfaceView und Einhängen in die Activity
-* Setzen einer Renderer Implementierung für die GLSurfaceView
+* Erstellen einer GLSurfaceView und EinhÃ¤ngen in die Activity
+* Setzen einer Renderer Implementierung fÃ¼r die GLSurfaceView
 * Implementierung der Rendererer Implementierung
 
-Für eine saubere Implementierung werden wir einfach die Klasse Activity ableiten und diese ''GameActivity'' nennen. Dieser verpassen wir einen Member vom Typ GLSurfaceView den wir in der ''onCreate'' Methode der Klasse instanzieren und in die Activity einhängen. Weiters implementiert unsere abgeleitete Activity das Interface Renderer. In zweit weiteren Member Variablen speichern wird die aktuelle Größe des zu bemalenden Bereichs die wir beim Aufruf der Methode onSurfaceCreated in Erfahrung bringen. Diesen Bereich nennt man im übrigen auch [http://en.wikipedia.org/wiki/Viewport Viewport]. Wir werden diese Terminologie fortan übernehmen. Wir verpassen der Klasse noch Getter Methoden damit wir später auf die Abmessungen zugreifen können. 
+FÃ¼r eine saubere Implementierung werden wir einfach die Klasse Activity ableiten und diese ''GameActivity'' nennen. Dieser verpassen wir einen Member vom Typ GLSurfaceView den wir in der ''onCreate'' Methode der Klasse instanzieren und in die Activity einhÃ¤ngen. Weiters implementiert unsere abgeleitete Activity das Interface Renderer. In zweit weiteren Member Variablen speichern wird die aktuelle GrÃ¶ÃŸe des zu bemalenden Bereichs die wir beim Aufruf der Methode onSurfaceCreated in Erfahrung bringen. Diesen Bereich nennt man im Ã¼brigen auch [http://en.wikipedia.org/wiki/Viewport Viewport]. Wir werden diese Terminologie fortan Ã¼bernehmen. Wir verpassen der Klasse noch Getter Methoden damit wir spÃ¤ter auf die Abmessungen zugreifen kÃ¶nnen. 
 
-Um den Activity Life Cycle auch sauber zu implementieren müssen wir die Methoden ''onPause'' und ''onResume'' noch überschreiben. In dieser Rufen wir die selben Methoden auch für unsere GLSurfaceView auf. Dies ist nötig damit diese verschiedene Resourcen sauber verwalten kann. 
+Um den Activity Life Cycle auch sauber zu implementieren mÃ¼ssen wir die Methoden ''onPause'' und ''onResume'' noch Ã¼berschreiben. In dieser Rufen wir die selben Methoden auch fÃ¼r unsere GLSurfaceView auf. Dies ist nÃ¶tig damit diese verschiedene Resourcen sauber verwalten kann. 
 
-In unserer Activity werden wir auch gleich die Frame Rate und die Zeitspanne zwischen dem aktuellen und dem letzten Frame messen. Die Zeitspanne nennt man auch Delta Time, wieder ein Begriff den wir uns ab jetzt merken werden. Um eine genaue Zeitmessung im Millisekundenbereich zu gewährleisten verwenden wir die [http://java.sun.com/j2se/1.5.0/docs/api/java/lang/System.html#nanoTime%28%29 System.nanoTime] Methode. Diese liefert uns die aktuelle Zeit in Nanosekunden als long Typ zurück. Für die Delta Time merken wir uns den Zeitpunkt des letzten Frames als eigenen Member in der Klasse. Die Delta Time selbst errechnen wir dann in der ''onDrawFrame'' Methode indem wir einfach die aktuelle Zeit minus der zuvor gespeicherten Zeit nehmen. Diese Delta Time speichern wir in eine weitere Member Variable um später dann im Spiel einfach darauf zugreifen zu können, wir benötigen sie ja für das Frame Independant Movement. Zum Abschluss schreiben wir die aktuelle Zeit wieder in unsere dafür vorgesehene Member Variable für die nächste Delta Time Berechnung im nächsten Frame. 
+In unserer Activity werden wir auch gleich die Frame Rate und die Zeitspanne zwischen dem aktuellen und dem letzten Frame messen. Die Zeitspanne nennt man auch Delta Time, wieder ein Begriff den wir uns ab jetzt merken werden. Um eine genaue Zeitmessung im Millisekundenbereich zu gewÃ¤hrleisten verwenden wir die [http://java.sun.com/j2se/1.5.0/docs/api/java/lang/System.html#nanoTime%28%29 System.nanoTime] Methode. Diese liefert uns die aktuelle Zeit in Nanosekunden als long Typ zurÃ¼ck. FÃ¼r die Delta Time merken wir uns den Zeitpunkt des letzten Frames als eigenen Member in der Klasse. Die Delta Time selbst errechnen wir dann in der ''onDrawFrame'' Methode indem wir einfach die aktuelle Zeit minus der zuvor gespeicherten Zeit nehmen. Diese Delta Time speichern wir in eine weitere Member Variable um spÃ¤ter dann im Spiel einfach darauf zugreifen zu kÃ¶nnen, wir benÃ¶tigen sie ja fÃ¼r das Frame Independant Movement. Zum Abschluss schreiben wir die aktuelle Zeit wieder in unsere dafÃ¼r vorgesehene Member Variable fÃ¼r die nÃ¤chste Delta Time Berechnung im nÃ¤chsten Frame. 
 
-Als letzten Puzzle Stein werden wir noch an unserem Design etwas failen. Wir wollen unsere Activity ja nicht jedesmal neu schreiben, darum führen wir ein eigenes Listener Konzept ein. Dies machen wir über eine simples Interface welches zwei Methoden hat:
+Als letzten Puzzle Stein werden wir noch an unserem Design etwas failen. Wir wollen unsere Activity ja nicht jedesmal neu schreiben, darum fÃ¼hren wir ein eigenes Listener Konzept ein. Dies machen wir Ã¼ber eine simples Interface welches zwei Methoden hat:
 
  public interface GameListener
  {
@@ -114,66 +114,66 @@ Als letzten Puzzle Stein werden wir noch an unserem Design etwas failen. Wir wol
     public void mainLoopIteration( GameActivity activity, GL10 gl );
  }
 
-Der GameActivity spendieren wir eine Methode ''setGameListener'' der wir eine GameListener Implementierung übergeben können. Die Activity merkt sich diesen Listener und ruft seine Methoden entsprechend auf. Die Methode ''setup'' wird dabei nach dem Start des Spiels aufgerufen und ermöglicht es uns Resourcen zu laden die wir dann später im Main Loop gebrauchen. In der GameActivity rufen wir diese Methode in ''onSurfaceCreated'' auf, so ein GameListener gesetzt wurde. Die Methode mainLoopIteration implementiert den Körper des Main Loop. Hier werden wir später dann alles für unser Spiel nötige erledigen wie die Welt zu simulieren oder diese zu Zeichnen. Diese Methode wird in der Activity in ''onDrawFrame'' aufgerufen. Fangen wir mit der Programmierung eines neuen Spiels an implementieren wir lediglich eine Activity die direkt von GameActivity ableitet und setzen ihr einen GameListener in der onCreate Methode. Der GameListener ist also das eigentlich Spiel. 
+Der GameActivity spendieren wir eine Methode ''setGameListener'' der wir eine GameListener Implementierung Ã¼bergeben kÃ¶nnen. Die Activity merkt sich diesen Listener und ruft seine Methoden entsprechend auf. Die Methode ''setup'' wird dabei nach dem Start des Spiels aufgerufen und ermÃ¶glicht es uns Resourcen zu laden die wir dann spÃ¤ter im Main Loop gebrauchen. In der GameActivity rufen wir diese Methode in ''onSurfaceCreated'' auf, so ein GameListener gesetzt wurde. Die Methode mainLoopIteration implementiert den KÃ¶rper des Main Loop. Hier werden wir spÃ¤ter dann alles fÃ¼r unser Spiel nÃ¶tige erledigen wie die Welt zu simulieren oder diese zu Zeichnen. Diese Methode wird in der Activity in ''onDrawFrame'' aufgerufen. Fangen wir mit der Programmierung eines neuen Spiels an implementieren wir lediglich eine Activity die direkt von GameActivity ableitet und setzen ihr einen GameListener in der onCreate Methode. Der GameListener ist also das eigentlich Spiel. 
 
-Damit haben wir vorerst den Grundstock für unser erstes Spiel gelegt, eine voll Funktionsfähige Activity die uns die Verwendung von OpenGL erlaubt. Wir werden die GameActivity Klasse gleich noch ein wenig ausbauen um dort auch Eingaben entgegen zu nehmen. Den Source für die Klasse könnt ihr euch unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/tools/GameActivity.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/tools/GameActivity.java] ansehen.  
+Damit haben wir vorerst den Grundstock fÃ¼r unser erstes Spiel gelegt, eine voll FunktionsfÃ¤hige Activity die uns die Verwendung von OpenGL erlaubt. Wir werden die GameActivity Klasse gleich noch ein wenig ausbauen um dort auch Eingaben entgegen zu nehmen. Den Source fÃ¼r die Klasse kÃ¶nnt ihr euch unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/tools/GameActivity.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/tools/GameActivity.java] ansehen.  
 
 == Touch Screen & Accelerometer ==
-Das Lesen von User Eingaben auf Android ist wie vieles anderes wieder über ein Listener Konzept implementiert. Wir vernachlässigen hier Eingaben über den Trackball, die Tastatur oder das D-Pad da dies den Rahmen dieses Artikels wohl sprengen würde. Wir konzentrieren uns zuerst auf Touch Eingaben und gehen später zum Accelerometer über.
+Das Lesen von User Eingaben auf Android ist wie vieles anderes wieder Ã¼ber ein Listener Konzept implementiert. Wir vernachlÃ¤ssigen hier Eingaben Ã¼ber den Trackball, die Tastatur oder das D-Pad da dies den Rahmen dieses Artikels wohl sprengen wÃ¼rde. Wir konzentrieren uns zuerst auf Touch Eingaben und gehen spÃ¤ter zum Accelerometer Ã¼ber.
 
-Für die Eingabe per Touch brauchen wir ein GUI Element das diese auch entgegennimmt. Mit der GLSurfaceView in unserer GameActivity haben wir bereits einen geeigneten Kandidaten. Es gilt somit nur einen entsprechenden Listener bei der GLSurfaceView zu registrieren. Das Interface das wir implementieren müssen nennt sich [http://developer.android.com/reference/android/view/View.OnTouchListener.html OnTouchListener] und hat nur eine einzige Methode
+FÃ¼r die Eingabe per Touch brauchen wir ein GUI Element das diese auch entgegennimmt. Mit der GLSurfaceView in unserer GameActivity haben wir bereits einen geeigneten Kandidaten. Es gilt somit nur einen entsprechenden Listener bei der GLSurfaceView zu registrieren. Das Interface das wir implementieren mÃ¼ssen nennt sich [http://developer.android.com/reference/android/view/View.OnTouchListener.html OnTouchListener] und hat nur eine einzige Methode
 
  public abstract boolean onTouch(View v, MotionEvent event)
 
-Für uns interessant ist der Parameter event vom Typ [http://developer.android.com/reference/android/view/MotionEvent.html MotionEvent]. Dieser beinhaltet die Koordinaten des Touch events sowie die Aktion, also ob der Finger gerade aufgesetzt wurde, ob er gezogen wird oder ob er wieder hochgegangen ist. Die Koordinaten sind dabei zweidimensional und relativ zum View für den wir den Listener registriert haben. Über die Methoden [http://developer.android.com/reference/android/view/MotionEvent.html#getX%28%29 MotionEvent.getX()] und [http://developer.android.com/reference/android/view/MotionEvent.html#getY%28%29 MotionEvent.getY()] erhalten wird die Werte. Abhängig davon ob wir im Landscape oder Portrait Modus sind sind die X und Y Achse ausgerichtet. Die positive X Achse zeigt dabei immer nach rechts, die positive Y Achse nach '''unten'''. Dies ist ein wichtiges Faktum welches vielen Beginnern am Anfang Probleme macht da es nicht mit dem in der Schule gelernten klassischen cartesischen Koordinatensystem übereinstimmt. Die Koordinaten werden dabei wieder in Pixel angegeben. 
+FÃ¼r uns interessant ist der Parameter event vom Typ [http://developer.android.com/reference/android/view/MotionEvent.html MotionEvent]. Dieser beinhaltet die Koordinaten des Touch events sowie die Aktion, also ob der Finger gerade aufgesetzt wurde, ob er gezogen wird oder ob er wieder hochgegangen ist. Die Koordinaten sind dabei zweidimensional und relativ zum View fÃ¼r den wir den Listener registriert haben. Ãœber die Methoden [http://developer.android.com/reference/android/view/MotionEvent.html#getX%28%29 MotionEvent.getX()] und [http://developer.android.com/reference/android/view/MotionEvent.html#getY%28%29 MotionEvent.getY()] erhalten wird die Werte. AbhÃ¤ngig davon ob wir im Landscape oder Portrait Modus sind sind die X und Y Achse ausgerichtet. Die positive X Achse zeigt dabei immer nach rechts, die positive Y Achse nach '''unten'''. Dies ist ein wichtiges Faktum welches vielen Beginnern am Anfang Probleme macht da es nicht mit dem in der Schule gelernten klassischen cartesischen Koordinatensystem Ã¼bereinstimmt. Die Koordinaten werden dabei wieder in Pixel angegeben. 
 
 Welche Aktion gerade aktuell ist liefert uns die Methode ''MotionEvent.getAction()''. Wir werden auf die Aktionen 
-''MotionEvent.ACTION_DOWN'', ''MotionEvent.ACTION_UP'' und ''MotionEvent.ACTION_MOVE'' reagieren. Die GameActivity lassen wir das interface ''OnMotionListener'' implementieren. Wir spendieren ihr auch drei neue Member variablen, ''touchX'', ''touchY'' und ''isTouched'' in denen wir den aktuellen Status des Touch-Screen speichern. Kommt ein ''MotionEvent.ACTION_DOWN'' Event daher speichern wir die x und y Koordinate in ''touchX'' bzw. ''touchY'' und setzen ''isTouched'' auf true, bei einem ''MotionEvent.ACTION_MOVE'' machen wir das selbe und im Falle von ''MotionEvent.ACTION_UP'' setzen wir ''isTouched'' auf false. Damit wir im GameListener auf den aktuellen Status zugreifen können geben wir der GameActivity auch noch Getter Methoden um auslesen zu können. Dieses auslesen des aktuellen Status nennt man allgemein auch [http://de.wikipedia.org/wiki/Polling_%28Informatik%29 Polling]. 
+''MotionEvent.ACTION_DOWN'', ''MotionEvent.ACTION_UP'' und ''MotionEvent.ACTION_MOVE'' reagieren. Die GameActivity lassen wir das interface ''OnMotionListener'' implementieren. Wir spendieren ihr auch drei neue Member variablen, ''touchX'', ''touchY'' und ''isTouched'' in denen wir den aktuellen Status des Touch-Screen speichern. Kommt ein ''MotionEvent.ACTION_DOWN'' Event daher speichern wir die x und y Koordinate in ''touchX'' bzw. ''touchY'' und setzen ''isTouched'' auf true, bei einem ''MotionEvent.ACTION_MOVE'' machen wir das selbe und im Falle von ''MotionEvent.ACTION_UP'' setzen wir ''isTouched'' auf false. Damit wir im GameListener auf den aktuellen Status zugreifen kÃ¶nnen geben wir der GameActivity auch noch Getter Methoden um auslesen zu kÃ¶nnen. Dieses auslesen des aktuellen Status nennt man allgemein auch [http://de.wikipedia.org/wiki/Polling_%28Informatik%29 Polling]. 
 
-Es sei angemerkt das die ''onTouch'' Methode im GUI Thread und nicht im Render Thread der GLSurfaceView vom Betriebssystem aufgerufen wird. Normalerweise müßte man sich hier Sorgen um etwaige Thread Synchronisierung machen. Da es sich bei den Member Variablen die den Status halten aber um Plain Old Datatypes handelt und das schreiben auf diese atomar ist können wir das hier einfach übersehen. 
+Es sei angemerkt das die ''onTouch'' Methode im GUI Thread und nicht im Render Thread der GLSurfaceView vom Betriebssystem aufgerufen wird. Normalerweise mÃ¼ÃŸte man sich hier Sorgen um etwaige Thread Synchronisierung machen. Da es sich bei den Member Variablen die den Status halten aber um Plain Old Datatypes handelt und das schreiben auf diese atomar ist kÃ¶nnen wir das hier einfach Ã¼bersehen. 
 
 Die GameActivity registriert sich selbst als OnTouchListener bei der GLSurfaceView in der ''onCreate'' Methode die wir dementsprechend erweitern.
 
-Der Accelerometer ist ebenfalls wieder über ein Listener Konzept ansprechbar (ja, das zieht sich so ziemlich durch alles durch). Das entsprechende Interface nennt sich [http://developer.android.com/reference/android/hardware/SensorEventListener.html SensorEventListener]. Diesen registriert man aber nicht bei einem View sondern beim [http://developer.android.com/reference/android/hardware/SensorManager.html SensorManager]. Zugriff erhalten wir auf diesen wie folgt:
+Der Accelerometer ist ebenfalls wieder Ã¼ber ein Listener Konzept ansprechbar (ja, das zieht sich so ziemlich durch alles durch). Das entsprechende Interface nennt sich [http://developer.android.com/reference/android/hardware/SensorEventListener.html SensorEventListener]. Diesen registriert man aber nicht bei einem View sondern beim [http://developer.android.com/reference/android/hardware/SensorManager.html SensorManager]. Zugriff erhalten wir auf diesen wie folgt:
 
  SensorManager manager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
 
-Bevor wir uns dort registrieren können müssen wir aber zuerst einmal schaun ob der Accelerometer überhaupt verfügbar ist. Dies funktioniert so:
+Bevor wir uns dort registrieren kÃ¶nnen mÃ¼ssen wir aber zuerst einmal schaun ob der Accelerometer Ã¼berhaupt verfÃ¼gbar ist. Dies funktioniert so:
 
  boolean accelerometerAvailable = manager.getSensorList(Sensor.TYPE_ACCELEROMETER).size() > 0;
 
-Ist ein Accelerometer vorhanden können wir uns ohne große Umschweife bei diesem registrieren:
+Ist ein Accelerometer vorhanden kÃ¶nnen wir uns ohne groÃŸe Umschweife bei diesem registrieren:
 
  Sensor accelerometer = manager.getSensorList(Sensor.TYPE_ACCELEROMETER).get(0);
  if(!manager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME ) )
     accelerometerAvailable = false;
 
-Vom Manager holen wir uns zuerst den ersten Accelerometer Sensor den wir finden (in der Regel gibt es davon nur einen). Anschließend registrieren wir uns über die [http://developer.android.com/reference/android/hardware/SensorManager.html#registerListener%28android.hardware.SensorEventListener,%20android.hardware.Sensor,%20int,%20android.os.Handler%29 SensorManager.registerListener()] Methode. Dieser Vorgang kann fehlschlagen darum prüfen wir das auch. Der Parameter ''SensorManager.SENSOR_DELAY_GAME'' gibt dabei an wie oft das Betriebssystem den Accelerometer abtasten soll, in diesem Fall oft genug um für ein Spiel zu genügen. 
+Vom Manager holen wir uns zuerst den ersten Accelerometer Sensor den wir finden (in der Regel gibt es davon nur einen). AnschlieÃŸend registrieren wir uns Ã¼ber die [http://developer.android.com/reference/android/hardware/SensorManager.html#registerListener%28android.hardware.SensorEventListener,%20android.hardware.Sensor,%20int,%20android.os.Handler%29 SensorManager.registerListener()] Methode. Dieser Vorgang kann fehlschlagen darum prÃ¼fen wir das auch. Der Parameter ''SensorManager.SENSOR_DELAY_GAME'' gibt dabei an wie oft das Betriebssystem den Accelerometer abtasten soll, in diesem Fall oft genug um fÃ¼r ein Spiel zu genÃ¼gen. 
 
 Was noch bleibt ist das verabeiten der Sensor Events. Das machen wir in der [http://developer.android.com/reference/android/hardware/SensorEventListener.html#onSensorChanged%28android.hardware.SensorEvent%29 SensorEventListener.onSensorChanged()] Methode die wir implementieren. 
 
  public abstract void onSensorChanged(SensorEvent event)
 
-Ähnlich wie bei Touch-verarbeiten bekommen wir hier wieder ein Event, in diesem Fall vom Typ [http://developer.android.com/reference/android/hardware/SensorEvent.html SensorEvent]. Diese Klasse besitzt einen public Member namens values der die für uns relevanten Werte enthält. Derer gibt es drei an der Zahl gespeichert an den Indizes 0 bis 2. Diese drei Werte geben dabei die Beschleunigung in Meter pro Sekunde entlang der x, y und z-Achse des Android Devices an. Der maximal Wert beträgt dabei jeweils +-9.81m/s was der Erdbeschleunigung entspricht. Hält man das Android Device im Portrait mode so geht die positive x-Achse nach rechts, die positive y-Achse nach oben und die positive z-Achse gerade aus durch das Device. 
+Ã„hnlich wie bei Touch-verarbeiten bekommen wir hier wieder ein Event, in diesem Fall vom Typ [http://developer.android.com/reference/android/hardware/SensorEvent.html SensorEvent]. Diese Klasse besitzt einen public Member namens values der die fÃ¼r uns relevanten Werte enthÃ¤lt. Derer gibt es drei an der Zahl gespeichert an den Indizes 0 bis 2. Diese drei Werte geben dabei die Beschleunigung in Meter pro Sekunde entlang der x, y und z-Achse des Android Devices an. Der maximal Wert betrÃ¤gt dabei jeweils +-9.81m/s was der Erdbeschleunigung entspricht. HÃ¤lt man das Android Device im Portrait mode so geht die positive x-Achse nach rechts, die positive y-Achse nach oben und die positive z-Achse gerade aus durch das Device. 
 
 <gallery perrow=1>
 Datei:Motorola_Milestone_2.jpg|Accelerometer Achsen
 </gallery>
 
-Dies bleibt auch so wenn man das Device im Landscape Modus haltet. Wir werden dann bei der Space Invaders Umsetzung sehen wie wir diese Werte ausnutzen können. 
+Dies bleibt auch so wenn man das Device im Landscape Modus haltet. Wir werden dann bei der Space Invaders Umsetzung sehen wie wir diese Werte ausnutzen kÃ¶nnen. 
 
-Gleich wie für Touch Events spendieren wir der GameActivity einige neue Dinge. Zu aller erst wäre da eine neue Member Variable vom Typ float array. Diese hält unsere drei Accelerometer Werte. Weiters lassen wir die Activity das SensorEventListener Interface implementieren. Zum Abschluss bauen wir noch drei Methoden die uns jeweils den Accelerometer Wert für eine Achse liefern und wir sind fertig. Gleich wie für TouchEvents können wir damit den Accelerometer Status pollen. 
+Gleich wie fÃ¼r Touch Events spendieren wir der GameActivity einige neue Dinge. Zu aller erst wÃ¤re da eine neue Member Variable vom Typ float array. Diese hÃ¤lt unsere drei Accelerometer Werte. Weiters lassen wir die Activity das SensorEventListener Interface implementieren. Zum Abschluss bauen wir noch drei Methoden die uns jeweils den Accelerometer Wert fÃ¼r eine Achse liefern und wir sind fertig. Gleich wie fÃ¼r TouchEvents kÃ¶nnen wir damit den Accelerometer Status pollen. 
 
-Eine Beispiel-Applikation die den aktuellen Touch- und Accelerometer-Status per LogCat ausgibt findet ihr unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/InputSample.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/InputSample.java]. Diese zeigt auch gleich wie wir ab jetzt neue Samples und das eigentlich Spiel aufbauen werden. Wir leiten zuerst von GameActivity ab, registrieren uns in der ''onCreate'' Methode als GameListener bei uns selbst und befüllen dann die ''setup'' und ''render'' Methode mit unserem Applikations-Code. Einfach und elegant.
+Eine Beispiel-Applikation die den aktuellen Touch- und Accelerometer-Status per LogCat ausgibt findet ihr unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/InputSample.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/InputSample.java]. Diese zeigt auch gleich wie wir ab jetzt neue Samples und das eigentlich Spiel aufbauen werden. Wir leiten zuerst von GameActivity ab, registrieren uns in der ''onCreate'' Methode als GameListener bei uns selbst und befÃ¼llen dann die ''setup'' und ''render'' Methode mit unserem Applikations-Code. Einfach und elegant.
 
 == Resourcen, Assets und die SD-Karte ==
-Date Ein- und Ausgabe auf Android ist ein weites Land. Mehrere Möglichkeiten stehen uns zur Verfügung. Wir werden kurz auf alle eingehen, kleine Code-Snippets sollen illustrieren wie man die einzelnen Möglichkeiten verwenden kann.
+Date Ein- und Ausgabe auf Android ist ein weites Land. Mehrere MÃ¶glichkeiten stehen uns zur VerfÃ¼gung. Wir werden kurz auf alle eingehen, kleine Code-Snippets sollen illustrieren wie man die einzelnen MÃ¶glichkeiten verwenden kann.
 
 === Resource ===
-Resourcen stellen den von Google gewünschten Weg zur Verwaltung von Dateien dar. Sie werden im Android Projekt in speziel dafür vorgesehene Ordner gespeichert und sind dann im Applikations Code über Identifier direkt ansprechbar. Für die Spieleentwicklung sind sie meiner Ansicht nach nur bedingt von Nutzen da die vorgegebene Verzeichnisstruktur etwas einschränkt. Auf Resourcen gibt es nur Lesezugriff da sie direkt in der Apk-Datei der Applikation abgelegt werden, ähnlich wie Resourcen in normalen Java Jar-Dateien. Einen schönen Überblick bietet folgender [http://developer.android.com/guide/topics/resources/resources-i18n.html Link], wir lassen Resourcen einmal außen vor und wenden uns dem nächsten Kandidaten zu.
+Resourcen stellen den von Google gewÃ¼nschten Weg zur Verwaltung von Dateien dar. Sie werden im Android Projekt in speziel dafÃ¼r vorgesehene Ordner gespeichert und sind dann im Applikations Code Ã¼ber Identifier direkt ansprechbar. FÃ¼r die Spieleentwicklung sind sie meiner Ansicht nach nur bedingt von Nutzen da die vorgegebene Verzeichnisstruktur etwas einschrÃ¤nkt. Auf Resourcen gibt es nur Lesezugriff da sie direkt in der Apk-Datei der Applikation abgelegt werden, Ã¤hnlich wie Resourcen in normalen Java Jar-Dateien. Einen schÃ¶nen Ãœberblick bietet folgender [http://developer.android.com/guide/topics/resources/resources-i18n.html Link], wir lassen Resourcen einmal auÃŸen vor und wenden uns dem nÃ¤chsten Kandidaten zu.
 
 === Assets ===
-Assets werden ebenfalls wie Resourcen direkt in der APK-Datei eingepackt. Der Vorteil liegt hier in der freien Wahl der Verzeichnisstruktur. Sie ähneln damit viel mehr dem herkömmlichen Java Resourcen Mechanismus (und sind mir daher auch sympathischer). Im Android Projekt kann man unter dem Assets Verzeichnis seine eigene Struktur beliebig anlegen. Der Zugriff auf ein Asset läuft dabei gewohnt über InputStreams:
+Assets werden ebenfalls wie Resourcen direkt in der APK-Datei eingepackt. Der Vorteil liegt hier in der freien Wahl der Verzeichnisstruktur. Sie Ã¤hneln damit viel mehr dem herkÃ¶mmlichen Java Resourcen Mechanismus (und sind mir daher auch sympathischer). Im Android Projekt kann man unter dem Assets Verzeichnis seine eigene Struktur beliebig anlegen. Der Zugriff auf ein Asset lÃ¤uft dabei gewohnt Ã¼ber InputStreams:
 
  InputStream in = activity.getAssets().open( "path/to/resource" );
 
@@ -184,54 +184,54 @@ So der Besitzer des Android Devices eine SD-Karte eingelegt hat kann man in der 
 
  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
-Ein- und Ausgabe funktioniert dann über die herkömmlichen Java Klassen:
+Ein- und Ausgabe funktioniert dann Ã¼ber die herkÃ¶mmlichen Java Klassen:
 
  FileInputStream in = new FileInputStream( "/sdcard/path/to/file" );
  FileOutputStream out = new FileOutputStream( "/sdcard/path/to/file" );
 
 == OpenGL ES ==
-Jetzt geht's ans Eingemachte. [http://en.wikipedia.org/wiki/OpenGL_ES OpenGL ES] ist eine Schnittstelle die es uns erlaubt direkt mit der Grafikkarte eines mobilen Devices zu sprechen. Der Standard wurde von mehreren Herstellern gemeinsam entworfen und lehnt sich stark an die Variante an die in herkömmlichen PCs aber auch Workstations zum Einsatz kommt (genauer an die Version 1.3). Im Rahmen dieses Artikels werden wir uns die wichtigsten Dinge zu Gemüte führen, verständlicherweise kann ich hier aber nicht auf alles und jedes eingehen. Bevor wir uns in die Untiefen von OpenGL ES stürzen müssen wir uns aber noch ein paar grundlegende Dinge anschaun die allgemein in der Computergrafik gelten.
+Jetzt geht's ans Eingemachte. [http://en.wikipedia.org/wiki/OpenGL_ES OpenGL ES] ist eine Schnittstelle die es uns erlaubt direkt mit der Grafikkarte eines mobilen Devices zu sprechen. Der Standard wurde von mehreren Herstellern gemeinsam entworfen und lehnt sich stark an die Variante an die in herkÃ¶mmlichen PCs aber auch Workstations zum Einsatz kommt (genauer an die Version 1.3). Im Rahmen dieses Artikels werden wir uns die wichtigsten Dinge zu GemÃ¼te fÃ¼hren, verstÃ¤ndlicherweise kann ich hier aber nicht auf alles und jedes eingehen. Bevor wir uns in die Untiefen von OpenGL ES stÃ¼rzen mÃ¼ssen wir uns aber noch ein paar grundlegende Dinge anschaun die allgemein in der Computergrafik gelten.
 
 === Grundlegendes zur Grafikprogrammierung ===
-Die Entwicklung im Grafikbereich war in den letzten Jahrzehnten extrem. Viele Dinge haben sich geändert, bei der Programmierung blieb aber auch einiges gleich. Grundlage für so ziemlich jede Art von Grafikprogrammierung ist der sogenannte [http://en.wikipedia.org/wiki/Framebuffer Frame Buffer]. Dieser ist ein Teil des Video-RAM und entspricht in Java Termen einem großen eindimensionalen Array in dem die Farbwerte jedes Pixels für das aktuell am Bildschirm angezeigte Bild gespeichert werden. Wie die Farbwerte codiert werden hängt vom Bildschirmmodus ab. Hier kommt der Begriff der [http://de.wikipedia.org/wiki/Farbtiefe_%28Computergrafik%29 Farbtiefe] ins Spiel. Diese spezifiziert wieviele Bits pro Pixel verwendet werden. Herkömmlicherweise sind das bei Desktop Systemen 24- bzw. 32-Bit. Auf mobilen Devices sind 16-Bit Farbtiefen weit verbreitet. Die Farbe selbst wird als Rot-Grün-Blau Triple bzw. Rot-Grün-Blau-Alpha Quadruple in diesen 16-, 24- oder 32-Bit abgelegt. Je nach Farbtiefe kann für jede der Komponenten natürlich eine größere oder kleinere Reichweite entstehen. Wir müssen uns aber Spaghettimonster sei dank bei OpenGL ES nicht oft und vor allem nicht so intensiv wie zu DOS-Zeiten mit der Thematik auseinandersetzen. Farben werden in OpenGL ES normalerweise normiert, d.h. im Bereich zwischen 0 und 1 für jede der Komponenten der Farbe (rot, grün, blau, alpha=Transparenz) angegeben. 
+Die Entwicklung im Grafikbereich war in den letzten Jahrzehnten extrem. Viele Dinge haben sich geÃ¤ndert, bei der Programmierung blieb aber auch einiges gleich. Grundlage fÃ¼r so ziemlich jede Art von Grafikprogrammierung ist der sogenannte [http://en.wikipedia.org/wiki/Framebuffer Frame Buffer]. Dieser ist ein Teil des Video-RAM und entspricht in Java Termen einem groÃŸen eindimensionalen Array in dem die Farbwerte jedes Pixels fÃ¼r das aktuell am Bildschirm angezeigte Bild gespeichert werden. Wie die Farbwerte codiert werden hÃ¤ngt vom Bildschirmmodus ab. Hier kommt der Begriff der [http://de.wikipedia.org/wiki/Farbtiefe_%28Computergrafik%29 Farbtiefe] ins Spiel. Diese spezifiziert wieviele Bits pro Pixel verwendet werden. HerkÃ¶mmlicherweise sind das bei Desktop Systemen 24- bzw. 32-Bit. Auf mobilen Devices sind 16-Bit Farbtiefen weit verbreitet. Die Farbe selbst wird als Rot-GrÃ¼n-Blau Triple bzw. Rot-GrÃ¼n-Blau-Alpha Quadruple in diesen 16-, 24- oder 32-Bit abgelegt. Je nach Farbtiefe kann fÃ¼r jede der Komponenten natÃ¼rlich eine grÃ¶ÃŸere oder kleinere Reichweite entstehen. Wir mÃ¼ssen uns aber Spaghettimonster sei dank bei OpenGL ES nicht oft und vor allem nicht so intensiv wie zu DOS-Zeiten mit der Thematik auseinandersetzen. Farben werden in OpenGL ES normalerweise normiert, d.h. im Bereich zwischen 0 und 1 fÃ¼r jede der Komponenten der Farbe (rot, grÃ¼n, blau, alpha=Transparenz) angegeben. 
 
-Wollen wir also die Ausgabe am Bildschirm ändern so müssen wir den Framebuffer, genauer die Pixel im Framebuffer manipulieren. Früher geschah das wirklich quasi noch per Hand, heutzutage wird uns diese direkte Manipulation des Framebuffer von Bibliotheken wie OpenGL abgenommen. Grob gesagt zeichnet OpenGL für uns gefärbte, texturierte Dreiecke in den Framebuffer und das ganze Hardwarebeschleunigt. Wir haben Einfluss darauf wo im Framebuffer diese Dreiecke wie gezeichnet werden, wie wir später noch sehen. 
+Wollen wir also die Ausgabe am Bildschirm Ã¤ndern so mÃ¼ssen wir den Framebuffer, genauer die Pixel im Framebuffer manipulieren. FrÃ¼her geschah das wirklich quasi noch per Hand, heutzutage wird uns diese direkte Manipulation des Framebuffer von Bibliotheken wie OpenGL abgenommen. Grob gesagt zeichnet OpenGL fÃ¼r uns gefÃ¤rbte, texturierte Dreiecke in den Framebuffer und das ganze Hardwarebeschleunigt. Wir haben Einfluss darauf wo im Framebuffer diese Dreiecke wie gezeichnet werden, wie wir spÃ¤ter noch sehen. 
 
-Pixel müssen natürlich addressiert werden können. Man verwendet dazu ein zweidimensionales Koordinaten-System. Koordinaten in diesem System werden dabei in eine lineare Addresse im Framebuffer umgerechnet mit der einfachen Formel:
+Pixel mÃ¼ssen natÃ¼rlich addressiert werden kÃ¶nnen. Man verwendet dazu ein zweidimensionales Koordinaten-System. Koordinaten in diesem System werden dabei in eine lineare Addresse im Framebuffer umgerechnet mit der einfachen Formel:
 
  Adresse = x + y * Breite
 
-Wobei mit Breite die Breite des Bildschirms in Pixel gemeint ist. Hier erklärt sich auch wieso die y-Achse in diesem Koordinaten-System nach unten zeigt (wie jenes das wir für Touch Events verwenden). Die Adresse 0 im Frame Buffer entspricht dem Pixel in der oberen linken Ecke des Bildschirms und hat die Koordinaten 0,0. Bei CRT-Monitoren fängt der Kathodenstrahl in dieser Ecke an, die Daten für die Intensität die er haben soll bekommt er vereinfacht gesagt aus dem Frame Buffer, wobei natürlich am Anfang dieses Frame Buffers zu lesen begonnen wird (Position 0, Koordinate 0,0).
+Wobei mit Breite die Breite des Bildschirms in Pixel gemeint ist. Hier erklÃ¤rt sich auch wieso die y-Achse in diesem Koordinaten-System nach unten zeigt (wie jenes das wir fÃ¼r Touch Events verwenden). Die Adresse 0 im Frame Buffer entspricht dem Pixel in der oberen linken Ecke des Bildschirms und hat die Koordinaten 0,0. Bei CRT-Monitoren fÃ¤ngt der Kathodenstrahl in dieser Ecke an, die Daten fÃ¼r die IntensitÃ¤t die er haben soll bekommt er vereinfacht gesagt aus dem Frame Buffer, wobei natÃ¼rlich am Anfang dieses Frame Buffers zu lesen begonnen wird (Position 0, Koordinate 0,0).
 
-OpenGL arbeitet intern auch in diesem Koordinaten-System, nach außen aber mit einem anderen. Unkonfiguriert liegt der Ursprung in der Mitte des Bildschirms, die positive x-Achse geht nach rechts und die positive y-Achse geht nach oben. dabei bewegen sich die x und y Koordinaten im Bereich -1, 1, ähnlich zu den Bereichen bei Farben. Wollen wir Pixel-perfekt arbeiten müssen wir das OpenGL erst beibringen. Wir werden später noch sehen wie wir das bewerkstelligen.
+OpenGL arbeitet intern auch in diesem Koordinaten-System, nach auÃŸen aber mit einem anderen. Unkonfiguriert liegt der Ursprung in der Mitte des Bildschirms, die positive x-Achse geht nach rechts und die positive y-Achse geht nach oben. dabei bewegen sich die x und y Koordinaten im Bereich -1, 1, Ã¤hnlich zu den Bereichen bei Farben. Wollen wir Pixel-perfekt arbeiten mÃ¼ssen wir das OpenGL erst beibringen. Wir werden spÃ¤ter noch sehen wie wir das bewerkstelligen.
 
-Bewegung am Bildschirm entsteht ähnlich wie bei einem Zeichentrickfilm. Es werden verschiedene Animationsphasen, oder Frames nacheinander in den Framebuffer geschrieben. Ist die Frequenz mit der wir die Frames schreiben hoch genug entsteht beim Betrachter die Illusion von Bewegung. 24 Bilder pro Sekunde werden in der Regel bei Filmen gezeigt. 
+Bewegung am Bildschirm entsteht Ã¤hnlich wie bei einem Zeichentrickfilm. Es werden verschiedene Animationsphasen, oder Frames nacheinander in den Framebuffer geschrieben. Ist die Frequenz mit der wir die Frames schreiben hoch genug entsteht beim Betrachter die Illusion von Bewegung. 24 Bilder pro Sekunde werden in der Regel bei Filmen gezeigt. 
 
 === Ein wenig Mathematik ===
-Ja, ohne Mathematik kommen wir leider nicht aus. Konkret brauchen wir ein wenig lineare Algebra. Klingt grauslich, ist es aber eigentlich gar nicht. Den Stoff den wir uns hier zu Gemüte führen sollten wir alle schon einmal in der Schule gehört haben. Wir werden uns kurz mit Vektoren in der dritten Dimension beschäftigen.
+Ja, ohne Mathematik kommen wir leider nicht aus. Konkret brauchen wir ein wenig lineare Algebra. Klingt grauslich, ist es aber eigentlich gar nicht. Den Stoff den wir uns hier zu GemÃ¼te fÃ¼hren sollten wir alle schon einmal in der Schule gehÃ¶rt haben. Wir werden uns kurz mit Vektoren in der dritten Dimension beschÃ¤ftigen.
 
-Definieren wir zuerst das Koordinaten-System von OpenGL in dem wir uns dann bewegen werden. Die positive x-Achse zeigt nach rechts, die positive y-Achse zeigt nach oben und die positive z-Achse zeigt aus der ebene heraus. Siehe dazu die nächste Grafik:
+Definieren wir zuerst das Koordinaten-System von OpenGL in dem wir uns dann bewegen werden. Die positive x-Achse zeigt nach rechts, die positive y-Achse zeigt nach oben und die positive z-Achse zeigt aus der ebene heraus. Siehe dazu die nÃ¤chste Grafik:
 
 [[Datei:coordinatesystem.jpg|200px]]
 
-Einen Punkt in diesem System gibt man über die Verschiebung auf den drei Achsen an, d.h. ein Punkt hat 3 Koordinaten, x, y und z. Ein Vektor gibt eine Richtung im Koordinaten-System an und ist nicht mit einem Punkt gleichzusetzen. Vektoren können im System beliebig verschoben werden. Trotzdem werden wir die Termini Vektor und Punkt ein wenig durchmischen da man im Alltag in der Regel mit Vektoren arbeitet. Wir werden im Artikel Vektoren wie folgt anschreiben:
+Einen Punkt in diesem System gibt man Ã¼ber die Verschiebung auf den drei Achsen an, d.h. ein Punkt hat 3 Koordinaten, x, y und z. Ein Vektor gibt eine Richtung im Koordinaten-System an und ist nicht mit einem Punkt gleichzusetzen. Vektoren kÃ¶nnen im System beliebig verschoben werden. Trotzdem werden wir die Termini Vektor und Punkt ein wenig durchmischen da man im Alltag in der Regel mit Vektoren arbeitet. Wir werden im Artikel Vektoren wie folgt anschreiben:
 
  '''v''' = [vx, vy, vz]
 
 Vektoren werden '''fett''' gedruckt, Skalare (also einfach Zahlen) werden wir normal drucken. 
 
-Mit Vektoren kann man auch wunderbar rechnen. Als erstes wollen wir die Länge eines Vektors bestimmen:
+Mit Vektoren kann man auch wunderbar rechnen. Als erstes wollen wir die LÃ¤nge eines Vektors bestimmen:
 
  |'''v'''| = Math.sqrt( vx * vx + vy * vy + vz * vz );
 
-Das sollte euch bekannt vor kommen: die Länge eines Vektors leitet sich von Pythagoras' Satz ab. Die Notation auf der rechten Seite bedeutet "Länge des Vektors '''v'''". 
+Das sollte euch bekannt vor kommen: die LÃ¤nge eines Vektors leitet sich von Pythagoras' Satz ab. Die Notation auf der rechten Seite bedeutet "LÃ¤nge des Vektors '''v'''". 
 
 Vektoren kann man auch addieren und subtrahieren:
 
  '''a''' + '''b''' = [ax + bx, ay + by, az + bz]
  '''a''' - '''b''' = [ax - bx, ay - by, az - bz]
 
-Bei der Multiplikation sieht das ganz ähnlich aus:
+Bei der Multiplikation sieht das ganz Ã¤hnlich aus:
 
  '''a''' * '''b''' = ax * bx + ay * by + az * bz
 
@@ -239,22 +239,22 @@ Das nennt man auch das [http://de.wikipedia.org/wiki/Skalarprodukt Skalarprodukt
 
  winkel = Math.acos( '''a''' * '''b''' / ( |'''a'''| * |'''b'''| ) );
 
-Ich mische hier Java und mathematische Notation etwas da mir die Formatierungsmöglichkeiten fehlen und es so etwas verständlicher wird. Der Winkel ist dabei immer <= 180 Grad. ''Math.acos()'' liefert diesen Winkel jedoch nicht in Grad sondern in Bogenmaß welches man recht einfach mit ''Math.toDegrees()'' in Grad umrechnen kann. Alle trigonometrischen Funktionen der Klasse Math arbeiten übrigens mit Bogenmaß, sowohl was Parameter als auch was Rückgabewerte betrifft. Das sorgt oft für schwer zu findende Bugs, also immer daran denken.
+Ich mische hier Java und mathematische Notation etwas da mir die FormatierungsmÃ¶glichkeiten fehlen und es so etwas verstÃ¤ndlicher wird. Der Winkel ist dabei immer <= 180 Grad. ''Math.acos()'' liefert diesen Winkel jedoch nicht in Grad sondern in BogenmaÃŸ welches man recht einfach mit ''Math.toDegrees()'' in Grad umrechnen kann. Alle trigonometrischen Funktionen der Klasse Math arbeiten Ã¼brigens mit BogenmaÃŸ, sowohl was Parameter als auch was RÃ¼ckgabewerte betrifft. Das sorgt oft fÃ¼r schwer zu findende Bugs, also immer daran denken.
 
-Zu allerletzt wollen wir noch auf Einheitsvektoren eingehen. Dies sind Vektoren die die Länge eins haben. Um einen beliebigen Vektor zu einem Einheitsvektor zu machen müssen wir dessen Komponenten einfach durch seine Länge dividieren.
+Zu allerletzt wollen wir noch auf Einheitsvektoren eingehen. Dies sind Vektoren die die LÃ¤nge eins haben. Um einen beliebigen Vektor zu einem Einheitsvektor zu machen mÃ¼ssen wir dessen Komponenten einfach durch seine LÃ¤nge dividieren.
 
   '''a'''' = [ax / |'''a'''|, ay / |'''a'''|, az / |'''a'''|]
 
-Der Apostroph nach dem '''a''' zeigt an dass es sich um einen Einheitsvektor handelt. Wir werden Einheitsvektoren später für ein paar Kleinigkeiten benötigen. 
+Der Apostroph nach dem '''a''' zeigt an dass es sich um einen Einheitsvektor handelt. Wir werden Einheitsvektoren spÃ¤ter fÃ¼r ein paar Kleinigkeiten benÃ¶tigen. 
 
-Und damit sind wir mit dem Mathematik Kapitel auch schon fertig. Ich hoffe es war nicht gar zu schlimm. Bei Unsicherheiten empfehle ich euch im Netz ein wenig in Material zum Thema zu stöbern. 
+Und damit sind wir mit dem Mathematik Kapitel auch schon fertig. Ich hoffe es war nicht gar zu schlimm. Bei Unsicherheiten empfehle ich euch im Netz ein wenig in Material zum Thema zu stÃ¶bern. 
 
 === Das erste Dreieck ===
-Wie Eingangs schon erwähnt ist OpenGL im Grunde seines Herzens eine Dreieck-Zeichenmaschine. In diesem Abschnitt wollen wir uns dran machen das erste Dreieck auf den Bildschirm zu Zaubern. Dazu erstellen wir eine neue Activity die von GameActivity ableitet und die sich selbst als GameListener in der ''onCreate()'' Methode registriert. 
+Wie Eingangs schon erwÃ¤hnt ist OpenGL im Grunde seines Herzens eine Dreieck-Zeichenmaschine. In diesem Abschnitt wollen wir uns dran machen das erste Dreieck auf den Bildschirm zu Zaubern. Dazu erstellen wir eine neue Activity die von GameActivity ableitet und die sich selbst als GameListener in der ''onCreate()'' Methode registriert. 
 
-Wie wir schon Eingangs erwähnt haben nennen sich die Dinge die wir zeichnen Meshes. Ein solches Mesh wird durch sogenannte Vertices definiert. Ein Vertex entspricht dabei einem Punkt des Meshes mit verschiedenen Attributen. Anfangs wollen wir uns nur um die wichtigste Komponente kümmern, der Position. Die Position eines Vertex wird, ihr habt es erraten, als dreidimensionaler Vektor angegeben. Ein Punkt alleine macht noch kein Mesh, darum brauchen wir mindestens drei. Mehrere Dreiecke sind natürlich auch kein Problem, wir wollen aber klein anfangen. 
+Wie wir schon Eingangs erwÃ¤hnt haben nennen sich die Dinge die wir zeichnen Meshes. Ein solches Mesh wird durch sogenannte Vertices definiert. Ein Vertex entspricht dabei einem Punkt des Meshes mit verschiedenen Attributen. Anfangs wollen wir uns nur um die wichtigste Komponente kÃ¼mmern, der Position. Die Position eines Vertex wird, ihr habt es erraten, als dreidimensionaler Vektor angegeben. Ein Punkt alleine macht noch kein Mesh, darum brauchen wir mindestens drei. Mehrere Dreiecke sind natÃ¼rlich auch kein Problem, wir wollen aber klein anfangen. 
 
-OpenGL ES erwartet in seiner Basisversion 1.1 die Vertex Positionen in einem [http://java.sun.com/j2se/1.4.2/docs/api/java/nio/ByteBuffer.html direct ByteBuffer]. Definieren wir zur Übung einmal ein Dreieck in der x-y-Ebene mit Hilfe so eines ByteBuffers:
+OpenGL ES erwartet in seiner Basisversion 1.1 die Vertex Positionen in einem [http://java.sun.com/j2se/1.4.2/docs/api/java/nio/ByteBuffer.html direct ByteBuffer]. Definieren wir zur Ãœbung einmal ein Dreieck in der x-y-Ebene mit Hilfe so eines ByteBuffers:
 
  ByteBuffer buffer = ByteBuffer.allocateDirect( 3 * 3 * 4 );
  buffer.order(ByteBuffer.nativeOrder());
@@ -269,7 +269,7 @@ OpenGL ES erwartet in seiner Basisversion 1.1 die Vertex Positionen in einem [ht
  vertices.put( 0.5f );
  vertices.put( 0 );
 
-Ganz schön viel Code für so ein kleines Dreieck. Als erstes erstellen wir einen direct ByteBuffer der 3 * 3 * 4 Bytes groß ist. Die Zahl ergibt sich da wir 3 Vertices haben zu je 3 Komponenten (x, y, z) die jeweils 4 Byte Speicher brauchen (float -> 32-bit). Anschließend sagen wir dem ByteBuffer, dass er bitte alles in nativer Ordnung speichern soll, d.h. in Big- oder Little-Endian. Den fertig initialisierten ByteBuffer wandeln wir dann in einen FloatBuffer um den wir mit der Methode ''FloatBuffer.put()'' befüllen können. Jeweils 3 Aufrufe definieren die Koordinaten eines Vertex' unseres Dreiecks. Der erste Vertex liegt links unter dem Ursprung, der zweite Vertex rechts unter dem Ursprung und der dritte Vertex direkt über dem Ursprung: 
+Ganz schÃ¶n viel Code fÃ¼r so ein kleines Dreieck. Als erstes erstellen wir einen direct ByteBuffer der 3 * 3 * 4 Bytes groÃŸ ist. Die Zahl ergibt sich da wir 3 Vertices haben zu je 3 Komponenten (x, y, z) die jeweils 4 Byte Speicher brauchen (float -> 32-bit). AnschlieÃŸend sagen wir dem ByteBuffer, dass er bitte alles in nativer Ordnung speichern soll, d.h. in Big- oder Little-Endian. Den fertig initialisierten ByteBuffer wandeln wir dann in einen FloatBuffer um den wir mit der Methode ''FloatBuffer.put()'' befÃ¼llen kÃ¶nnen. Jeweils 3 Aufrufe definieren die Koordinaten eines Vertex' unseres Dreiecks. Der erste Vertex liegt links unter dem Ursprung, der zweite Vertex rechts unter dem Ursprung und der dritte Vertex direkt Ã¼ber dem Ursprung: 
 
 [[Datei:dreieck.jpg|200px]]
 
@@ -280,11 +280,11 @@ Damit haben wir OpenGL aber noch immer nicht wirklich etwas verraten. Das machen
  gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertices);
  gl.glDrawArrays(GL10.GL_TRIANGLES, 0, 3);
 
-Im ersten Methoden Aufruf teilen wir OpenGL mit welcher Bereich des Bildschirms bezeichnet werden soll. Die ersten beiden Parameter geben dabei die Startkoordinaten des zu bezeichnenden Bereichs an, die nächsten beiden seine Größe. Beide angaben werden in Pixeln gemacht, hier sagen wir konkret dass der ganze Bildschirm ausgenutzt werden soll. 
+Im ersten Methoden Aufruf teilen wir OpenGL mit welcher Bereich des Bildschirms bezeichnet werden soll. Die ersten beiden Parameter geben dabei die Startkoordinaten des zu bezeichnenden Bereichs an, die nÃ¤chsten beiden seine GrÃ¶ÃŸe. Beide angaben werden in Pixeln gemacht, hier sagen wir konkret dass der ganze Bildschirm ausgenutzt werden soll. 
 
-'''Achtung:''' der Emulator benötigt unbedingt den Aufruf von ''glViewport''. Auf Devices ist der Viewport bereits auf den gesamten Bildschirm gesetzt, im Emulator hat der Viewport am Anfang die Größe 0,0. Nicht vergessen da sonst nichts am Bildschirm gezeichnet wird und man stundenlang sucht (ja, ist mir auch schon passiert...)!
+'''Achtung:''' der Emulator benÃ¶tigt unbedingt den Aufruf von ''glViewport''. Auf Devices ist der Viewport bereits auf den gesamten Bildschirm gesetzt, im Emulator hat der Viewport am Anfang die GrÃ¶ÃŸe 0,0. Nicht vergessen da sonst nichts am Bildschirm gezeichnet wird und man stundenlang sucht (ja, ist mir auch schon passiert...)!
 
-Im nächsten Aufruf sagen wir OpenGL dass wir ihm jetzt gleich Vertex Positionen übergeben werden und er fortan beim Zeichnen immer den Übergebenen FloatBuffer verwenden soll. Im dritten Aufruf teilen wir OpenGL mit wo er die Positionensdaten findet. Der erste Parameter gibt dabei die Anzahl der Vertices an, der zweite gibt den Typen der Komponenten jeder Position an, in diesem Fall floats. Der dritte Parameter nennt sich stride und ist für uns ohne Belang, wir setzen ihn einfach auf 0. Der letzte Parameter ist der FloatBuffer den wir zuvor mit den Positionen der 3 Vertices befüllt haben. Als letztes befehlen wir OpenGL die eben definierten Vertices zu zeichnen. Der erste Parameter gibt dabei an was wir zeichnen wollen, und zwar Dreiecke. Der zweite Parameter gibt an ab welcher Position im FloatBuffer OpenGL beginnen soll die Positionsdaten zu holen. Der letzte Parameter sagt OpenGL noch wieviele Vertices wir gezeichnet haben wollen. Zeichnen wir Dreiecke muss dieser Parameter immer ein Vielfaches von 3 sein. Und schon haben wir das erste Dreieck mit OpenGL gezeichnet! Zur Entspannung hier der gesamte Code dieses Beispiels:
+Im nÃ¤chsten Aufruf sagen wir OpenGL dass wir ihm jetzt gleich Vertex Positionen Ã¼bergeben werden und er fortan beim Zeichnen immer den Ãœbergebenen FloatBuffer verwenden soll. Im dritten Aufruf teilen wir OpenGL mit wo er die Positionensdaten findet. Der erste Parameter gibt dabei die Anzahl der Vertices an, der zweite gibt den Typen der Komponenten jeder Position an, in diesem Fall floats. Der dritte Parameter nennt sich stride und ist fÃ¼r uns ohne Belang, wir setzen ihn einfach auf 0. Der letzte Parameter ist der FloatBuffer den wir zuvor mit den Positionen der 3 Vertices befÃ¼llt haben. Als letztes befehlen wir OpenGL die eben definierten Vertices zu zeichnen. Der erste Parameter gibt dabei an was wir zeichnen wollen, und zwar Dreiecke. Der zweite Parameter gibt an ab welcher Position im FloatBuffer OpenGL beginnen soll die Positionsdaten zu holen. Der letzte Parameter sagt OpenGL noch wieviele Vertices wir gezeichnet haben wollen. Zeichnen wir Dreiecke muss dieser Parameter immer ein Vielfaches von 3 sein. Und schon haben wir das erste Dreieck mit OpenGL gezeichnet! Zur Entspannung hier der gesamte Code dieses Beispiels:
 
  public class TriangleSample extends GameActivity implements GameListener 
  {
@@ -321,22 +321,22 @@ Im nächsten Aufruf sagen wir OpenGL dass wir ihm jetzt gleich Vertex Positionen 
     }	
  }
 
-Alternativ kann man sich den Source etwas schöner formartiert unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/TriangleSample.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/TriangleSample.java] ansehen.
+Alternativ kann man sich den Source etwas schÃ¶ner formartiert unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/TriangleSample.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/TriangleSample.java] ansehen.
 
 Und hier ein Screenshot unseres Dreiecks
 
 [[Datei:triangle.png]]
 
 === Farbspiele ===
-Ein weisses Dreieck ist natürlich etwas langweilig. Um das zu ändern verwenden wir bevor wir ''glDrawArrays'' aufrufen den Befehl
+Ein weisses Dreieck ist natÃ¼rlich etwas langweilig. Um das zu Ã¤ndern verwenden wir bevor wir ''glDrawArrays'' aufrufen den Befehl
 
  glColor4f( float r, float g, float b, float a );
 
-R, g, b stehen für die drei Farbkomponenten, a steht für die transparenz. Alle Werte sind im Bereich 0 bis 1 anzugeben. Setzen wir r und b auf 1 bekommen wir ein schönes pink:
+R, g, b stehen fÃ¼r die drei Farbkomponenten, a steht fÃ¼r die transparenz. Alle Werte sind im Bereich 0 bis 1 anzugeben. Setzen wir r und b auf 1 bekommen wir ein schÃ¶nes pink:
 
 [[Datei:pink.png]]
 
-Ich habe vorher schon erwähnt das ein Vertex nicht nur eine Position hat. Solange wir diese nicht explizit definieren hat jeder Vertex in einem Mesh die Farbe die wir mit ''glColor4f'' angeben. Um jedem Vertex eine eigene Farbe zu geben verwenden wir den selben Mechanismus wie für die Vertex Positionen. Zuerst bauen wir wieder einen direct FloatBuffer in den wir für jeden Vertex dir r, g, b und a Werte speichern:
+Ich habe vorher schon erwÃ¤hnt das ein Vertex nicht nur eine Position hat. Solange wir diese nicht explizit definieren hat jeder Vertex in einem Mesh die Farbe die wir mit ''glColor4f'' angeben. Um jedem Vertex eine eigene Farbe zu geben verwenden wir den selben Mechanismus wie fÃ¼r die Vertex Positionen. Zuerst bauen wir wieder einen direct FloatBuffer in den wir fÃ¼r jeden Vertex dir r, g, b und a Werte speichern:
 
  buffer = ByteBuffer.allocateDirect( 3 * 4 * 4 );
  buffer.order(ByteOrder.nativeOrder());
@@ -355,14 +355,14 @@ Ich habe vorher schon erwähnt das ein Vertex nicht nur eine Position hat. Solang
  colors.put( 1 );	
  colors.rewind();
 
-Da wir 3 Vertices haben brauchen wir einen ByteBuffer der 3 Farben hält, zu je 4 Komponenten (r, g, b, a) mit je 4 byte (floats). Den ByteBuffer schalten wir wieder auf native order und wandeln ihn in einen FloatBuffer um. Nun können wir ihn mit den drei Farben für unsere drei Vertices befüllen, hier rot (1, 0, 0, 1), grün (0, 1, 0, 1) und blau (0, 0, 1, 1). Beim Zeichnen sagen wir OpenGL das es bitte unseren FloatBuffer für die Farben der Vertices verwenden soll:
+Da wir 3 Vertices haben brauchen wir einen ByteBuffer der 3 Farben hÃ¤lt, zu je 4 Komponenten (r, g, b, a) mit je 4 byte (floats). Den ByteBuffer schalten wir wieder auf native order und wandeln ihn in einen FloatBuffer um. Nun kÃ¶nnen wir ihn mit den drei Farben fÃ¼r unsere drei Vertices befÃ¼llen, hier rot (1, 0, 0, 1), grÃ¼n (0, 1, 0, 1) und blau (0, 0, 1, 1). Beim Zeichnen sagen wir OpenGL das es bitte unseren FloatBuffer fÃ¼r die Farben der Vertices verwenden soll:
 
  gl.glEnableClientState(GL10.GL_COLOR_ARRAY );
  gl.glColorPointer( 4, GL10.GL_FLOAT, 0, colors );
 
-Zuerst sagen wir OpenGL das wir für die Farben der einzelnen Vertices einen FloatBuffer haben (''glEnableClientState''). Dann geben wir gleich wie bei den Vertex Positionen an wo dieser FloatBuffer zu finden ist (''glColorPointer''). Der erste Parameter sagt wieviele Komponenten eine Farbe hat (4 -> r, g, b, a), der zweite Parameter gibt an welchen Typ die Komponenten haben, der dritte Parameter ist wieder der stride und der vierte ist unser zuvor befüllter FloatBuffer. Und das wars auch schon wieder. '''Achtung:''' hat man den client state GL10.GL_COLOR_ARRAY enabled so wird jeder Aufruf von ''glColor4f'' ignoriert. Es muss dann unbedingt ein FloatBuffer mit ''glColorPointer'' angegeben werden der zumindest soviele Farben besitzt wie das Mesh Vertices hat, bzw. soviele wie man Vertices bei ''glDrawArrays'' angibt!
+Zuerst sagen wir OpenGL das wir fÃ¼r die Farben der einzelnen Vertices einen FloatBuffer haben (''glEnableClientState''). Dann geben wir gleich wie bei den Vertex Positionen an wo dieser FloatBuffer zu finden ist (''glColorPointer''). Der erste Parameter sagt wieviele Komponenten eine Farbe hat (4 -> r, g, b, a), der zweite Parameter gibt an welchen Typ die Komponenten haben, der dritte Parameter ist wieder der stride und der vierte ist unser zuvor befÃ¼llter FloatBuffer. Und das wars auch schon wieder. '''Achtung:''' hat man den client state GL10.GL_COLOR_ARRAY enabled so wird jeder Aufruf von ''glColor4f'' ignoriert. Es muss dann unbedingt ein FloatBuffer mit ''glColorPointer'' angegeben werden der zumindest soviele Farben besitzt wie das Mesh Vertices hat, bzw. soviele wie man Vertices bei ''glDrawArrays'' angibt!
 
-Der gesamte Code zum Zeichnen unseres nun schön eingefärbten Dreiecks schaut so aus:
+Der gesamte Code zum Zeichnen unseres nun schÃ¶n eingefÃ¤rbten Dreiecks schaut so aus:
 
  gl.glEnableClientState(GL10.GL_VERTEX_ARRAY );    
  gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertices);
@@ -370,16 +370,16 @@ Der gesamte Code zum Zeichnen unseres nun schön eingefärbten Dreiecks schaut so 
  gl.glColorPointer( 4, GL10.GL_FLOAT, 0, colors );
  gl.glDrawArrays(GL10.GL_TRIANGLES, 0, 3);
 
-Hier zeichnet sich langsam ein Muster ab: für jede Komponente eines Vertex, also z.B. die Position oder die Farbe, enablen wir einen Array (GL10.GL_VERTEX_ARRAY, GL10.GL_COLOR_ARRAY) mit ''glEnableClientState'' und geben dann mit einer der ''glXXXPointer'' Methoden an wo der entsprechende "Array" (in unserem Fall in Form eines FloatBuffer) zu finden ist. Diese Methode des Zeichnens nennt man in OpenGL [http://www.opengl.org/documentation/specs/version1.1/glspec1.1/node21.html Vertex Arrays] und ist die einzige Methode mit der man in OpenGL ES 1.0 überhaupt etwas zeichnen kann. Wir werden vielleicht in einem anderen Artikel die sogenannten [http://www.spec.org/gwpg/gpc.static/vbo_whitepaper.html Vertex Buffer Objects] näher betrachten die ab OpenGL ES 1.1 zur Verfügung stehen. Einstweilen bleiben wir aber bei den Vertex Arrays da die auf allen Android Devices funktionieren.
+Hier zeichnet sich langsam ein Muster ab: fÃ¼r jede Komponente eines Vertex, also z.B. die Position oder die Farbe, enablen wir einen Array (GL10.GL_VERTEX_ARRAY, GL10.GL_COLOR_ARRAY) mit ''glEnableClientState'' und geben dann mit einer der ''glXXXPointer'' Methoden an wo der entsprechende "Array" (in unserem Fall in Form eines FloatBuffer) zu finden ist. Diese Methode des Zeichnens nennt man in OpenGL [http://www.opengl.org/documentation/specs/version1.1/glspec1.1/node21.html Vertex Arrays] und ist die einzige Methode mit der man in OpenGL ES 1.0 Ã¼berhaupt etwas zeichnen kann. Wir werden vielleicht in einem anderen Artikel die sogenannten [http://www.spec.org/gwpg/gpc.static/vbo_whitepaper.html Vertex Buffer Objects] nÃ¤her betrachten die ab OpenGL ES 1.1 zur VerfÃ¼gung stehen. Einstweilen bleiben wir aber bei den Vertex Arrays da die auf allen Android Devices funktionieren.
 
 Hier noch ein Screenshot unseres farbigen Dreiecks:
 
 [[Datei:color.png]]
 
-Den Code für dieses Beispiel könnt ihr euch unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/ColorSample2.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/ColorSample2.java] ansehen.
+Den Code fÃ¼r dieses Beispiel kÃ¶nnt ihr euch unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/ColorSample2.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/ColorSample2.java] ansehen.
 
 === Texturen ===
-So richtig peppig wird's wenn man seinen Dreiecken [http://en.wikipedia.org/wiki/Texture_mapping Texturen] verpasst. Dabei tapeziert man auf die Dreiecke eine Bitmap die man zuvor geladen hat. Bevor wir uns an die Texturierung selbst machen schaun wir uns schnell an wie man eine Bitmap überhaupt ladet. Im Beispiel Projekt habe ich im assets Verzeichnis ein PNG-File namens "droid.png" abgelegt. Dieses laden wir in unserer ''setup'' Methode wie folgt:
+So richtig peppig wird's wenn man seinen Dreiecken [http://en.wikipedia.org/wiki/Texture_mapping Texturen] verpasst. Dabei tapeziert man auf die Dreiecke eine Bitmap die man zuvor geladen hat. Bevor wir uns an die Texturierung selbst machen schaun wir uns schnell an wie man eine Bitmap Ã¼berhaupt ladet. Im Beispiel Projekt habe ich im assets Verzeichnis ein PNG-File namens "droid.png" abgelegt. Dieses laden wir in unserer ''setup'' Methode wie folgt:
 
  try
  {
@@ -391,15 +391,15 @@ So richtig peppig wird's wenn man seinen Dreiecken [http://en.wikipedia.org/wiki
     // Oh no!
  }
 
-Sehr einfach: wir rufen die statische Methode ''decodeStream'' der Klasse BitmapFactory auf und übergeben ihr einen InputStream auf unser Bitmap Asset namens "droid.png". Nachdem die Methode eine IOException wirft baun wir noch ein try-catch drum. Da wir klug genug waren das Asset auch wirklich in das entsprechende Verzeichnis zu packen sollte keine Exception fallen. Normalerweise handle ich Exceptions beim Resourcen laden mit einem Log Output und einem ''System.exit(-1)''. Wie ihr das löst bleibt aber euch überlassen.
+Sehr einfach: wir rufen die statische Methode ''decodeStream'' der Klasse BitmapFactory auf und Ã¼bergeben ihr einen InputStream auf unser Bitmap Asset namens "droid.png". Nachdem die Methode eine IOException wirft baun wir noch ein try-catch drum. Da wir klug genug waren das Asset auch wirklich in das entsprechende Verzeichnis zu packen sollte keine Exception fallen. Normalerweise handle ich Exceptions beim Resourcen laden mit einem Log Output und einem ''System.exit(-1)''. Wie ihr das lÃ¶st bleibt aber euch Ã¼berlassen.
 
-Das Texturieren selbst ist wieder relativ einfach. Die Bitmap die man läd wird in ein normiertes Koordinaten-System gelegt:
+Das Texturieren selbst ist wieder relativ einfach. Die Bitmap die man lÃ¤d wird in ein normiertes Koordinaten-System gelegt:
 
 [[Datei:texturecoordinates.png]]
 
-Den Achsen geben wir zur Vermeidung von Verwechslungen mit dem Vertex Positions Koordinaten-System neue Namen, s nach Rechts und t nach unten. Egal welche Abmessungen das Bild hat, Pixel werden immer im Bereich [0,0]-[1,1] angesprochen. Man kann so z.B. leicht eine hochauflösende Texture mit einer niedrig auflösenden Texture austauschen ohne die Texture-Koordinaten des Meshes zu ändern. Was die Bildabmessungen betrifft so gibt es eine Limitation auf Android: diese müssen 2er Potenzen sein, also 1, 2, 4, 8, 32, 64, 128, 256 usw. Maximal sollte man nicht mehr als 512x512 Pixel verwenden, die Hardware könnte das nicht mehr unterstützen. Die Bilder müssen dabei nicht quadratisch sein sondern können z.B. auch die Abmessungen 32x64 oder 128x32 haben. 
+Den Achsen geben wir zur Vermeidung von Verwechslungen mit dem Vertex Positions Koordinaten-System neue Namen, s nach Rechts und t nach unten. Egal welche Abmessungen das Bild hat, Pixel werden immer im Bereich [0,0]-[1,1] angesprochen. Man kann so z.B. leicht eine hochauflÃ¶sende Texture mit einer niedrig auflÃ¶senden Texture austauschen ohne die Texture-Koordinaten des Meshes zu Ã¤ndern. Was die Bildabmessungen betrifft so gibt es eine Limitation auf Android: diese mÃ¼ssen 2er Potenzen sein, also 1, 2, 4, 8, 32, 64, 128, 256 usw. Maximal sollte man nicht mehr als 512x512 Pixel verwenden, die Hardware kÃ¶nnte das nicht mehr unterstÃ¼tzen. Die Bilder mÃ¼ssen dabei nicht quadratisch sein sondern kÃ¶nnen z.B. auch die Abmessungen 32x64 oder 128x32 haben. 
 
-Damit unser Dreieck texturiert wird müssen wir für jeden Vertex zuerst eine Texture-Koordinate angeben. Die Angabe erfolgt dabei im Koordinaten-System der Texture, also zweidimensional und jeweils zwischen 0 und 1 (man kann auch kleinere und größere Werte angeben, das schaun wir uns aber später an):
+Damit unser Dreieck texturiert wird mÃ¼ssen wir fÃ¼r jeden Vertex zuerst eine Texture-Koordinate angeben. Die Angabe erfolgt dabei im Koordinaten-System der Texture, also zweidimensional und jeweils zwischen 0 und 1 (man kann auch kleinere und grÃ¶ÃŸere Werte angeben, das schaun wir uns aber spÃ¤ter an):
 
 [[Datei:texturecoordinates2.png]]
 
@@ -416,35 +416,35 @@ Hier haben wir unser Dreieck gemapped. Aufmerksame Leser wissen schon was jetzt 
  texCoords.put(0);
  texCoords.rewind();
 
-Die größe ergibt sich wieder aus den 3 Vertices für die wir jeweils Texture-Koordinaten mit 2 Komponenten haben die wiederum jeweils 4 Byte groß sind (float). Der Rest sollte selbst erklärend sein. 
+Die grÃ¶ÃŸe ergibt sich wieder aus den 3 Vertices fÃ¼r die wir jeweils Texture-Koordinaten mit 2 Komponenten haben die wiederum jeweils 4 Byte groÃŸ sind (float). Der Rest sollte selbst erklÃ¤rend sein. 
 
-Bevor wir die Texture-Koordinaten als Vertex Komponente OpenGL mitteilen müssen wir uns noch um eine Kleinigkeit kümmern: das eigentliche laden der Texture. Wir haben zwar schon die Bitmap aus dem Asset geladen, eine Texture haben wir aber noch nicht erstellt. Das machen wir jetzt:
+Bevor wir die Texture-Koordinaten als Vertex Komponente OpenGL mitteilen mÃ¼ssen wir uns noch um eine Kleinigkeit kÃ¼mmern: das eigentliche laden der Texture. Wir haben zwar schon die Bitmap aus dem Asset geladen, eine Texture haben wir aber noch nicht erstellt. Das machen wir jetzt:
 
  int[] textureIds = new int[1];
  gl.glGenTextures(1, textureIds, 0);		
  textureId = textureIds[0];
 
-Mit ''glGenTextures'' weisen wir OpenGL an uns eine neue Texture zu erstellen. Der erste Parameter gibt dabei an wieviele Texturen wir erstellen wollen (eine), in den zweiten Parameter speichert OpenGL dann die ID(s) der neuen Texture(n). Der letzte Parameter ist nur ein Offset ab dem OpenGL in dem übergebenen Array schreiben soll. Die erhaltene Texture-ID müssen wir uns merken, mit dieser aktivieren wir dann später die Texture. 
+Mit ''glGenTextures'' weisen wir OpenGL an uns eine neue Texture zu erstellen. Der erste Parameter gibt dabei an wieviele Texturen wir erstellen wollen (eine), in den zweiten Parameter speichert OpenGL dann die ID(s) der neuen Texture(n). Der letzte Parameter ist nur ein Offset ab dem OpenGL in dem Ã¼bergebenen Array schreiben soll. Die erhaltene Texture-ID mÃ¼ssen wir uns merken, mit dieser aktivieren wir dann spÃ¤ter die Texture. 
 
-Als nächstes müssen wir die Bitmap in die Texture laden. Hier hat uns das Android Team einen großen Brocken Arbeit abgenommen und stellt uns die Klasse GLUtils zur Verfügung:
+Als nÃ¤chstes mÃ¼ssen wir die Bitmap in die Texture laden. Hier hat uns das Android Team einen groÃŸen Brocken Arbeit abgenommen und stellt uns die Klasse GLUtils zur VerfÃ¼gung:
 
  gl.glBindTexture( GL10.GL_TEXTURE_2D, textureId );
  GLUtils.texImage2D( GL10.GL_TEXTURE_2D, 0, bitmap, 0);
 
-Zuerst müssen wir die Texture "binden" damit sie zur aktuel aktiven Texture wird. Dazu übergeben wir als ersten Parameter GL10.TEXTURE_2D (dessen Erklärung ich mir spare, das ist einfach immer so :)) und als zweiten Parameter die zuvor generierte Texture-ID. Erst dann können wir Daten in die Texture laden, ihre Konfiguration ändern oder sie als Texture für eines unserer Meshes verwenden. Als nächster Rufen wir die statische Methode ''texImage2D'' der Klasse GLUtils auf die unsere zuvor geladene Bitmap in die Texture läd. Den ersten Parameter ignorieren wir wieder, den zweiten auch (gibt den [http://de.wikipedia.org/wiki/Mip_Mapping MipMap-Level] an), als dritten übergeben wir die Bitmap und den letzten Parameter ignorieren wir auch wieder. Damit hat unsere Texture jetzt die Bilddaten die sie haben soll. 
+Zuerst mÃ¼ssen wir die Texture "binden" damit sie zur aktuel aktiven Texture wird. Dazu Ã¼bergeben wir als ersten Parameter GL10.TEXTURE_2D (dessen ErklÃ¤rung ich mir spare, das ist einfach immer so :)) und als zweiten Parameter die zuvor generierte Texture-ID. Erst dann kÃ¶nnen wir Daten in die Texture laden, ihre Konfiguration Ã¤ndern oder sie als Texture fÃ¼r eines unserer Meshes verwenden. Als nÃ¤chster Rufen wir die statische Methode ''texImage2D'' der Klasse GLUtils auf die unsere zuvor geladene Bitmap in die Texture lÃ¤d. Den ersten Parameter ignorieren wir wieder, den zweiten auch (gibt den [http://de.wikipedia.org/wiki/Mip_Mapping MipMap-Level] an), als dritten Ã¼bergeben wir die Bitmap und den letzten Parameter ignorieren wir auch wieder. Damit hat unsere Texture jetzt die Bilddaten die sie haben soll. 
 
-Als letzten Schritt müssen wir die Texture jetzt noch konfigurieren:
+Als letzten Schritt mÃ¼ssen wir die Texture jetzt noch konfigurieren:
 
  gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_LINEAR );
  gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR );
  gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE );
  gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE );	
 
-Die ersten beiden Methoden setzen die Filter der aktuel gebundenen Texture die zum Einsatz komm wenn die Texture am Bildschirm größer als im Original ist, bzw. kleiner als im Original ist. Der letzte Parameter gibt dabei den Filter an. Hier hat man die Wahl zwischen GL10.GL_NEAREST, GL10.GL_LINEAR, GL10.GL_LINEAR_MIPMAP_NEAREST und GL10.GL_LINEAR_MIPMAP_LINEAR. GL10.GL_NEAREST ist der häßlichste, GL10.GL_LINEAR ist ein bi-linearer Filter der ganz gute Ergebnisse bringt und die beiden Mip-Map Filter ignorieren wir einstweilen wieder.
+Die ersten beiden Methoden setzen die Filter der aktuel gebundenen Texture die zum Einsatz komm wenn die Texture am Bildschirm grÃ¶ÃŸer als im Original ist, bzw. kleiner als im Original ist. Der letzte Parameter gibt dabei den Filter an. Hier hat man die Wahl zwischen GL10.GL_NEAREST, GL10.GL_LINEAR, GL10.GL_LINEAR_MIPMAP_NEAREST und GL10.GL_LINEAR_MIPMAP_LINEAR. GL10.GL_NEAREST ist der hÃ¤ÃŸlichste, GL10.GL_LINEAR ist ein bi-linearer Filter der ganz gute Ergebnisse bringt und die beiden Mip-Map Filter ignorieren wir einstweilen wieder.
 
-Die beiden anderen Methoden geben an was geschehen soll wenn der User Texture-Koordinaten angibt die kleiner als 0 oder größer als 1 sind. Wir wählen hier GL10.GL_CLAMP_TO_EDGE was zur Folge hat das solche Texturen einfach auf den Bereich geschnitten werden ( kleiner 0 wird 0, größer 1 wird 1 ). Alternativ kann man hier GL10.GL_WRAP angeben. Dies hat zur Folge das die Koordinaten modulo 1 genommen werden. Eine 4.5 wird so zur 0.5 und so weiter. Damit kann man die Texture über ein Dreieck mehrere Male wiederholen. Die Angabe des Wrap-Modus erfolgt dabei für die s unt t Komponente einzeln. Man kann also auf s z.B. clampen und auf t wrappen.
+Die beiden anderen Methoden geben an was geschehen soll wenn der User Texture-Koordinaten angibt die kleiner als 0 oder grÃ¶ÃŸer als 1 sind. Wir wÃ¤hlen hier GL10.GL_CLAMP_TO_EDGE was zur Folge hat das solche Texturen einfach auf den Bereich geschnitten werden ( kleiner 0 wird 0, grÃ¶ÃŸer 1 wird 1 ). Alternativ kann man hier GL10.GL_WRAP angeben. Dies hat zur Folge das die Koordinaten modulo 1 genommen werden. Eine 4.5 wird so zur 0.5 und so weiter. Damit kann man die Texture Ã¼ber ein Dreieck mehrere Male wiederholen. Die Angabe des Wrap-Modus erfolgt dabei fÃ¼r die s unt t Komponente einzeln. Man kann also auf s z.B. clampen und auf t wrappen.
 
-Damit haben wir die Texture fertig geladen und konfiguriert. Uns bleibt noch das zeichnen mit der Texture über. Hier der gesamte Code im Überblick:
+Damit haben wir die Texture fertig geladen und konfiguriert. Uns bleibt noch das zeichnen mit der Texture Ã¼ber. Hier der gesamte Code im Ãœberblick:
 
  gl.glEnable( GL10.GL_TEXTURE_2D );
  gl.glBindTexture( GL10.GL_TEXTURE_2D, textureId );		
@@ -454,19 +454,23 @@ Damit haben wir die Texture fertig geladen und konfiguriert. Uns bleibt noch das
  gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertices);		
  gl.glDrawArrays(GL10.GL_TRIANGLES, 0, 3);
 
-Zuerst müssen wir OpenGL sagen das es ab jetzt alle Meshes mit der aktuel gebundenen Texture texturieren soll. Als nächstes binden wir unsere Texture. Dann geben wir an dass unsere Vertices Texture-Koordinaten haben und wir die gleich übergeben was im nächsten Aufruf mit ''glTexCoordPointer'' geschieht.
+Zuerst mÃ¼ssen wir OpenGL sagen das es ab jetzt alle Meshes mit der aktuel gebundenen Texture texturieren soll. Als nÃ¤chstes binden wir unsere Texture. Dann geben wir an dass unsere Vertices Texture-Koordinaten haben und wir die gleich Ã¼bergeben was im nÃ¤chsten Aufruf mit ''glTexCoordPointer'' geschieht. Hier unser texturiertes Dreieck:
 
-Es sei noch angemerkt dass man die Texture nur einmal baut (z.B. in der ''setup'') Methode. Ich hatte da schon Code von einigen Leuten gesehen die die selbe Texture immer und immer wieder bauen. Wie für Meshes gilt: einmal bauen, solang verwenden wie nötig, dann die Resourcen wieder freigeben. Im Fall von Vertex Arrays gibts nichts zu tun. Im Fall von Texturen müssen wir diese löschen was sehr einfach geht:
+[[Datei:texturetri.png]]
+
+Den Code zum Beispiel findet ihr unter [[http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/TextureSample.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/TextureSample.java]
+
+Es sei noch angemerkt dass man die Texture nur einmal baut (z.B. in der ''setup'') Methode. Ich hatte da schon Code von einigen Leuten gesehen die die selbe Texture immer und immer wieder bauen. Wie fÃ¼r Meshes gilt: einmal bauen, solang verwenden wie nÃ¶tig, dann die Resourcen wieder freigeben. Im Fall von Vertex Arrays gibts nichts zu tun. Im Fall von Texturen mÃ¼ssen wir diese lÃ¶schen was sehr einfach geht:
 
  int[] textureIds = { textureId };
  gl.glDeleteTextures( 1, textureIds, 0 );
 
-Wir geben einfach die Texture-ID an und schon ist die Texture Geschichte. Man sollte ein gelöschte Texture natürlich nach dem Löschen nicht mehr binden. 
+Wir geben einfach die Texture-ID an und schon ist die Texture Geschichte. Man sollte ein gelÃ¶schte Texture natÃ¼rlich nach dem LÃ¶schen nicht mehr binden. 
 
-Und das war's wieder. Eigentlich keine Rocket Science, ein wenig Code ist es aber schon. Wir werden darum zwei Klassen bauen die uns für Meshes und Textures ein wenig Arbeit abnehmen und den Code schlanker machen. 
+Und das war's wieder. Eigentlich keine Rocket Science, ein wenig Code ist es aber schon. Wir werden darum zwei Klassen bauen die uns fÃ¼r Meshes und Textures ein wenig Arbeit abnehmen und den Code schlanker machen. 
 
 === Mesh & Texture Klasse ===
-Für euer Seelenheil hab ich zwei Klassen gestrickt die ihr sehr einfach verwenden könnt. Zum einen haben wir da die Mesh Klasse:
+FÃ¼r euer Seelenheil hab ich zwei Klassen gestrickt die ihr sehr einfach verwenden kÃ¶nnt. Zum einen haben wir da die Mesh Klasse:
 
  public final class Mesh
  {
@@ -487,9 +491,9 @@ Für euer Seelenheil hab ich zwei Klassen gestrickt die ihr sehr einfach verwende
     public void texCoord( float s, float t )
 }
 
-Ihr könnt sie über den Konstruktor einfach instanzieren. Den ersten Parameter erhaltet ihr in der ''GameListener.setup()'' bzw. ''GameListener.render()'' Methode. Der zweite Parameter gibt an wieviele Vertices das Mesh insgesamt haben soll. Der dritte Parameter besagt ob das Mesh auch Colors definiert, der vierte ob Texture-Koordinaten dabei sein sollen und der vierte ob [http://www.flipcode.com/archives/Vertex_Normals.shtml Normalen] vorhanden sind. Moment, Normalen? Die erklären wir an dieser Stelle nicht. Sie werden für die Beleuchtung von Meshes durch Lichtquellen benötigt. Damit wir in späteren Teilen einmal darauf eingehen können habe ich sie gleich in den Source miteingebaut.
+Ihr kÃ¶nnt sie Ã¼ber den Konstruktor einfach instanzieren. Den ersten Parameter erhaltet ihr in der ''GameListener.setup()'' bzw. ''GameListener.render()'' Methode. Der zweite Parameter gibt an wieviele Vertices das Mesh insgesamt haben soll. Der dritte Parameter besagt ob das Mesh auch Colors definiert, der vierte ob Texture-Koordinaten dabei sein sollen und der vierte ob [http://www.flipcode.com/archives/Vertex_Normals.shtml Normalen] vorhanden sind. Moment, Normalen? Die erklÃ¤ren wir an dieser Stelle nicht. Sie werden fÃ¼r die Beleuchtung von Meshes durch Lichtquellen benÃ¶tigt. Damit wir in spÃ¤teren Teilen einmal darauf eingehen kÃ¶nnen habe ich sie gleich in den Source miteingebaut.
 
-Nachdem ihr das Mesh instanziert habt könnt ihr es sehr einfach befüllen. Unser Color Sample von oben würde z.B. so ausschaun:
+Nachdem ihr das Mesh instanziert habt kÃ¶nnt ihr es sehr einfach befÃ¼llen. Unser Color Sample von oben wÃ¼rde z.B. so ausschaun:
 
  mesh = new Mesh( gl, 3, true, false, false );
  mesh.color( 1, 0, 0, 1 );
@@ -499,13 +503,13 @@ Nachdem ihr das Mesh instanziert habt könnt ihr es sehr einfach befüllen. Unser 
  mesh.color( 0, 0, 1, 1 );
  mesh.vertex( 0, 0.5f, 0);
 
-Als Richtlinie gilt hier: zuerst immer alle Komponenten ungleich der Position für einen Vertex angeben (Color, Texture-Koordinaten, Normale) und zum fixieren des Vertex ''vertex'' mit der Position des Vertex aufrufen. Natürlich solltet ihr nicht mehr Vertices definieren als ihr im Konstruktor angegeben habt. Zum Rendern des Mesh reicht folgender Aufruf
+Als Richtlinie gilt hier: zuerst immer alle Komponenten ungleich der Position fÃ¼r einen Vertex angeben (Color, Texture-Koordinaten, Normale) und zum fixieren des Vertex ''vertex'' mit der Position des Vertex aufrufen. NatÃ¼rlich solltet ihr nicht mehr Vertices definieren als ihr im Konstruktor angegeben habt. Zum Rendern des Mesh reicht folgender Aufruf
 
  mesh.render(PrimitiveType.Triangles);
  
-PrimitiveType ist wie oben zu sehen ein enum welches mehrere Arten von Primitiven definiert. Wir haben bis jetzt nur die Dreiecke besprochen, es sind aber auch andere Primitive möglich. Ihr könnt diese im Netz nachschlagen (z.B. Triangle Strip) um einen Einblick zu erlangen. 
+PrimitiveType ist wie oben zu sehen ein enum welches mehrere Arten von Primitiven definiert. Wir haben bis jetzt nur die Dreiecke besprochen, es sind aber auch andere Primitive mÃ¶glich. Ihr kÃ¶nnt diese im Netz nachschlagen (z.B. Triangle Strip) um einen Einblick zu erlangen. 
 
-Ein schönes Feature der Klasse ist das ihr das Mesh nachdem ihr es einmal gerendert habt wieder neu definieren könnt. Ihr verwendet dazu einfach wieder die Methoden ''color'', ''texCoord'' usw. wie vorher gezeigt. Wichtig dabei ist aber, dass das Mesh mindestens einmal zuvor gerendert wurde da ansonsten ein interner Zeiger noch zurückgesetzt wird. Ihr könnt euch den Code zur Mesh Klasse unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/tools/Mesh.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/tools/Mesh.java] ansehen. Wirklich was neues mache ich dort nicht. Die Grundlagen dafür habt ihr bereits oben gesehen. Den Source Code zu einem Beispiel Programm welches die Mesh Klasse verwendet findet ihr unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/MeshSample.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/MeshSample.java]. Durch die Verwendung der Klasse wird der Code um einiges schlanker und verständlicher.
+Ein schÃ¶nes Feature der Klasse ist das ihr das Mesh nachdem ihr es einmal gerendert habt wieder neu definieren kÃ¶nnt. Ihr verwendet dazu einfach wieder die Methoden ''color'', ''texCoord'' usw. wie vorher gezeigt. Wichtig dabei ist aber, dass das Mesh mindestens einmal zuvor gerendert wurde da ansonsten ein interner Zeiger noch zurÃ¼ckgesetzt wird. Ihr kÃ¶nnt euch den Code zur Mesh Klasse unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/tools/Mesh.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/tools/Mesh.java] ansehen. Wirklich was neues mache ich dort nicht. Die Grundlagen dafÃ¼r habt ihr bereits oben gesehen. Den Source Code zu einem Beispiel Programm welches die Mesh Klasse verwendet findet ihr unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/MeshSample.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/MeshSample.java]. Durch die Verwendung der Klasse wird der Code um einiges schlanker und verstÃ¤ndlicher.
 
 Die Texture Klasse ist noch einfacher:
 
@@ -530,13 +534,230 @@ Die Texture Klasse ist noch einfacher:
     public int getWidth() 
 }
 
-Beim Instanzieren geben wir wieder die GL10 Instanz an, gleich wie beim Mesh. Außerdem übergeben wir die Bitmap, die gewünschten Vergrößerungs- und Verkleinerungs-Filter sowie die Wrap Modi für die s und t Texture-Koordinaten. Diese haben wir ja oben ganz kurz angerissen. Auch Mip-Mapping ist hier schon implementiert, einfach den minFilter auf TextureFilter.MipMap setzen. Des weiteren gibt es eine Methode ''bind()'' die die Texture bindet, gleich wie ''glBindTexture''. Die Methode ''dispose'' löscht die Texture und gibt alle Resourcen frei. Die Methode ''draw()'' ist ein sehr nettes Feature: Sie erlaubt es im Nachhinein eine andere Bitmap an eine bestimmte x, y Position in der Texture zu zeichnen. Die Koordinaten werden dabei in Pixel angegeben, der Ursprung ist das obere linke Eck, die positive y-Achse geht nach unten. Intern bindet die Methode die Texture vor dem zeichnen, man muss hier also auf den Seiteneffekt achten. 
+Beim Instanzieren geben wir wieder die GL10 Instanz an, gleich wie beim Mesh. AuÃŸerdem Ã¼bergeben wir die Bitmap, die gewÃ¼nschten VergrÃ¶ÃŸerungs- und Verkleinerungs-Filter sowie die Wrap Modi fÃ¼r die s und t Texture-Koordinaten. Diese haben wir ja oben ganz kurz angerissen. Auch Mip-Mapping ist hier schon implementiert, einfach den minFilter auf TextureFilter.MipMap setzen. Des weiteren gibt es eine Methode ''bind()'' die die Texture bindet, gleich wie ''glBindTexture''. Die Methode ''dispose'' lÃ¶scht die Texture und gibt alle Resourcen frei. Die Methode ''draw()'' ist ein sehr nettes Feature: Sie erlaubt es im Nachhinein eine andere Bitmap an eine bestimmte x, y Position in der Texture zu zeichnen. Die Koordinaten werden dabei in Pixel angegeben, der Ursprung ist das obere linke Eck, die positive y-Achse geht nach unten. Intern bindet die Methode die Texture vor dem zeichnen, man muss hier also auf den Seiteneffekt achten. 
 
-Was die Klasse nicht macht ist das Einschalten von Texturierung über ''glEnable''. Darauf also nicht vergessen. Ein Beispiel für die Verwendung der Texture Klasse in Zusammenhang mit der Mesh Klasse findet ihr unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/TextureMeshSample.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/TextureMeshSample.java] anschaun. Das Mesh dort verwendet Colors und Texture-Coordinates was einen hübschen Effekt hat :)
+Was die Klasse nicht macht ist das Einschalten von Texturierung Ã¼ber ''glEnable''. Darauf also nicht vergessen. Ein Beispiel fÃ¼r die Verwendung der Texture Klasse in Zusammenhang mit der Mesh Klasse findet ihr unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/TextureMeshSample.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/TextureMeshSample.java] anschaun. Das Mesh dort verwendet Colors und Texture-Coordinates was einen hÃ¼bschen Effekt hat :)
 
 Damit haben wir jetzt zwei sehr kleine und feine Klassen die uns viel Arbeit und Code abnehmen. 
+
+=== Projektionen ===
+Ich bin ein wenig fies. Nach dem Kapitel Ã¼ber Vektoren hab ich versprochen dass das alles an Mathematik war was wir hier sehen werden. Ich hab gelogen. Wir werden uns jetzt mit [http://de.wikipedia.org/wiki/Zentralprojektion Projektionen] beschÃ¤ftigen. Dabei gibt es zwei fÃ¼r uns relevante Arten:
+
+* [http://de.wikipedia.org/wiki/Parallelprojektion Parallelprojektion]
+* [http://de.wikipedia.org/wiki/Zentralprojektion Zentralprojektion]
+
+Die Parallelprojektion wird auch orthographische Projektion genannt, die Zentralprojektion kennt man auch als perspektivische Projektion. Was genau macht eine Projektion? Sie nimmt unsere dreidimensionalen Vertex Positionen und transformiert diese in 2D Koordinaten am Bildschirm (vereinfacht ausgedrÃ¼ckt, bis zu den Bildschirmkoordinaten gibts noch ein paar Zwischenschritte, die sparen wir uns aber). Die orthographische Projektion verwendet man im allgemeinen wenn man in 2D Arbeiten mÃ¶chte, wie z.B. in alten NES Spielen. Die perspektivische Projektion verwendet man fÃ¼r alles Spiele die einen 3D Eindruck verwenden wollen. In der Schule sollten die meisten von euch schon mal Fluchtpunkt Zeichnungen gemacht haben, genau das selbe Prinzip verwendet auch die perspektivische Projektion, nur mathematisch ausformuliert. 
+
+Beginnen wir mit der orthographischen Projektion. FÃ¼r jede Art von Projektion brauchen wir eine ProjektionsflÃ¤che, in unserem Fall ist das der Bildschirm. Die orthographische Projektion nimmt einfach jeden Vertex her und ignoriert dessen z-Koordinate. Die x und y Koordinate werden mehr oder minder so Ã¼bernommen wie sie sind. Geometrisch kann man sich das so vorstellen, dass von jedem Vertex eine Linie ausgeht die die ProjektionsflÃ¤che schneidet. Diese Linien sind alle parallel zueinander und normal, d.h. in einem 90 Grad Winkel zur ProjektionsflÃ¤che. Die Schnittpunkte der Linien mit der ProjektionsflÃ¤che ergeben die finalen projizierten Punkte. Ein Bild sagt mehr als tausend Worte:
+
+[[Datei:ortho.png]]
+
+Es ist also vollkommen unerheblich wie weit ein Punkt von der ProjektionsflÃ¤che entfernt ist. Die orthographische Projektion werden wir fÃ¼r all unsere 2D BedÃ¼rfnisse verwenden. Wir konfigurieren sie so das wir direkt in Bildschirmkoordinaten Arbeiten kÃ¶nnen. Dazu verwenden wir die Klasse GLU die eine statische Methode namens ''glOrtho2D'' besitzt. Um das gewÃ¼nschte 2D Koordinaten System zu bekommen rufen wir folgendes auf:
+
+ gl.glMatrixMode( GL10.GL_PROJECTION );
+ gl.glLoadIdentity();
+ GLU.glOrtho2D( gl, 0, activity.getViewportWidth(), 0, activity.getViewportHeight() )
+ 
+Zuerst sagen wir OpenGL dass wir die Projektions-Matrix ab jetzt bearbeiten wollen. Projektionen sind Transformationen von Vertices und werden in OpenGL Ã¼ber Matrizen abgebildet. Jeder Vertex den wir an OpenGL schicken wird mit ein paar Matrizen multipliziert um seine finale Position am Bildschirm zu errechnen. Die Projektionsmatrix ist eine dieser Matrizen. Wir brauchen uns aber Gott sei dank hier nicht mit Matrizen direkt herumschlagen. Als nÃ¤chstes laden wir eine Einheits-Matrize. Man stelle sich hier einfach vor, dass der Inhalt der Projektions-Matrize dadurch gelÃ¶scht wird und die Matrize keinen EinfluÃŸ auf unsere Vertices hat. Die Multiplikation mit dieser Matrize ergibt den selben Vektor. AbschlieÃŸend verwenden wir ''glOrtho2D'' welches eine orthographische Projektions-Matrize lÃ¤d. Die Parameter geben dabei an wie groÃŸ die ProjektionsflÃ¤che ist (stimmt so nicht ganz). Wir geben hier den gesamten Bildschirm an, die Angaben sind in Pixel. Ab nun kÃ¶nnen wir die Vertex Positionen in Bildschirmkoordinaten angeben wobei das Koordinaten-System wie folgt im Portrait und Landscape Modus ausschaut:
+
+[[Datei:ortho2.png|400px]]
+
+Zur Veranschaulichung hier noch das ganze mit einem Mesh welches wir in diesem neuen Koordinaten-System so definieren:
+
+ mesh = new Mesh( gl, 3, false, false, false );
+ mesh.vertex( 0, 0, 0 );
+ mesh.vertex( 50, 0, 0 );
+ mesh.vertex( 25, 50, 0 );	
+
+Wir erwarten also ein Dreieck welches unten links neben dem Ursprung in Erscheinung tritt. Und das tut es auch (siehe Sample unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/OrthoSample.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/OrthoSample.java]
+
+[[Datei:orthotri.png]]
+
+Damit kÃ¶nnten wir jetzt schon fast unser erstes kleines 2D Spielchen implementieren. Da wir aber moderne Menschen sind wollen wir etwas in 3D machen. Dazu benÃ¶tigen wir die perspektivische Projektion. 
+
+Die perspektivische Projektion ist um ein StÃ¼ckchen schwerer zu durchschaun als die orthographische Projektion funktioniert aber nach einem Ã¤hnlichen Prinzip. Wieder schicken wir Linien durch alle Vertices, diesmal jedoch nicht normal zur ProjektionsflÃ¤che sondern durch einen Punkt vor der ProjektionsflÃ¤che (auf der anderen Seite sind die Vertices). 
+
+[[Datei:perspective.jpg]]
+
+Dieser Punkt ist insofern besonders als dass er der Position des Auges eines Betrachters in unserer dreidimensionalen Welt entspricht. 
+
+[[Datei:perspective2.gif]]
+
+Die perspektivische Projektion wird durch mehrere Parameter definiert. Zum einen durch das sogenannte Field of View. Dies ist das Sichtfeld das man in der y-Achse bis zur ProjektionsflÃ¤che abdeckt. Als nÃ¤chstes gibt es die near und die far Clipping Planes. Die near Clipping Plane ist unserer Projektionsebene, man gibt hier die Entfernung zum Betrachter an. Die far Clipping Plane ist jene Ebene ab der nichts mehr dargestellt wird. Jeder Vertex der hinter dieser Ebene liegt wird nicht gezeichnet. Als letzten Parameter fÃ¼r eine perspektivische Projektion braucht man das VerhÃ¤ltnis zwischen Breite und HÃ¶he der Projektionsebene, auch Aspect Ratio genannt. Diesen errechnen wir aus der Viewport GrÃ¶ÃŸe die in Pixeln angegeben ist. All diese Parameter gemeinsam definieren einen Sichtkegel der vorne durch die near Clipping Plane und hinten durch die Far Clipping Plane begrenzt ist. Auch ist er oben und unten sowie links und rechts begrenzt. Diesen Sichtkegel nennt man View Frustum. Ganz schÃ¶n viel Information auf einmal, schaun wir uns an wie einfach das in OpenGL geht:
+
+ gl.glMatrixMode( GL10.GL_PROJECTION );
+ gl.glLoadIdentity();
+ float aspectRatio = (float)activity.getViewportWidth() / activity.getViewportHeight();
+ GLU.gluPerspective( gl, 67, aspectRatio, 1, 100 );
+
+Wieder sagen wir OpenGL das wir die Projektions-Matrix Ã¤ndern wollen und laden dann eine Einheits-Matrix. Als nÃ¤chstes berechnen wir den aspectRatio als Viewport Breite durch Viewport HÃ¶he. Dieser Wert ist eine Dezimalzahl daher der Cast auf (float). Zu guter letzt verwenden wir wieder GLU und dessen Methode ''gluPerspective''. Der erste Parameter ist die GL Instanz, der zweite Parameter das Field of View in Grad, wobei 67 Grad ungefÃ¤hr dem Sichtfeld nach oben und unten eines Menschen entsprechen. Der nÃ¤chste Parameter gibt die Distanz zur near Clipping Plane an, hier setzen wir ihn auf 1. Der letzte Parameter gibt die Distanz zur far Clipping Plane an, hier 100, und wir sind auch schon fertig mit der Konfiguration der perspektivischen Projektion. 
+
+Jetzt stellt sich uns die Frage wo in unserem 3D Koordinaten-System sich der Betrachter befindet. Wir erinnern uns, die positive x-Achse zeigt nach rechts, die positive y-Achse nach oben und die positive z-Achse aus dem Bildschirm heraus. Die negative z-Achse zeigt somit in den Bildschirm hinein. Der Betrachter befindet sich im Ursprung, also an den Koordinaten (0,0,0) und schaut gerade entlang der '''negativen''' z-Achse. Die near Clipping Plane befindet sich damit an der z-Koordinate -1, die far Clipping Plane an der z-Koordinate -101. FÃ¼r unser Mesh bedeutet das, dass wir es auf z irgendwo zwischen -1 und -100 ansiedeln mÃ¼ssen. Hier ein Beispiel mit 2 Dreiecken, eines auf z=-2 und ein zweites auf z=-5. Beide Dreiecke haben die selbe GrÃ¶ÃŸe:
+
+ mesh = new Mesh( gl, 6, true, false, false );				
+ mesh.color( 0, 1, 0, 1 );
+ mesh.vertex( 0f, -0.5f, -5 );
+ mesh.color( 0, 1, 0, 1 );
+ mesh.vertex( 1f, -0.5f, -5 );
+ mesh.color( 0, 1, 0, 1 );
+ mesh.vertex( 0.5f, 0.5f, -5 );		
+ mesh.color( 1, 0, 0, 1 );
+ mesh.vertex( -0.5f, -0.5f, -2 );
+ mesh.color( 1, 0, 0, 1 );
+ mesh.vertex( 0.5f, -0.5f, -2 );
+ mesh.color( 1, 0, 0, 1 );
+ mesh.vertex( 0, 0.5f, -2);
+
+Das erste Dreieck ist ein wenig nach rechts verschoben und liegt hinter dem zweiten Dreieck. Die Dreiecke werden von OpenGL auch in dieser Reihenfolge gezeichnet, wodurch das hintere grÃ¼ne Dreieck vom vorderen roten Dreieck Ã¼berdeckt wird:
+
+[[Datei:perspectivetri.png]]
+
+Wie zu erwarten ist das grÃ¼ne Dreieck kleiner als das rote da es ja auch weiter entfernt ist. Wir haben somit den Schritt in die 3te Dimension geschafft! Den Sample Code findet ihr unter [[http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/PerspectiveSample.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/PerspectiveSample.java]
+
+=== Kamera, Z-Buffer und wie LÃ¶sch ich den Schirm ===
+Eine Kamera die man nicht bewegen kann ist Ã¤uÃŸerst langweilig. Zum GlÃ¼ck ist es mit Hilfe der Klasse GLU extrem einfach das zu Ã¤ndern. Dazu mÃ¼ssen wir uns aber zuerst vor Augen fÃ¼hren wie eine Kamera definiert ist. Zum einen hat sie natÃ¼rlich eine Position in unserer 3D-Welt. Auch muss sie eine Richtung besitzen in die sie schaut. Aus dem Vektor Kapitel wissen wir wie wir das abbilden kÃ¶nnen. Ein Baustein fehlt noch: der sogenannte Up Vektor. Dieser definiert die y-Achse der Kamera, die Richtung definiert die z-Achse der Kamera und die x-Achse kÃ¶nnen wir leicht Ã¼ber das sogenannte Kreuz-Produkt aus Up und Richtungsvektor errechnen. Das brauchen wir aber alles gar nicht da uns das die GLU Klasse abnimmt. Zur VerstÃ¤ndnis des Up-Vektors: man stelle sich vor ein Pfeil ragt einem senkrecht aus dem Kopf. Das ist der Up Vektor. Neigt man sein Haupt nun nach rechts oder links Ã¤nder sich auch dieser Up Vektor und mit ihm der Winkel unter dem man das Bild sieht. Aus mathematischer Sicht sei noch angemerkt, dass dieser Up Vektor und der Richtungsvektor Einheitsvektoren sind und normal auf einander stehen, also im neunzig Grad Winkel. 
+
+Damit wir unsere Welt aus der Sicht der Kamera sehen mÃ¼ssen wir wieder eine Matrize von OpenGL bemÃ¼hen. Diese nennt sich die Model-View-Matrize. Der View Teil bezeichnet dabei den Umstand das man in dieser Matrize die Kamera-Matrize (die sich aus den oben genannten Eigenschaften der Kamera ergibt) ablegt. Ein Vertex wird zuerst durch die Model-View-Matrize transformiert (per Multiplikation) und dann mit der Projektions-Matrix multipliziert um seine finale Position zu bestimmen. Schaun wir uns also an wie wir diese Model-View-Matrix mit GLU so setzen kÃ¶nnen das wir unsere Welt aus der Sicht des Kamera sehen:
+
+ gl.glMatrixMode( GL10.GL_MODELVIEW );
+ gl.glLoadIdentity();
+ GLU.glLookAt( gl, positionX, positionY, positionZ, zentrumX, zentrumY, zentrumZ, upX, upY, upZ );
+ 
+Die ersten beiden Zeilen kennen wir ja schon. In der ersten sagen wir jedoch, dass wir die Model-View-Matrix verÃ¤ndern mÃ¶chten. In der dritten Zeile definieren wir unsere Kamera aus der GLU dann eine Matrize errechnet und die Model-View-Matrix auf diese setzt. Der erste Parameter ist wieder die GL Instanz. Die nÃ¤chsten drei Parameter geben die Koordinaten der Kamera an. zentrumX, zentrumY und zentrumZ geben einen Punkt in der Welt an auf den die Kamera blicken soll. Nimmt man diesen Punkt und subtrahiert man davon die Kamera Position vektoriel erhÃ¤lt man die Richtung der Kamera und damit deren z-Achse. Die letzten drei Parameter geben den oben beschriebenen Up Vektor an. Dieser muss ein Einheits-Vektor sein, also die LÃ¤nge 1 besitzen sonst kÃ¶nnen komische Ergebnisse auftreten. 
+
+Ziehen wir unsere Szene mit dem roten und dem grÃ¼nen Dreieck aus dem letzten Beispiel heran. Wir wollen die Kamera jetzt hinter das grÃ¼ne Dreieck positionieren (also z<-5) und sie in Richtung Ursprung sehen lassen. Die Neigung lassen wir dabei normal, d.h. der Up Vektor schaut nach oben (0,1,0):
+
+  gl.glMatrixMode( GL10.GL_MODELVIEW );
+  gl.glLoadIdentity();
+  GLU.glLookAt( 0, 0, -7, 0, 0, 0, 0, 1, 0 );
+
+Das Ergebnis sieht so aus ( Sample Code unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/CameraSample.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/CameraSample.java] )
+
+[[Datei:camera.png]]
+
+Da scheint etwas schief gegangen zu sein. Eigentlich dÃ¼rfte das rote Dreieck ja das grÃ¼ne nicht Ã¼berdecken, tut es aber. Das Problem: Im Mesh haben wir das rote Dreieck nach dem grÃ¼nen definiert und in der Reihenfolge werden sie auch gezeichnet. Betrachten wir das ganze von vorne stimmt alles. Von unten passt es aber nicht mehr. Was tun? In AbhÃ¤ngigkeit von der Blickrichtung die Ordnung der Dreiecke Ã¤ndern? Was macht man dann bei sich Ã¼berlappenden Dreiecken wo die Ordnung nicht eindeutig ist?
+
+FÃ¼r all diese Probleme gibt es eine LÃ¶sung mit dem klingenden Namen [[http://de.wikipedia.org/wiki/Z-Buffer Z-Buffer]. Dieser ist quasi ein Zusatz zum Frame Buffer (wir erinnern uns, dort werden alle Pixel gespeichert) und besitzt die selbe GrÃ¶ÃŸe. Jeder Pixel eines gezeichneten Dreiecks besitzt neben seiner x- und y-Koordinate nach der Transformation mit der Projektions- und Model-View-Matrix auch eine z-Koordinate. In den Z-Buffer schreibt OpenGL genau diese z-Koordinate und macht noch etwas besonders schlaues: bevor es Ã¼berhaupt einen Pixel zeichnet prÃ¼ft es ob im Z-Buffer bereits ein Pixel existiert der nÃ¤her zur Kamera liegt. Ist dem der Fall braucht OpenGL den aktuellen Pixel nicht schreiben da er ja hinter dem aktuellen Pixel liegt. Alles was wir also tun mÃ¼ssen ist diesen Z-Buffer einzuschalten und das geht so:
+
+ gl.glEnable(GL10.GL_DEPTH_TEST);
+
+Dazu mÃ¼ssen wir aber noch etwas tun und zwar den Z-Buffer in jedem Frame lÃ¶schen. Und wenn wir schon dabei sind dann kÃ¶nnen wir auch gleich den Frame Buffer mitlÃ¶schen, was so geht:
+
+ gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
+ 
+Wer auch noch die Farbe mit der der Frame Buffer gelÃ¶scht werden soll bestimmen will kann dies folgendermaÃŸen tun:
+
+ gl.glClearColor( red, green, blue, alpha );
+  
+Der Frame und der Z-Buffer sollte mÃ¶glichst in jedem Frame gelÃ¶scht werden. Normalerweise mache ich das immer ganz am Anfang des Rendering damit ich nicht darauf vergesse. Schaun wir uns an wie unser Dreieck-Sortierproblem jetzt ausschaut:
+
+[[Datei:zbuffer.png]]
+  
+Ausgezeichnet, und all das mit nur zwei zusÃ¤tzlichen Befehlen. Mit dem Z-Buffer kommen aber auch Probleme:
+
+* Wenn zwei Dreiecke in der selben Ebene liegen und Ãœberlappen kommt es zum sogenannten [http://en.wikipedia.org/wiki/Z-fighting Z-Fighting]. Dies tritt vor allem auf wenn man beim Rendern mit orthographischer Projektion vergisst den Z-Buffer mit ''glDisable(GL10.GL_DEPTH_TEST)'' auszuschalten. Wir werden immer daran denken dies vor dem Zeichnen von 2D Elementen zu tun!
+* Das Problem der Sortierung wird bei transparenten Dreicken, also solchen durch die der Hintergrund etwas zu sehen ist, nicht gelÃ¶st. Man stelle sich ein Dreieck vor welches hinter einem anderen in der Szene liegt. Das verdeckende Dreieck ist transparent und wird vor dem hinteren Dreieck gerendert. Ergebnis: das hintere Dreieck kann nicht durchscheinen da seine Pixel gar nicht erst in den Frame Buffer geschrieben werden. Im Z-Buffer befinden sich ja schon die Werte fÃ¼r das vordere Dreieck welche nÃ¤her an der Kamera sind. Dieses Problem lÃ¶st man im allgemeinen in dem man zuerst alle nicht transparenten Objekte zeichnet, dann alle transparenten Objekte Ã¼ber die Distanz zur Kamera sortiert und in der sortierten Reihenfolge rendert.
+
+Beachtet man diese beiden Probleme steht dem vergnÃ¼glichen Gebrauch des Z-Buffers nichts im Weg!
+
+=== Licht und Schatten ===
+3D allein macht noch kein 3D GefÃ¼hl. Das menschliche Auge verwendet nicht nur das stereoskopische Sehen zum AbschÃ¤tzen von Tiefe sondern auch andere Hinweise und hier vor allem Licht & Schatten.
+
+OpenGL bietet hier einiges an MÃ¶glichkeiten zumindest was Licht betrifft. Schattenwurf wie wir in kennen ist nicht direkt in OpenGL inkludiert kann aber nachgebaut werden. Mit OpenGL ES ist dies jedoch zu rechenaufwendig wir werden uns daher nur um das Licht kÃ¼mmern. Schatten bekommen wir in der Sparversion: vom Licht abgewendete Seiten sind dunkler.
+
+Um OpenGL dazu zu bewegen Licht zu simulieren mÃ¼ssen wir dieses einfach anknipsen:
+
+ gl.glEnable(GL10.GL_LIGHTING);
+
+Das ausschalten funktioniert analog:
+
+ gl.glDisable(GL10.GL_LIGHTING);
+
+FÃ¼r unsere 2D Elemente werden wir kein Licht brauchen sondern wollen deren vollen Farben haben. Darum mÃ¼ssen wir vor dem Zeichnen der 2D Elemente das Licht auch ausschalten.
+
+OpenGL kann verschiedene Lichtarten und Lichtquellen simulieren. Wo liegt hier der Unterschied? Als Lichtarten gelten ambientes Licht, diffuses Licht, spekulares Licht und emissives Licht (streng genommen keine Lichtart). Ambientes Licht kommt aus allen Richtungen und hat keine bestimmte Quelle. Es handelt sich um jene Photonen die schon tausende Male von einem Objekt reflektiert wurden und so fÃ¼r einen "Grundlichtpegel" sorgen. Diffuses Licht geht von einer bestimmten Lichtquelle aus und wird aufgrund von feinen unebenheiten des das Licht reflektierenden Objekts in alle mÃ¶glichen Richtungen reflektiert. Spekulares Licht hingegen wird scharf reflektiert, z.B. auf einem Spiegel und bildet an einem bestimmten Punkt am Objekt ein sogenanntes Highlight, einen Ã¼berbeleuchteten Punkt. Emissives Licht ist Licht das vom bestrahlten Objekt selbst ausgeht. Das folgende Bild zeigt alle vier Typen: ambient, diffuse, spekular und emissiv.
+
+[[Datei:lighttypes.png]]
+
+Wir werden uns nur mit ambienten und diffusen Licht in OpenGL beschÃ¤ftigen. Spekulares Licht benÃ¶tigt ein sehr fein aufgelÃ¶stest Mesh und damit viele Dreiecke um richtig zur Geltung zu kommen. Emissives Licht kÃ¶nnen wir auch Ã¼ber die Farbe des Meshes simulieren, was in der Regel einfacher ist.
+
+Als Lichtquellen gelten Punktlichtquellen, wie etwa eine Lampe, deren Strahlen radial ausstrahlen, direktionale Lichtquellen, wie etwa die Sonne deren  Strahlen aufgrund der Entfernung alle so gut wie parallel bei uns auftreffen und Spotlichtquellen, wie ein gerichteter Scheinwerfer der einen Lichtkegel bildet. Punktlichtquellen und Spotlichtquellen besitzen eine Position im Raum. Eine direktionale Lichtquelle wird in OpenGL als unendlich weit entfernt angenommen und hat deswegen nur eine Richtung. Wir werden uns nur mit Punktlichtquellen und direktionalen Lichtquellen beschÃ¤ftigen. FÃ¼r Spotlichtquellen gilt wieder Ã¤hnliches wie fÃ¼r spekulares Licht, sie benÃ¶tigen hoch aufgelÃ¶ste Meshes um zur Geltung zu kommen. Jeder Lichttyp emitiert ambientes, diffuses und spekulares Licht. Wenn wir eine Lichtquelle definieren mÃ¼ssen wir fÃ¼r jeden Lichttypen die Farbe angeben die die Lichtquelle fÃ¼r diesen Typen emitiert. OpenGL ES kann insgesamt 8 Lichtquellen zugleich simulieren. Diese Lichtquellen werden von 0 bis 7 durchnummeriert und werden mit den Konstanten GL10.GL_LIGHT0 bis GL10.GL_LIGHT7 identifiziert. Schauen wir uns zuerst an wie man die Farben der Lichttypen eines Lichtes definiert:
+
+ float lightColor[] = {1, 1, 1, 1.0};
+ float ambientLightColor[] = { 0.2f, 0.2f, 0.2f, 1.0 };
+ gl.glLightfv(GL.GL_LIGHT0, GL10.GL_AMBIENT, lightColor, 0 );
+ gl.glLightfv(GL.GL_LIGHT0, GL10.GL_DIFFUSE, lightColor, 0 );
+ gl.glLightfv(GL.GL_LIGHT0, GL10.GL_SPECULAR, lightColor, 0 );
+
+In der ersten Zeile basteln wir einen Array mit der Lichtfarbe, schÃ¶nes weiss. FÃ¼r die ambiente Komponente definieren wir ein dunkles Grau in Zeile 2. Zeilen 3 bis 5 setzt dann die Farbe fÃ¼r jeden Lichttypen der Lichtquelle 0. So einfach geht das. NatÃ¼rlich kann man fÃ¼r jeden Lichttyp eine verschiedene Farbe angeben, hier kann man experimentieren. 
+
+Ob die Lichtquelle ein direktionales Licht oder ein Punktlicht ist definiert man ebenfalls Ã¼ber die Methode ''glLightfv''. Anstatt als zweiten Parameter den Lichttyp anzugeben (z.B: GL10.GL_AMBIENT) verwendet man aber die Konstante GL10.GL_POSITION. Auch Ã¼bergeben wir wieder einen float Array mit 4 Elementen. Ist das letzte Element gleich 0 so sagt dies OpenGL dass wir ein direktionales Licht haben wollen. Die drei ersten Elemente geben dann die '''negative''' Richtung des Lichts an. Diese Richtung muss ein Einheitsvektor sein! Man kann sich dies auch als die Position einer Lichtquelle gelten. Die Richtung ist dann der Vektor von der Lichtquelle zum Ursprung. Sehr verwirrent. Ist das vierte Element gleich 1 so sagen wir OpenGL damit das wir ein Punktlicht wollen. Die ersten drei Elemente im Array entsprechen dann der Position des Lichts in der Welt.
+
+Ein direktionales Licht von Links wÃ¼rde dem zur folge so definiert:
+
+ float[] direction = { 1, 0, 0, 0 };
+ gl.glLightfv(GL.GL_LIGHT0, GL10.GL_POSITION, direction, 0 );
+
+Eine Punktlichtquelle direkt Ã¼ber dem Ursprung gibt man so an:
+
+ float[] position = { 0, 10, 0, 1 };
+ gl.glLightfv(GL.GL_LIGHT0, GL10.GL_POSITION, position, 0 );
+
+Wie Licht von einem Objekt reflektiert wird hÃ¤ngt nicht nur vom Lichttyp und der Lichtquelle ab. Auch das Material des Objektes spielt dabei eine Rolle. OpenGL ES hat einen relativ elaborierten Mechanismus um das Material eines Objekts zu definieren. So elaboriert dieser ist so langsam ist er leider auch. Wieder mÃ¼ssen wir fÃ¼r jeden Lichttyp eine Farbe definieren. Dies wÃ¼rden wir mit der Methode glMaterialfv machen. Diese ist aber wie gesagt extrem langsam. Wir nehmen hier eine AbkÃ¼rzung und verwenden eine spezielle Methode von OpenGL ES:
+
+ gl.glEnable(GL_COLOR_MATERIAL);
+
+Dies weiÃŸt OpenGL ES an das es anstatt eines definierten Materials einfach die Farbe des Vertex hernehmen soll und dieses fÃ¼r die ambiente und diffuse Komponente verwenden soll. In der Regel kommt man damit vor allem auf kleinen Bildschirmen locker durch. 
+
+Wer sich noch an das Kapitel Mesh & Texture Klasse erinnern kann denkt vielleicht jetzt an die Normalen die wir pro Vertex gleich wie Farbe oder Texture-Koordinaten angeben kann. Diese brauchen wir auch '''unbedingt''' wenn wir OpenGLs Beleuchtungsmodel verwenden wollen. Was ist also so eine Vertex-Normale? Ein kleines Bild:
+
+[[Datei:normals.jpg]]
+
+An jeder Ecke des WÃ¼rfels sitzen 3 Vertices. Wenn wir darÃ¼ber nachdenken wird schnell klar warum: jede Seite die auf diese Ecke trifft hat ein Dreieck an dieser Stelle. Da wir es nicht besser wissen wÃ¼rden wir fÃ¼r den WÃ¼rfel insgesamt 6 * 2 = 12 Dreiecke haben und damit 6 * 2 * 3 = 36 Vertices. Jeder Vertex hat nun eine Normale. Diese Normale ist normal zur Ebene in der das Dreieck liegt und ragt aus der Vorderseite des Dreiecks. OpenGL verwendet diese Normale um den Winkel des Vertices zur Lichtquelle zu berechnen. Darum mÃ¼ssen wir die in Meshes die wir beleuchten wollen auch unbedingt angeben. Im Source zur Mesh Klasse kÃ¶nnt ihr euch anschaun wie man die Normale eines Vertex OpenGL Ã¼bergibt. Der Mechanismus ist 1:1 der selbe wie bei Farben und Texture-Koordinaten, darum gehe ich hier nicht gesondert nochmal drauf ein. Zur Ãœbung versuchen wir einfach schnell ein Mesh zu machen das den drei in der obigen Zeichnung eingezeichneten Dreiecken entspricht. Wir werden es so definieren das das dunkelste Dreieck in der x-y-Ebene liegt:
+
+ mesh = new Mesh( gl, 9, false, false, true );
+ mesh.normal( 0, 0, 1 );
+ mesh.vertex( 1, 0, 0 );
+ mesh.normal( 0, 0, 1 );
+ mesh.vertex( 1, 1, 0 );
+ mesh.normal( 0, 0, 1 );
+ mesh.vertex( 0, 1, 0 );
+ mesh.normal( 1, 0, 0 );
+ mesh.vertex( 1, 0, 0 );
+ mesh.normal( 1, 0, 0 );
+ mesh.vertex( 1, 0, -1);
+ mesh.normal( 1, 0, 0 );
+ mesh.vertex( 1, 1, 0 );
+ mesh.normal( 0, 1, 0 );
+ mesh.vertex( 1, 1, 0 );
+ mesh.normal( 0, 1, 0 );
+ mesh.vertex( 1, 1, -1 );
+ mesh.normal( 0, 1, 0 );
+ mesh.vertex( 0, 1, 0 );
+
+Pfuh, ganz schÃ¶n viel Code fÃ¼r 3 Dreiecke. Wir werden da spÃ¤ter abhilfe schaffen. Beim Rendern mÃ¼ssen wir jetzt ein paar Dinge erledigen. Zum einen die Beleuchtung einschalten. Danach die Lichtquelle definieren. Dann die Lichtquelle einschalten und vor dem Rendern des Mesh noch Color Material enablen. Als Lichtquelle nehmen wir eine weisses direktionale die von Rechts oben kommt (-1, -1, 0): 
+
+ gl.glEnable( GL10.GL_LIGHTING );
+ float[] lightColor = { 1, 1, 1, 1 };
+ float[] ambientLightColor = {0.2f, 0.2f, 0.2f, 1 };
+ gl.glLightfv( GL10.GL_LIGHT0, GL10.GL_AMBIENT, ambientLightColor );
+ gl.glLightfv( GL10.GL_LIGHT0, GL10.GL_DIFFUSE, lightColor );
+ gl.glLightfv( GL10.GL_LIGHT0, GL10.GL_SPECULAR, lightColor );
+ float[] direction = { -1 / (float)Math.sqrt(2), -1 / (float)Math.sqrt(2), 0, 1 };
+ gl.glLightfv( GL10.GL_LIGHT0, GL10.GL_POSITION, direction );
+ gl.glEnable( GL10.GL_LIGHT0 );
+ gl.glEnable( GL10.GL_COLOR_MATERIAL );
+ mesh.render(PrimitiveType.Triangles);
+
+Wieder ein HÃ¶llen Aufwand. Wir haben auch ein paar Faux Pas geschossen. Zum einen wÃ¼rden wir so im Main Loop permanent zwei neue float Arrays instanzieren. Das wÃ¼rde irgendwann den Garbage Collector verstimmen der sich dann ein paar hundert Millisekunden Auszeit nimmt um auf zu rÃ¤umen. Wir werden im Sample Code die beiden Arrays zu Klassen Member unserer Sample Activity machen und somit nur einmal instanzieren. Zweitens mÃ¼ssen wir eine Lichtquelle nicht immer neu definieren. So sich diese Ã¼ber den Verlauf nicht Ã¤ndert reicht es deren Lichttypen Farben und Position/Richtung nur einmal anzugeben. Wer sich Ã¼brigens fragt warum wir die direction Elemente durch Math.sqrt(2) dividieren: Hier normalisieren wir den Richtungsvektor! ( (-1, -1, 0)' = [-1 / |(-1, -1, 0)|, -1 / |(-1, -1, 0), 0 / |(-1, -1, 0)] ).
+
+Um die Situation im Bild oben nachzustellen werden wir auch die Kamera Position und Richtung entsprechend setzen. Den genauen Code kÃ¶nnt ihr hier sehen []. Das Ergebnis sieht so aus:
+
+Eine Punktlichtquelle wÃ¼rde komplett analog dazu definiert und eingesetzt werden, mit dem Unterschied im 4ten Element im Positions Array. Und wieder ein Geheimnis von OpenGL gelÃ¼ftet!
 
 == SoundPool und MediaPlayer ==
 = Space Invaders =
 
 [[Kategorie:Entwicklung]]
+= Einleitung =
+
