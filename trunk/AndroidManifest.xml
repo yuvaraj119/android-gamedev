@@ -32,6 +32,11 @@
                 <action android:name="android.intent.action.MAIN" />
         </intent-filter>
         </activity>
+        <activity android:name=".samples.ColorSample2" android:label="Color Sample 2">
+        <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+        </intent-filter>
+        </activity>
         <activity android:name=".samples.TextureSample" android:label="Texture Sample">
         <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
