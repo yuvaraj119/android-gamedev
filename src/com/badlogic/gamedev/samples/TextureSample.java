@@ -89,6 +89,8 @@ public class TextureSample extends GameActivity implements GameListener
 	@Override
 	public void mainLoopIteration(GameActivity activity, GL10 gl) 
 	{							
+		gl.glViewport( 0, 0, activity.getViewportWidth(), activity.getViewportHeight() );
+		
 		gl.glEnable( GL10.GL_TEXTURE_2D );
 		gl.glBindTexture( GL10.GL_TEXTURE_2D, textureHandle );
 		
