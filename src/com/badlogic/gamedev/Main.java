@@ -7,11 +7,13 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.badlogic.gamedev.samples.CameraSample;
 import com.badlogic.gamedev.samples.ColorSample;
 import com.badlogic.gamedev.samples.ColorSample2;
 import com.badlogic.gamedev.samples.InputSample;
 import com.badlogic.gamedev.samples.MeshSample;
 import com.badlogic.gamedev.samples.OrthoSample;
+import com.badlogic.gamedev.samples.PerspectiveSample;
 import com.badlogic.gamedev.samples.TextureMeshSample;
 import com.badlogic.gamedev.samples.TextureSample;
 import com.badlogic.gamedev.samples.TriangleSample;
@@ -25,7 +27,7 @@ public class Main extends ListActivity
 		super.onCreate(savedInstanceState); 
 		String[] items = new String[]{"GameActivity", "Input Sample", "Triangle Sample",  "Color Sample",
 									  "Color Sample 2","Texture Sample", "Mesh Sample", "Texture & Mesh Sample",
-									  "Ortho Sample"
+									  "Ortho Sample", "Camera Sample"
 									 };
 		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));        
 	}
@@ -56,6 +58,10 @@ public class Main extends ListActivity
 			intent = new Intent( this, TextureMeshSample.class );
 		if( keyword.equals( "Ortho Sample" ) )
 			intent = new Intent( this, OrthoSample.class );
+		if( keyword.equals( "Perspective Sample" ) )
+			intent = new Intent( this, PerspectiveSample.class );
+		if( keyword.equals( "Camera Sample" ) )
+			intent = new Intent( this, CameraSample.class );
 			
 		startActivity( intent );
 	}
