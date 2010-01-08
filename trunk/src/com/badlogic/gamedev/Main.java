@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.badlogic.gamedev.samples.ColorSample;
 import com.badlogic.gamedev.samples.InputSample;
 import com.badlogic.gamedev.samples.TextureSample;
 import com.badlogic.gamedev.samples.TriangleSample;
@@ -18,7 +19,8 @@ public class Main extends ListActivity
 	public void onCreate(Bundle savedInstanceState) 
 	{
 		super.onCreate(savedInstanceState); 
-		String[] items = new String[]{"GameActivity", "Input Sample", "Triangle Sample", "Texture Sample"};
+		String[] items = new String[]{"GameActivity", "Input Sample", "Triangle Sample", "Texture Sample",
+									  "Color Sample"};
 		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));        
 	}
 
@@ -36,6 +38,8 @@ public class Main extends ListActivity
 			intent = new Intent( this, InputSample.class );
 		if( keyword.equals( "Triangle Sample" ) )
 			intent = new Intent( this, TriangleSample.class );
+		if( keyword.equals( "Color Sample" ) )
+			intent = new Intent( this, ColorSample.class );
 		if( keyword.equals( "Texture Sample" ) )
 			intent = new Intent( this, TextureSample.class );
 		
