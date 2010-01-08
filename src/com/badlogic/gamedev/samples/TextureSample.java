@@ -20,7 +20,7 @@ public class TextureSample extends GameActivity implements GameListener
 {
 	private FloatBuffer vertices;
 	private FloatBuffer texCoords;
-	private int textureHandle;
+	private int textureId;
 	
 	public void onCreate( Bundle savedInstance )
 	{
@@ -74,15 +74,15 @@ public class TextureSample extends GameActivity implements GameListener
 		{
 			Log.d( "Texture Sample", "Couldn't load bitmap 'droid.png'" );
 		}
-		int[] textures = new int[1];
-		gl.glGenTextures(1, textures, 0);		
-		textureHandle = textures[0];	
-		gl.glBindTexture( GL10.GL_TEXTURE_2D, textureHandle );
+		int[] textureIds = new int[1];
+		gl.glGenTextures(1, textureIds, 0);		
+		textureId = textureIds[0];	
+		gl.glBindTexture( GL10.GL_TEXTURE_2D, textureId );
+		GLUtils.texImage2D( GL10.GL_TEXTURE_2D, 0, bitmap, 0);
 		gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_LINEAR );
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR );
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE );
-        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE );
-		GLUtils.texImage2D( GL10.GL_TEXTURE_2D, 0, bitmap, 0);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE );		
 		bitmap.recycle();
 	}
 	
@@ -92,7 +92,7 @@ public class TextureSample extends GameActivity implements GameListener
 		gl.glViewport( 0, 0, activity.getViewportWidth(), activity.getViewportHeight() );
 		
 		gl.glEnable( GL10.GL_TEXTURE_2D );
-		gl.glBindTexture( GL10.GL_TEXTURE_2D, textureHandle );
+		gl.glBindTexture( GL10.GL_TEXTURE_2D, textureId );
 		
 		gl.glEnableClientState(GL10.GL_VERTEX_ARRAY );    
 		gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertices);

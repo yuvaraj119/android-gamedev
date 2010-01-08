@@ -3,13 +3,19 @@ package com.badlogic.gamedev.tools;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
-import javax.microedition.khronos.opengles.GL11;
 
-import android.util.Log;
-
+/**
+ * A simple Mesh class that wraps OpenGL ES 
+ * Vertex Arrays. Just instantiate it with
+ * the proper parameters then fill it with
+ * the color, texCoord, normal and vertex 
+ * method. 
+ * 
+ * @author mzechner
+ *
+ */
 public final class Mesh
 {
 	public enum PrimitiveType
@@ -22,427 +28,109 @@ public final class Mesh
 		TriangleFan
 	}
 	
-	private boolean dirty = true;
-	private int numVertices = 0;
-	private int numIndices = 0;
-	private int currentVertex = 0;
-	private int currentIndex = 0;
-	public float[] vertices;
-	public float[] normals;
-	public float[] colors;	
-	public float[] uv;
-	public short[] indices;
-	private FloatBuffer verticesBuffer;
-	private FloatBuffer normalsBuffer;
-	private FloatBuffer colorsBuffer;
-	private FloatBuffer uvBuffer;
-	private ShortBuffer indicesBuffer;				
-	private boolean isVBO = false;
-	/** disable/enable vbos globally **/
-	public static boolean globalVBO = true;	
-
-	private int vertexHandle = -1;
-	private int colorHandle = -1;
-	private int normalHandle = -1;
-	private int uvHandle = -1;
-	private int indexHandle = -1;
-	private static Mesh lastMesh = null;
-	private GL10 gl;
+	/** The gl instance **/	 
+	private GL10 gl;	
 	
-	public static int meshes = 0;
-
-	/**
-	 * Instantiates a new mesh.
-	 *  
-	 * @param type the type of the primitives (GL10.GL_TRIANGLES, GL10.GL_QUADS etc.)
-	 * @param order winding of the primitives (GL10.GL_CW, GL10.GL_CCW)
-	 * @param numVertices the number of vertices
-	 * @param hasColors wheter a vertex has a color
-	 * @param hasNormals wheter a vertex has a normal
-	 * @param hasIndices wheter indices should be used
-	 * @param hasUV wheter a vertex has uv coordinates
-	 * @param numIndices the number of indices given.
-	 */
-	public Mesh( GL10 gl, int numVertices, boolean hasColors, boolean hasNormals, boolean hasUV, boolean hasIndices, int numIndices, boolean useVBO  )
-	{			
+	/** vertex position buffer and array **/
+	private float vertices[];
+	private FloatBuffer vertexBuffer;
+	
+	/** color buffer and array **/
+	private float colors[];
+	private FloatBuffer colorBuffer;
+	
+	/** texture coordinate buffer and array **/
+	private float texCoords[];
+	private FloatBuffer texCoordBuffer;
+	
+	/** normal buffer and array **/
+	private float normals[];
+	private FloatBuffer normalBuffer;
+	
+	/** vertex index at which the next vertex gets inserted **/
+	private int index = 0;
+	
+	/** number of vertices defined for the mesh **/
+	private int numVertices = 0;
+	
+	/** is the mesh dirty? **/
+	private boolean dirty = true;
+	
+	public Mesh( GL10 gl, int numVertices, boolean hasColors, boolean hasTextureCoordinates, boolean hasNormals )
+	{
 		this.gl = gl;
-		if( gl instanceof GL11 && useVBO && globalVBO )
-		{						
-			isVBO = true;
-			setupVertexBufferObject( (GL11)gl, numVertices, hasColors, hasNormals, hasUV, hasIndices, numIndices );
-		}
-		else
-		{
-			isVBO = false;
-			setupVertexArray( numVertices, hasColors, hasNormals, hasUV, hasIndices, numIndices );
-		}
-
-		meshes++;
-	}
-
-	private void setupVertexBufferObject( GL11 gl, int numVertices, boolean hasColors, boolean hasNormals, boolean hasUV, boolean hasIndices, int numIndices )
-	{
 		vertices = new float[numVertices * 3];		
-		int[] buffer = new int[1];
-
-		gl.glGenBuffers(1, buffer, 0);
-		vertexHandle = buffer[0];
-		verticesBuffer = FloatBuffer.wrap( vertices );
-
+		vertexBuffer = allocateBuffer( numVertices * 3 );
+		
 		if( hasColors )
 		{
-			colors = new float[numVertices*4];
-			gl.glGenBuffers(1, buffer, 0);
-			colorHandle = buffer[0];
-			colorsBuffer = FloatBuffer.wrap( colors );
+			colors = new float[numVertices * 4];
+			colorBuffer = allocateBuffer( numVertices * 4 );
 		}
-
+		
+		if( hasTextureCoordinates )
+		{
+			texCoords = new float[numVertices * 2];
+			texCoordBuffer = allocateBuffer( numVertices * 2 );
+		}
+		
 		if( hasNormals )
 		{
-			normals = new float[numVertices*3];
-			gl.glGenBuffers(1, buffer, 0);
-			normalHandle = buffer[0];
-			normalsBuffer = FloatBuffer.wrap( normals );
-		}
-
-		if( hasUV )
-		{
-			uv = new float[numVertices*2];
-			gl.glGenBuffers(1, buffer, 0);
-			uvHandle = buffer[0];
-			uvBuffer = FloatBuffer.wrap( uv );
-		}
-
-		if( hasIndices )			
-		{
-			indices = new short[numIndices];
-			gl.glGenBuffers(1, buffer, 0);
-			indexHandle = buffer[0];
-			indicesBuffer = ShortBuffer.wrap( indices );
-		}
-		setDirty();
-		updateVertexBufferObject(gl);
-	}
-
-	private void setupVertexArray( int numVertices, boolean hasColors, boolean hasNormals, boolean hasUV, boolean hasIndices, int numIndices )
-	{
-		vertices = new float[numVertices * 3];
-		ByteBuffer byteBuffer = ByteBuffer.allocateDirect( numVertices * 4 * 3);
-		byteBuffer.order(ByteOrder.nativeOrder());
-		verticesBuffer = byteBuffer.asFloatBuffer();
-
-		if( hasColors )
-		{
-			byteBuffer = ByteBuffer.allocateDirect( numVertices * 4 * 4);
-			byteBuffer.order(ByteOrder.nativeOrder());
-			colorsBuffer = byteBuffer.asFloatBuffer();
-			colors = new float[numVertices*4];
-		}
-
-		if( hasNormals )
-		{
-			byteBuffer = ByteBuffer.allocateDirect( numVertices * 4 * 3);
-			byteBuffer.order(ByteOrder.nativeOrder());
-			normalsBuffer = byteBuffer.asFloatBuffer();
-			normals = new float[numVertices*3];
-		}
-
-		if( hasUV )
-		{
-			byteBuffer = ByteBuffer.allocateDirect( numVertices * 4 * 2 );
-			byteBuffer.order(ByteOrder.nativeOrder());
-			uvBuffer = byteBuffer.asFloatBuffer();
-			uv = new float[numVertices*2];
-		}
-
-		if( hasIndices )
-		{
-			byteBuffer = ByteBuffer.allocateDirect( numIndices * 4 );
-			byteBuffer.order(ByteOrder.nativeOrder());
-			indicesBuffer = byteBuffer.asShortBuffer();
-			indices = new short[numIndices];
-		}			
-	}
-
-	private void update( GL10 gl )
-	{
-		if( dirty )
-		{
-			if( isVBO )
-				updateVertexBufferObject( gl );
-			else
-				updateVertexArray( );
-			dirty = false;			
+			normals = new float[numVertices * 3];
+			normalBuffer = allocateBuffer( numVertices * 3 );
 		}
 	}
-
-	private void updateVertexArray( )
+	
+	/**
+	 * Allocates a direct FloatBuffer of the given size.
+	 * Sets order to native
+	 * @param size The size in number of floats
+	 * @return The FloatBuffer
+	 */
+	private FloatBuffer allocateBuffer( int size )
 	{
-		verticesBuffer.put(vertices);
-		verticesBuffer.position(0);
-
-		if( colorsBuffer != null )
-		{
-			colorsBuffer.put(colors);
-			colorsBuffer.position(0);
-		}
-
-		if( normalsBuffer != null )
-		{
-			normalsBuffer.put(normals);
-			normalsBuffer.position(0);
-		}
-
-		if( uvBuffer != null )
-		{
-			uvBuffer.put(uv);
-			uvBuffer.position(0);
-		}
-
-		if( indicesBuffer != null )
-		{
-			indicesBuffer.put(indices);
-			indicesBuffer.position(0);
-		}
-
-		dirty = false;
-		numVertices = currentVertex;
-		numIndices = currentIndex;
-		currentVertex = 0;
-		currentIndex = 0;	
+		ByteBuffer buffer = ByteBuffer.allocateDirect( size * 4 );
+		buffer.order(ByteOrder.nativeOrder());
+		return buffer.asFloatBuffer();
 	}
-
-	private void updateVertexBufferObject( GL10 gl10 )
+	
+	/**
+	 * updates the direct buffers in case the user
+	 */
+	private void update( )
 	{
-		GL11 gl = (GL11)gl10;
-
-		gl.glBindBuffer( GL11.GL_ARRAY_BUFFER, vertexHandle );
-		gl.glBufferData( GL11.GL_ARRAY_BUFFER, vertices.length * 4, verticesBuffer, GL11.GL_DYNAMIC_DRAW);
-
+		vertexBuffer.put(vertices);
+		vertexBuffer.position(0);
+		
 		if( colors != null )
 		{
-			gl.glBindBuffer( GL11.GL_ARRAY_BUFFER, colorHandle );
-			gl.glBufferData( GL11.GL_ARRAY_BUFFER, colors.length * 4, colorsBuffer, GL11.GL_DYNAMIC_DRAW);
+			colorBuffer.put( colors );
+			colorBuffer.position(0);
 		}
-
+		
+		if( texCoords != null )
+		{
+			texCoordBuffer.put( texCoords );
+			texCoordBuffer.position(0);
+		}
+		
 		if( normals != null )
 		{
-			gl.glBindBuffer( GL11.GL_ARRAY_BUFFER, normalHandle );
-			gl.glBufferData( GL11.GL_ARRAY_BUFFER, normals.length * 4, normalsBuffer, GL11.GL_DYNAMIC_DRAW);
+			normalBuffer.put( normals );
+			normalBuffer.position(0);
 		}
-
-		if( uv != null )
-		{
-			gl.glBindBuffer( GL11.GL_ARRAY_BUFFER, uvHandle );
-			gl.glBufferData( GL11.GL_ARRAY_BUFFER, uv.length * 4, uvBuffer, GL11.GL_DYNAMIC_DRAW);
-		}
-
-		if( indices != null )
-		{
-			gl.glBindBuffer( GL11.GL_ELEMENT_ARRAY_BUFFER, indexHandle );
-			gl.glBufferData( GL11.GL_ELEMENT_ARRAY_BUFFER, indices.length * 4, indicesBuffer, GL11.GL_STATIC_DRAW);
-			gl.glBindBuffer( GL11.GL_ELEMENT_ARRAY_BUFFER, 0 );
-		}
-
-		gl.glBindBuffer( GL11.GL_ARRAY_BUFFER, 0 );
-
+		
+		numVertices = index;
+		index = 0;
 		dirty = false;
-		numVertices = currentVertex;
-		numIndices = currentIndex;
-		currentVertex = 0;
-		currentIndex = 0;		
-	}
-
-	public void vertex( float x, float y, float z )
-	{		
-		dirty = true;
-		int offset = currentVertex * 3;
-		vertices[offset] = x;
-		vertices[offset+1] = y;
-		vertices[offset+2] = z;
-		currentVertex++;		
-	}
-
-	public void color( float r, float g, float b, float a )
-	{
-		dirty = true;
-		int offset = currentVertex * 4;
-		colors[offset] = r;
-		colors[offset+1] = g;
-		colors[offset+2] = b;
-		colors[offset+3] = a;		
-	}
-
-	public void normal( float x, float y, float z )
-	{
-		dirty = true;
-		int offset = currentVertex * 3;
-		normals[offset] = x;
-		normals[offset+1] = y;
-		normals[offset+2] = z;
-	}
-
-	public void texCoord( float u, float v )
-	{
-		dirty = true;
-		int offset = currentVertex * 2;
-		uv[offset] = u;
-		uv[offset+1] = v;		
-	}
-
-	public void index( int ... index )
-	{
-		for( int i = 0; i < index.length; i++ )		
-			indices[currentIndex++] = (short)index[i];		
 	}
 	
-
-	private void renderVertexBufferObject( GL10 gl10, int type, int numVertices, int offset )
-	{
-		GL11 gl = (GL11)gl10;	
-
-//		if( lastMesh == this )
-//		{
-//			if( indexHandle != -1 )
-//			{
-//				gl.glBindBuffer( GL11.GL_ELEMENT_ARRAY_BUFFER, indexHandle );
-//				gl.glDrawElements(type, numVertices, GL10.GL_UNSIGNED_SHORT, offset);    
-//			}
-//			else
-//				gl.glDrawArrays(type, offset, numVertices);
-//			return;
-//		}			
-
-		gl.glEnableClientState(GL10.GL_VERTEX_ARRAY );
-		gl.glBindBuffer( GL11.GL_ARRAY_BUFFER, vertexHandle );
-		gl.glVertexPointer(3, GL10.GL_FLOAT, 0, 0);
-
-		if( colorHandle != -1 )
-		{     
-			gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
-			gl.glBindBuffer( GL11.GL_ARRAY_BUFFER, colorHandle );
-			gl.glColorPointer(4, GL10.GL_FLOAT, 0, 0);
-		}
-
-		if( normalHandle != -1)
-		{           
-			gl.glEnableClientState(GL10.GL_NORMAL_ARRAY);
-			gl.glBindBuffer( GL11.GL_ARRAY_BUFFER, normalHandle );
-			gl.glNormalPointer( GL10.GL_FLOAT, 0, 0);
-		}
-
-		if( uvHandle != -1 )
-		{        	
-			gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-			gl.glBindBuffer( GL11.GL_ARRAY_BUFFER, uvHandle );
-			gl.glTexCoordPointer( 2, GL10.GL_FLOAT, 0, 0 );
-		}
-
-		if( indexHandle != -1 )
-		{
-			gl.glBindBuffer( GL11.GL_ELEMENT_ARRAY_BUFFER, indexHandle );
-			gl.glDrawElements(type, numVertices, GL10.GL_UNSIGNED_SHORT, offset);    
-		}
-		else
-			gl.glDrawArrays(type, offset, numVertices);   
-		
-//		gl.glDisableClientState(GL.GL_VERTEX_ARRAY );
-		if( colorHandle != -1 )
-			gl.glDisableClientState(GL10.GL_COLOR_ARRAY );
-		if( uvHandle != -1 )			
-			gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY );
-		if( normalHandle != -1 )
-			gl.glDisableClientState(GL10.GL_NORMAL_ARRAY );
-	}
-
-	private void renderVertexArray( GL10 gl, int type, int numVertices, int offset )
-	{
-		GL11 gl11 = (GL11)gl;
-
-		if( lastMesh != null && lastMesh.isVBO )
-		{
-			gl11.glBindBuffer( GL11.GL_ARRAY_BUFFER, 0 );
-			gl11.glBindBuffer( GL11.GL_ELEMENT_ARRAY_BUFFER, 0 );
-		}
-
-		gl.glEnableClientState(GL10.GL_VERTEX_ARRAY );    
-		gl.glVertexPointer(3, GL10.GL_FLOAT, 0, verticesBuffer);
-
-		if( colorsBuffer != null )
-		{
-			gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
-			gl.glColorPointer(4, GL10.GL_FLOAT, 0, colorsBuffer);
-		}
-
-		if( normalsBuffer != null )
-		{
-			gl.glEnableClientState(GL10.GL_NORMAL_ARRAY);
-			gl.glNormalPointer( GL10.GL_FLOAT, 0, normalsBuffer);
-		}
-
-		if( uvBuffer != null )
-		{
-			gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-			gl.glTexCoordPointer( 2, GL10.GL_FLOAT, 0, uvBuffer );
-		}
-
-		if( indicesBuffer != null )
-		{
-			indicesBuffer.position(offset);
-			gl.glDrawElements(type, numVertices, GL10.GL_UNSIGNED_SHORT, indicesBuffer);
-		}
-		else
-			gl.glDrawArrays(type, offset, numVertices);     
-		
-		gl.glDisableClientState(GL10.GL_VERTEX_ARRAY );
-		gl.glDisableClientState(GL10.GL_COLOR_ARRAY );
-		gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY );
-		gl.glDisableClientState(GL10.GL_NORMAL_ARRAY );
-	}	
-
-	public void dispose( )
-	{
-		if( isVBO )
-		{			
-			GL11 gl = (GL11)this.gl;
-			if( vertexHandle != -1 )
-				gl.glDeleteBuffers(1, new int[] { vertexHandle }, 0);
-			if( colorHandle != -1 )
-				gl.glDeleteBuffers(1, new int[] { colorHandle }, 0);
-			if( normalHandle != -1 )
-				gl.glDeleteBuffers(1, new int[] { normalHandle }, 0);
-			if( uvHandle != -1 )
-				gl.glDeleteBuffers(1, new int[] { uvHandle }, 0);
-			if( indexHandle != -1 )
-				gl.glDeleteBuffers(1, new int[] { indexHandle }, 0);			
-		}
-
-		vertices = null;
-		verticesBuffer = null;
-		colors = null;
-		colorsBuffer = null;
-		normals = null;
-		normalsBuffer = null;
-		uv = null;
-		uvBuffer = null;
-		indices = null;
-		indicesBuffer = null;
-		meshes--;
-	}
-	
-	public void render(PrimitiveType type, int numVertices, int offset) {		
-		update( gl );		       
-        
-		int t = getPrimitiveType(type);
-		
-		if( isVBO )
-			renderVertexBufferObject( gl, t, numVertices, offset );
-		else
-			renderVertexArray( gl, t,numVertices, offset );	
-		lastMesh = this;
-		
-	}
-	
+	/**
+	 * Returns the OpenGL constant for the given 
+	 * primitive type
+	 * @param type the type
+	 * @return the OpenGL constant
+	 */
 	private int getPrimitiveType( PrimitiveType type )
 	{
 		if( type == PrimitiveType.Lines )
@@ -463,49 +151,123 @@ public final class Mesh
 			return GL10.GL_TRIANGLE_FAN;
 		
 	}
-
-	public void render(PrimitiveType type) 
+	
+	/**
+	 * Renders the mesh as the given type, starting at offset using
+	 * numVertices vertices.
+	 * @param type the type
+	 * @param offset the offset, in number of vertices
+	 * @param numVertices the number of vertices to use
+	 */
+	public void render( PrimitiveType type, int offset, int numVertices )
 	{
-		update( gl );
-		if( indices != null )
-			render( type, numIndices, 0 );
-		else
-			render( type, numVertices, 0 );
-	}
-
-	public void reset() {
-		dirty = true;
-		currentIndex = 0;
-		currentVertex = 0;
-		numIndices = 0;
-		numVertices = 0;
-	}
-
-	public int getMaximumVertices() {
-		return vertices.length / 3;
-	}
-
-	public float[] getColors() {
-		return colors;
-	}
-
-	public short[] getIndices() {
-		return indices;
+		if( dirty )
+			update();
+		
+		gl.glEnableClientState( GL10.GL_VERTEX_ARRAY );
+		gl.glVertexPointer( 3, GL10.GL_FLOAT, 0, vertexBuffer );
+		
+		if( colors != null )
+		{
+			gl.glEnableClientState( GL10.GL_COLOR_ARRAY );
+			gl.glColorPointer( 4, GL10.GL_FLOAT, 0, colorBuffer );
+		}
+		
+		if( texCoords != null )
+		{
+			gl.glEnableClientState( GL10.GL_TEXTURE_COORD_ARRAY );
+			gl.glTexCoordPointer( 2, GL10.GL_FLOAT, 0, texCoordBuffer );
+		}
+		
+		if( normals != null )
+		{
+			gl.glEnableClientState( GL10.GL_NORMAL_ARRAY );
+			gl.glNormalPointer( GL10.GL_FLOAT, 0, normalBuffer );
+		}
+		
+		gl.glDrawArrays( getPrimitiveType( type ), offset, numVertices );
+		
+		gl.glDisableClientState(GL10.GL_VERTEX_ARRAY );
+		if( colors != null )
+			gl.glDisableClientState(GL10.GL_COLOR_ARRAY );
+		if( texCoords != null )
+			gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY );
+		if( normals != null )
+			gl.glDisableClientState(GL10.GL_NORMAL_ARRAY );
 	}
 	
-	public float[] getNormals() {
-		return normals;
+	/**
+	 * Renders the mesh as the given type using as many vertices as have
+	 * been defined by calling vertex().
+	 * @param type the type
+	 */
+	public void render( PrimitiveType type )
+	{
+		render( type, 0, numVertices );
+	}
+	
+	/**
+	 * Defines the position of the current vertex. Before
+	 * you call this you have to call any other method like
+	 * color, normal and texCoord for the current vertex!
+	 * 
+	 * @param x the x coordinate
+	 * @param y the y coordinate
+	 * @param z the z coordinate
+	 */
+	public void vertex( float x, float y, float z )
+	{		
+		dirty = true;
+		int offset = index * 3;
+		vertices[offset] = x;
+		vertices[offset+1] = y;
+		vertices[offset+2] = z;
+		index++;			
 	}
 
-	public float[] getUV() {
-		return uv;
+	/**
+	 * Sets the color of the current vertex
+	 * 
+	 * @param r the red component
+	 * @param g the green component
+	 * @param b the blue component
+	 * @param a the alpha component
+	 */
+	public void color( float r, float g, float b, float a )
+	{
+		dirty = true;
+		int offset = index * 4;
+		colors[offset] = r;
+		colors[offset+1] = g;
+		colors[offset+2] = b;
+		colors[offset+3] = a;		
+	}
+	
+	/**
+	 * Sets the normal of the current vertex
+	 * @param x the x component
+	 * @param y the y component
+	 * @param z the z component
+	 */
+	public void normal( float x, float y, float z )
+	{
+		dirty = true;
+		int offset = index * 3;
+		normals[offset] = x;
+		normals[offset+1] = y;
+		normals[offset+2] = z;
 	}
 
-	public float[] getVertices() {
-		return vertices;
-	}
-
-	public void setDirty() {
-		dirty = true;		
+	/**
+	 * Sets the texture coordinates of the current vertex
+	 * @param s the s coordinate
+	 * @param t the t coordinate
+	 */
+	public void texCoord( float s, float t )
+	{
+		dirty = true;
+		int offset = index * 2;
+		texCoords[offset] = s;
+		texCoords[offset+1] = t;		
 	}
 }
