@@ -56,7 +56,17 @@
         <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
         </intent-filter>
-        </activity>        
+        </activity>
+        <activity android:name=".samples.CameraSample" android:label="Camera Sample">
+        <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+        </intent-filter>
+        </activity>     
+        <activity android:name=".samples.ZBufferSample" android:label="Z-Buffer Sample">
+        <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+        </intent-filter>
+        </activity>                   
         <activity android:name=".samples.LightSample" android:label="Light Sample">
         <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
