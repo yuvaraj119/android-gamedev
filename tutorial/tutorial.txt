@@ -743,19 +743,80 @@ Pfuh, ganz schön viel Code für 3 Dreiecke. Wir werden da später abhilfe schaffen
  gl.glLightfv( GL10.GL_LIGHT0, GL10.GL_AMBIENT, ambientLightColor );
  gl.glLightfv( GL10.GL_LIGHT0, GL10.GL_DIFFUSE, lightColor );
  gl.glLightfv( GL10.GL_LIGHT0, GL10.GL_SPECULAR, lightColor );
- float[] direction = { -1 / (float)Math.sqrt(2), -1 / (float)Math.sqrt(2), 0, 1 };
+ float[] direction = { -1 / (float)Math.sqrt(2), -1 / (float)Math.sqrt(2), 0, 0 };
  gl.glLightfv( GL10.GL_LIGHT0, GL10.GL_POSITION, direction );
  gl.glEnable( GL10.GL_LIGHT0 );
  gl.glEnable( GL10.GL_COLOR_MATERIAL );
  mesh.render(PrimitiveType.Triangles);
 
-Wieder ein Höllen Aufwand. Wir haben auch ein paar Faux Pas geschossen. Zum einen würden wir so im Main Loop permanent zwei neue float Arrays instanzieren. Das würde irgendwann den Garbage Collector verstimmen der sich dann ein paar hundert Millisekunden Auszeit nimmt um auf zu räumen. Wir werden im Sample Code die beiden Arrays zu Klassen Member unserer Sample Activity machen und somit nur einmal instanzieren. Zweitens müssen wir eine Lichtquelle nicht immer neu definieren. So sich diese über den Verlauf nicht ändert reicht es deren Lichttypen Farben und Position/Richtung nur einmal anzugeben. Wer sich übrigens fragt warum wir die direction Elemente durch Math.sqrt(2) dividieren: Hier normalisieren wir den Richtungsvektor! ( (-1, -1, 0)' = [-1 / |(-1, -1, 0)|, -1 / |(-1, -1, 0), 0 / |(-1, -1, 0)] ).
+Wieder ein Höllen Aufwand. Wir haben auch ein paar Faux Pas geschossen. Zum einen würden wir so im Main Loop permanent zwei neue float Arrays instanzieren. Das würde irgendwann den Garbage Collector verstimmen der sich dann ein paar hundert Millisekunden Auszeit nimmt um auf zu räumen. Wir werden im Sample Code die beiden Arrays zu Klassen Member unserer Sample Activity machen und somit nur einmal instanzieren. Zweitens müssen wir eine Lichtquelle nicht immer neu definieren. So sich diese über den Verlauf nicht ändert reicht es deren Lichttypen Farben nur einmal anzugeben. Die Position/Richtung der Lichtquelle müssen wir aber '''immer''' nach dem Aufruf von ''GLU.glLookAt'' machen, da die Position sonst in einem anderen Koordinaten-System definiert wird. Verwirrent. Wer sich übrigens fragt warum wir die direction Elemente durch Math.sqrt(2) dividieren: Hier normalisieren wir den Richtungsvektor! ( (-1, -1, 0)' = [-1 / |(-1, -1, 0)|, -1 / |(-1, -1, 0), 0 / |(-1, -1, 0)] ).
 
 Um die Situation im Bild oben nachzustellen werden wir auch die Kamera Position und Richtung entsprechend setzen. Den genauen Code könnt ihr hier sehen [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/LightSample.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/LightSample.java]. Das Ergebnis sieht so aus:
 
 [[Datei:lightsample.png|320px]]
 
 Eine Punktlichtquelle würde komplett analog dazu definiert und eingesetzt werden, mit dem Unterschied im 4ten Element im Positions Array. Und wieder ein Geheimnis von OpenGL gelüftet!
+
+=== Transformationen ===
+Jetzt wird's noch mal kurz mathematisch. Vielleicht hat sich der eine oder andere bereits gefragt wie man den ein Mesh an verschiedenen Positionen mehrere Male zeichnen kann. Schließlich sieht man das ja auch in anderen Spielen, z.B. in einem Echtzeitstrategiespiel wo der selbe Einheitentyp mehrere male gezeichnet wird nur an verschiedenen Positionen und unterschiedlicher Ausrichtung. In OpenGL verwendet man dazu wieder Matrizen, genauer, die bereits erwähnte Model-View-Matrize. Hier erklärt sich auch der erste Teil des Namens der Matrize: Model steht für die möglichkeit ein Model (Mesh) in der Welt zu verschieben, zu rotieren und zu skalieren (größer und kleiner machen). 
+
+Unter einer Transformation versteht man die Verschiebung (Translation), Skalierung und Rotation von Vertices in der Welt. Dabei kann man mehrere solcher Transformationen über die Model-View-Matrix kombinieren, z.B. zuerst skalieren, dann rotieren und zum Schluss verschieben. Mathematisch gesehen entspricht das der Multiplikation von Matrizen: für jede Transformation wird eine Matrix erstellt, diese werden dann in der gewünschten Reihenfolge der Transformationen miteinander multipliziert. Wieder müssen wir uns zum Glück nicht direkt mit Matrizen herumschlagen, OpenGL bietet uns verschiedene Methoden die das erstellen und multiplizieren der Matrizen für uns erledigt. 
+
+Fangen wir mit der Translation an. Diese wird über einen Translations-Vektor angegeben der zu allen Vertices die man rendert hinzuaddiert wird:
+
+[[Datei:translation.png]]
+
+In OpenGL ES erreichen wir das, indem wir folgende Methode verwenden:
+
+ gl.glTranslatef( x, y, z );
+
+Wie unschwer zu erkennen handelt es sich bei den 3 Parametern um den Translations-Vektor. Diese Methode erstellt intern eine Translations Matrix und multipliziert die aktuel aktive Matrix damit, z.B. die Model-View-Matrix die wir über ''glMatrixMode'' ausgewählt haben. 
+
+Die Skalierung multipliziert jede Komponente der Vertex Position mit einem Skalierungsfaktor:
+
+[[Datei:scaling.png]]
+
+OpenGL stellt dafür folgende Methode zur Verfügung:
+
+ gl.glScalef( scaleX, scaleY, scaleZ );
+
+Für jede der drei Achsen gibt es einen eigenen Skalierungsfaktor. Wieder wird intern eine Matrix erstellt, mit den Werten für die Skalierung befüllt und dann mit der aktuel aktiven Matrix multipliziert. 
+
+Die Rotation ist ein wenig schwieriger zu verstehen. Gedreht wird immer um den Ursprung. Gleichzeitig müssen wir eine Achse angeben (die implizit durch den Ursprung geht) um die sich die Vertices drehen sollen. 
+
+[[Datei:rotation.png]]
+
+Die OpenGL Methode dafür:
+
+ gl.glRotatef( angle, axisX, axisY, axisZ );
+
+Angle gibt den Winkel in Grad an, axisX bis axisZ ist die Rotationsachse um die gedreht werden soll. Im obigen Beispiel ist diese (0, 0, 1). Wie bei vielen anderen Dingen muss die Rotationsachse ein Einheitsvektor sein. 
+
+Diese drei Transformationen können wir beliebig miteinander kombinieren, z.B. verschieben, rotieren, verschieben, skalieren usw. Als aktive Matrix wählen wir für diese Transformationen immer die Model-View-Matrix über ''glMatrixMode''. Schaun wir uns einmal an was die Kombination von Translation und Rotation bewirkt:
+
+[[Datei:transform1.png]]
+
+Zuerst verschieben wir das Dreieck ein wenig nach rechts, dann rotieren wir um die positive z-Achse. Wenn wir das ganze umdrehen schaut das ergebnis so aus:
+
+[[Datei:transform2.png]]
+
+Ein komplett anderes Ergebnis. Wir müssen bei der Anwedung von Transformationen immer auf die Reihenfolge schaun. Die erste Beispiel würden wir mit OpenGL so realisieren:
+
+ gl.glRotatef( 45, 0, 0, 1 );
+ gl.glTranslatef( 2, 0, 0 );
+
+Hm, sollte das nicht umgekehrt sein? Wir wollen ja zuerst verschieben und dann rotieren. OpenGL ist da anderer Ansicht, die letzte Transformation die wir über die Transformations Methoden angeben ist immer die erste die auf die Vertices wirkt. Dies resultiert aus der Art wie OpenGL Matrizen multipliziert und soll uns hier nicht weiter kümmern. Wir müssen uns nur den Umstand merken, dass wir Transformationen immer in der umgekehrten Reihenfolge ausführen müssen. 
+
+Was ich bis jetzt verschiegen habe ist der Zusammenhang zwischen Transformationen und der Kamera. Wir befüllen in 3D ja die Model-View-Matrix per ''GLU.gluLookAt'' bereits mit der Kamera Matrix. Zeichnen wir nun mehrere Objekte mit jeweils eigenen Transformationen müssten wir die Kamera Matrix vor dem Zeichnen eines Objektes jedesmal neue setzen da wir ja die Model-View-Matrix beim vorhergehenden Objekt überschrieben haben. Um diese recht kostspielige Operation zu vermeiden gibt es zwei Befehle:
+
+ gl.glPushMatrix();
+ gl.glPopMatrix();
+
+In Wirklichkeit gibt es für jede Matrix in OpenGL (Projektion, Model-View) nicht nur eine Matrix sondern einen Stack an Matrizen. Mit den oben vorgestellten Methoden manipulieren wir immer den Top of Stack. Die beiden Methoden ''glPushMatrix()'' und ''glPopMatrix()'' erlauben es uns die über ''glMatrixMode'' aktuel selektierte Matrix auf den Stack zu legen, bzw. die zuletzt auf den Stack gelegte Matrix wieder zur aktuellen Matrix zu machen. Beim pushen der Matrix wird eine Kopie angelegt, die aktuelle Matrix bleibt die selbe.
+
+In Spielen geht man in der Regel so vor: jedes Objekt in der Spielwelt hat eine Orientierung (also eine Richtung in die es schaut) und eine Position. Die Meshes für die Objekte sind immer um den Ursprung definiert. Zeichnet man nun die Objekte läd man zu aller erst die Kamera-Matrix in die Model-View-Matrix. Beim zeichnen jedes Objektes pushen wir die Model-View-Matrix damit wir eine Kopie der Kamera-Matrix am Stack haben, multiplizieren dann die Transformationen auf die Model-View-Matrix, zeichnen das Mesh des Objekts, welches somit richtig transformiert wird und popen die Model-View-Matrix wieder vom Stack womit diese wieder nur die Kamera-Matrix beinhaltet. Diesen Prozess wiederholen wir für alle Objekte die wir zeichnen. So werden wir das dann auch in unserem Space Invaders Clone machen.
+
+Damit haben wir den letzten großen Brocken was OpenGL betrifft abgearbeitet. Wie für Licht gilt: experimentieren, experimentieren, experimentieren. Um Transformationen zu verstehen muß man sie in Aktion sehen. Als kleine Aufgabe könnt ihr ja eines der Samples hernehmen und ein um die y-Achse rotierendes Dreieck produzieren. Dazu müsst ihr nur in jedem Frame ''glRotatef'' mit dem aktuellen Winkel aufrufen. Den Winkel muss man natürlich in jedem Frame erhöhen und wenn er größer als 360 ist wieder auf 0 zurücksetzen. 
 
 == SoundPool und MediaPlayer ==
 = Space Invaders =

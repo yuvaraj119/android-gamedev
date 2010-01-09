@@ -10,7 +10,7 @@ import com.badlogic.gamedev.tools.GameListener;
 import com.badlogic.gamedev.tools.Mesh;
 import com.badlogic.gamedev.tools.Mesh.PrimitiveType;
 
-public class LightSample extends GameActivity implements GameListener 
+public class TransformationSample extends GameActivity implements GameListener 
 {
     Mesh mesh;
 	
@@ -67,6 +67,9 @@ public class LightSample extends GameActivity implements GameListener
 		gl.glLoadIdentity();
 		GLU.gluLookAt( gl, 3, 3, 3, 0.5f, 0.5f, -0.5f, 0, 1, 0 );
 		
+		gl.glRotatef( 45, 0, 0, 1 );
+		gl.glTranslatef( 2, 0, 0 );
+		
 		gl.glEnable( GL10.GL_LIGHTING );
 		gl.glEnable( GL10.GL_LIGHT0 );		
 		float[] direction = { 1 / (float)Math.sqrt(2), 1 / (float)Math.sqrt(2), 0, 0 };
@@ -76,3 +79,4 @@ public class LightSample extends GameActivity implements GameListener
 		mesh.render( PrimitiveType.Triangles );
 	}
 }
+
