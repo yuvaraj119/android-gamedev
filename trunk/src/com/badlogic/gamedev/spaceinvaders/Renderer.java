@@ -32,8 +32,8 @@ public class Renderer
 		{
 			shipMesh = MeshLoader.loadObj(gl, activity.getAssets().open( "ship.obj" ) );
 			invaderMesh = MeshLoader.loadObj( gl, activity.getAssets().open( "invader.obj" ) );
-			blockMesh = MeshLoader.loadObj( gl, activity.getAssets().open( "block.obj" ) );
-			shotMesh = MeshLoader.loadObj( gl, activity.getAssets().open( "block.obj" ) );
+			blockMesh = MeshLoader.loadObj( gl, activity.getAssets().open( "shot.obj" ) );
+			shotMesh = MeshLoader.loadObj( gl, activity.getAssets().open( "shot.obj" ) );
 		}
 		catch( Exception ex )
 		{
