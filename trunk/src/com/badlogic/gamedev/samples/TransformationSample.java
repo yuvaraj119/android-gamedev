@@ -42,7 +42,7 @@ public class TransformationSample extends GameActivity implements GameListener
 		mesh.vertex( 1, 1, -1 );
 		mesh.normal( 0, 1, 0 );
 		mesh.vertex( 0, 1, 0 );
-				
+				 
 		float[] lightColor = { 1, 1, 1, 1 };
 		float[] ambientLightColor = {0.2f, 0.2f, 0.2f, 1 };		
 		gl.glLightfv( GL10.GL_LIGHT0, GL10.GL_AMBIENT, ambientLightColor, 0 );
