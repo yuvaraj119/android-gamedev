@@ -96,7 +96,12 @@
         <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
         </intent-filter>
-        </activity>                    
+        </activity>  
+        <activity android:name=".spaceinvaders.SpaceInvaderTest" android:label="Space Invader Test">
+        <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+        </intent-filter>
+        </activity>                   
 
     </application>
     <uses-sdk android:minSdkVersion="3" />
