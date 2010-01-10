@@ -1,4 +1,4 @@
-package com.badlogic.gamedev.spaceinvaders.stage1;
+package com.badlogic.gamedev.spaceinvaders;
 
 import java.util.ArrayList;
 

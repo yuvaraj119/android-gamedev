@@ -65,7 +65,7 @@ public class ObjSample extends GameActivity implements GameListener
 
 		gl.glMatrixMode( GL10.GL_MODELVIEW );
 		gl.glLoadIdentity();
-		GLU.gluLookAt( gl, 5, 5, 5, 0.5f, 0.5f, -0.5f, 0, 1, 0 );
+		GLU.gluLookAt( gl, 3, 3, 3, 0.5f, 0.5f, -0.5f, 0, 1, 0 );
 		
 		gl.glEnable( GL10.GL_LIGHTING );
 		gl.glEnable( GL10.GL_LIGHT0 );		

@@ -43,7 +43,7 @@ public class MultipleObjectsSample extends GameActivity implements GameListener
 		try {
 			mesh = MeshLoader.loadObj( gl, getAssets().open( "ship.obj" ) );
 			Bitmap bitmap = BitmapFactory.decodeStream( getAssets().open( "ship.png" ) );
-			texture = new Texture( gl, bitmap, TextureFilter.Linear, TextureFilter.Linear, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
+			texture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Linear, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
 			bitmap.recycle();
 		} catch (IOException e) {
 			e.printStackTrace();
