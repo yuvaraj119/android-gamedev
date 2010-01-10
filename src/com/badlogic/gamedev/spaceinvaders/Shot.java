@@ -21,7 +21,7 @@ public class Shot
 		
 		if( position.z > 2 )
 			hasLeftField = true;
-		if( position.z < -20 )
+		if( position.z < -15 )
 			hasLeftField = true;
 	}
 }
