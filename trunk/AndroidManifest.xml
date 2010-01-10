@@ -82,6 +82,11 @@
                 <action android:name="android.intent.action.MAIN" />
         </intent-filter>
         </activity>   
+        <activity android:name=".samples.MultipleObjectsSample" android:label="Multiple Objects Sample">
+        <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+        </intent-filter>
+        </activity> 
         <activity android:name=".samples.SoundSample" android:label="Sound Sample">
         <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
