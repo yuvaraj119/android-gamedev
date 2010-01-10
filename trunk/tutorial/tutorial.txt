@@ -830,6 +830,57 @@ Zum Laden übergeben wir also nur einen InputStream auf ein Obj-Asset und erhalte
 Jetzt haben wir aber wirklich alles besprochen was es zu besprechen gibt. Auf zum Sound!  
 
 == SoundPool und MediaPlayer ==
+Soundeffekte und Musik werden uns in diesem Kapitel beschäftigen. Für beides stellt uns Android zwei handliche Klassen zur Verfügung: SoundPool für Soundeffekte und MediaPlayer für das abspielen von Musik. Fangen wir mit SoundPool an.
+
+Wie wir uns erinnern sind Soundeffekte Audio-Dateien die wir aufgrund ihrer kleinen Größe vollständig in den Speicher laden. Auch kann ein und der selbe Soundeffekt mehrere male gleichzeitig abzuspielen sein. Genau diese Aufgaben erledigt für uns der [http://developer.android.com/reference/android/media/SoundPool.html SoundPool]. Schaun wir uns an wie man ihn instanziert:
+
+ SoundPool soundPool = new SoundPool( 5, AudioManager.STREAM_MUSIC, 0);
+
+Sehr einfach. Der erste Parameter gibt an wieviele Soundeffekte der Soundpool maximal gleichzeitig abspielen kann. Hier geht es wirklich nur um das abspielen, laden können wir soviele wie wir Speicher haben. Der zweite Parameter gibt an um welchen Stream es sich handelt. Auf Android gibt es verschiedene Kanäle für Audio, z.B. den Klingelton Stream oder eben den hier gewählten Musik Stream. Diesen wählen wir im Fall von Soundeffekten immer gleich. Der letzte Parameter hat zur Zeit noch keine Funktion und soll laut Dokumentation auf 0 gesetzt werden was wir auch tun.
+
+Einen Soundeffekt zu laden geht auch sehr einfach. Wir gehen davon aus dass wir ein Audio-File namens "shot.wav" in unserem Asset Verzeichnis haben. Laden tun wir diesen dann wie folgt:
+
+ AssetFileDescriptor descriptor = getAssets().openFd( "shot.wav" );
+ int soundId = soundPool.load( descriptor, 1 );
+ 
+Als erstes benötigen wir einen AssetFileDescriptor den wir uns für das Audio-File in der erste Zeile holen. Diesen übergeben wir dann in der zweiten Zeile an die Methode ''SoundPool.load'' die uns dann das Audio-File in den Speicher läd. Als Rückgabewert erhalten wir für das gerade geladene File eine Id die wir später angeben müssen wenn wir diesen Soundeffekt abspielen wollen. Eine kleine Warnung: Es dauert eine Zeit bis der SoundPool alle Soundeffekte geladen hat. Das macht er in einem seperaten Thread, d.h. in unserem Spiel werden wir davon Laufzeittechnisch nichts merken. Was wir aber merken ist, dass in den ersten paar Sekunden nach dem Laden das abspielen keinen Effekt hat. Hierfür gibt es leider noch keine Lösung, da ein Spiel aber meistens in einem Menü beginnt und dort keine Soundeffekte verwendet werden ist das meist kein Problem.
+
+Das abspielen des eben geladenen SoundEffekts ist dann ebenso simpel:
+
+ int volume = (AudioManager)activity.getSystemService(Context.AUDIO_SERVICE).getStreamVolume( AudioManager.STREAM_MUSIC );
+ soundPool.play(soundId, volume, volume, 1, 0, 1);
+ 
+Als erstes müssen wir herausfinden wie Laut die Medienlautstärke zur Zeit ist. Diese Information bekommen wir von der Methode ''getStreamVolume'' der Klasse AudioManager deren Instanz wir wiederum über ''getSystemService'' erhalten. Als Stream geben wir wieder den Musik Stream an da wir ja mit diesem Arbeiten. Den zurückgegebenen Wert merken wir uns und verwenden ihn in der zweiten Zeile. Hier weisen wir den SoundPool an den zuvor geladenen Soundeffekt abzuspielen. Dazu geben wir als ersten Parameter die Id an die wir zuvor erhalten haben, dann die Lautstärke des linken und rechten Kanals. Der vierte Parameter gibt die Priorität an mit der der Soundeffekt abgespielt werden soll, der Wert 1 erweist uns hier gute Dienste. Der fünfte Parameter gibt an ob der Soundeffekt geloopt, also mehrere male hintereinander abgespielt werden soll. Wie geben hier 0 an da wir das nicht wollen. Der letzte Parameter gibt an mit welcher Geschwindigkeit der Soundeffekt abgespielt werden soll, 1 bedeutet in normaler Geschwindigkeit, 2 würde doppelte Geschwindigkeit bedeuten und so weiter. Damit wissen wir jetzt wie wir Soundeffekte abspielen können.
+
+Ein Sample welches beim berühren des Bildschirms ein Schießgeräusch macht findet ihr unter [ 
+
+Für das Abspielen von Musik verwenden wir den [http://developer.android.com/reference/android/media/MediaPlayer.html MediaPlayer]. Der gibt sich von der Dokumentation her recht kompliziert, ist es aber im Grunde nicht. Schaun wir uns zuerst an wie wir ihn Instanzieren:
+
+ MediaPlayer mediaPlayer = new MediaPlayer( );
+ 
+Das war wieder einfach. Als nächstes müssen wir dem MediaPlayer sagen was er abspielen soll. Dafür brauchen wir wieder einen AssetFileDescriptor wie schon bei den Soundeffekten:
+
+ AssetFileDescriptor descriptor = getAssets().openFd( "music.mp3" );
+ mediaPlayer.setDataSource( descriptor.getFileDescriptor() );
+ mediaPlayer.prepare();
+ mediaPlayer.start();
+ 
+Wir holen uns also den File Descriptor auf unser Musik Asset. In der nächsten Zeile setzen wir den MediaPlayer dann von diesem File in Kenntnis. In der dritten Zeile geben wir dem MediaPlayer Zeit sich auf das Abspielen vorzubereitn. Ohne den Aufruf von ''MediaPlayer.prepare'' spielt der MediaPlayer nichts! Schließlich starten wir das Playback der Musik. 
+
+Der MediaPlayer bietet alle möglichen Methoden zum pausieren, zurückspulen und so weiter. Für unsere Zwecke reicht das einmalige starten aber vollkommen aus. Was wir beim MediaPlayer noch beachten müssen ist, dass wir in beim Pausieren der Applikation wieder freigeben müssen. Ansonsten spielt er einfach weiter. Wir überschreiben dazu die ''onPause'' Methode unserer GameActivity:
+
+ @Override
+ protected void onPause( )
+ {
+ 	super.onPause();
+ 	mediaPlayer.release();
+ }
+ 
+Nicht auf den Aufruf von ''super.onPause()'' vergessen!
+
+Das war ein erfrischend kurzes und einfaches Kapitel. Wir haben jetzt alle nötigen Tools zusammengetragen die wir für die Entwicklung eines kleinen Spiels brauchen. All die hier besprochenen Samples und Klassen findet ihr im Projekt. Ich empfehle euch damit herumzuspielen da man nur damit ein Gefühl für die Dinge erhält. Auch ist das Lesen der hier verlinkten Dokumentationen keine schlechte Idee. The more you know...
+
+Auf zu Space Invaders! 
 = Space Invaders =
 
 [[Kategorie:Entwicklung]]

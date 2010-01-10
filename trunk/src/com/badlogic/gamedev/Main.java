@@ -13,9 +13,11 @@ import com.badlogic.gamedev.samples.ColorSample2;
 import com.badlogic.gamedev.samples.InputSample;
 import com.badlogic.gamedev.samples.LightSample;
 import com.badlogic.gamedev.samples.MeshSample;
+import com.badlogic.gamedev.samples.MusicSample;
 import com.badlogic.gamedev.samples.ObjSample;
 import com.badlogic.gamedev.samples.OrthoSample;
 import com.badlogic.gamedev.samples.PerspectiveSample;
+import com.badlogic.gamedev.samples.SoundSample;
 import com.badlogic.gamedev.samples.TextureMeshSample;
 import com.badlogic.gamedev.samples.TextureSample;
 import com.badlogic.gamedev.samples.TransformationSample;
@@ -32,7 +34,7 @@ public class Main extends ListActivity
 		String[] items = new String[]{"GameActivity", "Input Sample", "Triangle Sample",  "Color Sample",
 									  "Color Sample 2","Texture Sample", "Mesh Sample", "Texture & Mesh Sample",
 									  "Ortho Sample", "Camera Sample", "Z-Buffer Sample", "Light Sample",
-									  "Transformation Sample", "Obj Sample"
+									  "Transformation Sample", "Obj Sample", "Sound Sample", "Music Sample"
 									 };
 		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));        
 	}
@@ -75,6 +77,10 @@ public class Main extends ListActivity
 			intent = new Intent( this, TransformationSample.class );
 		if( keyword.equals( "Obj Sample" ) )
 			intent = new Intent( this, ObjSample.class );
+		if( keyword.equals( "Sound Sample" ) )
+			intent = new Intent( this, SoundSample.class );
+		if( keyword.equals( "Music Sample" ) )
+			intent = new Intent( this, MusicSample.class );
 			
 		startActivity( intent );
 	}
