@@ -25,6 +25,8 @@ public class Renderer
 	Texture invaderTexture;
 	Mesh blockMesh;
 	Mesh shotMesh;
+	Mesh backgroundMesh;
+	Texture backgroundTexture;
 	
 	public Renderer( GL10 gl, GameActivity activity )
 	{
@@ -32,8 +34,18 @@ public class Renderer
 		{
 			shipMesh = MeshLoader.loadObj(gl, activity.getAssets().open( "ship.obj" ) );
 			invaderMesh = MeshLoader.loadObj( gl, activity.getAssets().open( "invader.obj" ) );
-			blockMesh = MeshLoader.loadObj( gl, activity.getAssets().open( "shot.obj" ) );
+			blockMesh = MeshLoader.loadObj( gl, activity.getAssets().open( "block.obj" ) );
 			shotMesh = MeshLoader.loadObj( gl, activity.getAssets().open( "shot.obj" ) );
+			
+			backgroundMesh = new Mesh( gl, 4, false, true, false );
+			backgroundMesh.texCoord(0, 0);
+			backgroundMesh.vertex(-1, 1, 0 );
+			backgroundMesh.texCoord(1, 0);
+			backgroundMesh.vertex(1, 1, 0 );
+			backgroundMesh.texCoord(1, 1);
+			backgroundMesh.vertex(1, -1, 0 );
+			backgroundMesh.texCoord(0, 1);
+			backgroundMesh.vertex(-1, -1, 0 );
 		}
 		catch( Exception ex )
 		{
@@ -49,6 +61,10 @@ public class Renderer
 			
 			bitmap = BitmapFactory.decodeStream( activity.getAssets().open( "invader.png" ) );
 			invaderTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Linear, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
+			bitmap.recycle();
+			
+			bitmap = BitmapFactory.decodeStream( activity.getAssets().open( "planet.jpg" ) );
+			backgroundTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Linear, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
 			bitmap.recycle();
 		}
 		catch( Exception ex )
@@ -68,20 +84,36 @@ public class Renderer
 	{		
 		gl.glClear( GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT );
 		gl.glViewport( 0, 0, activity.getViewportWidth(), activity.getViewportHeight() );		
-			
+					
+		gl.glEnable( GL10.GL_TEXTURE_2D );		
+		renderBackground( gl );
+		
 		gl.glEnable( GL10.GL_DEPTH_TEST );
-		gl.glEnable( GL10.GL_CULL_FACE );
+		gl.glEnable( GL10.GL_CULL_FACE );		
 		
 		setProjectionAndCamera( gl, simulation.ship, activity );
 		setLighting( gl );
 		
-		gl.glEnable( GL10.GL_TEXTURE_2D );		
+			
 		renderShip( gl, simulation.ship, activity );
 		renderInvaders( gl, simulation.invaders );
 		
 		gl.glDisable( GL10.GL_TEXTURE_2D );
-//		renderBlocks( gl, simulation.blocks );
+		renderBlocks( gl, simulation.blocks );
 		renderShots( gl, simulation.shots );
+		
+		gl.glDisable( GL10.GL_CULL_FACE );
+		gl.glDisable( GL10.GL_DEPTH_TEST );
+	}
+	
+	private void renderBackground( GL10 gl )
+	{
+		gl.glMatrixMode( GL10.GL_PROJECTION );
+		gl.glLoadIdentity();
+		gl.glMatrixMode( GL10.GL_MODELVIEW );
+		gl.glLoadIdentity();
+		backgroundTexture.bind();
+		backgroundMesh.render(PrimitiveType.TriangleFan);
 	}
 	
 	private void setProjectionAndCamera( GL10 gl, Ship ship, GameActivity activity )
@@ -131,6 +163,9 @@ public class Renderer
 	
 	private void renderBlocks( GL10 gl, ArrayList<Block> blocks )
 	{		
+		gl.glEnable( GL10.GL_BLEND );
+		gl.glBlendFunc( GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA );
+		gl.glColor4f( 0.2f, 0.2f, 1, 0.7f );
 		for( int i = 0; i < blocks.size(); i++ )
 		{
 			Block block = blocks.get(i);
@@ -138,11 +173,14 @@ public class Renderer
 			gl.glTranslatef( block.position.x, block.position.y, block.position.z );
 			blockMesh.render(PrimitiveType.Triangles);
 			gl.glPopMatrix();
-		}		
+		}
+		gl.glColor4f( 1, 1, 1, 1 );
+		gl.glDisable( GL10.GL_BLEND );
 	}
 	
 	private void renderShots( GL10 gl, ArrayList<Shot> shots )
 	{
+		gl.glColor4f( 1, 1, 0, 1 );
 		for( int i = 0; i < shots.size(); i++ )
 		{
 			Shot shot = shots.get(i);
@@ -150,12 +188,14 @@ public class Renderer
 			gl.glTranslatef( shot.position.x, shot.position.y, shot.position.z );
 			shotMesh.render(PrimitiveType.Triangles);
 			gl.glPopMatrix();
-		}			
+		}		
+		gl.glColor4f( 1, 1, 1, 1 );
 	}
 	
 	public void dispose( )
 	{
 		shipTexture.dispose();
 		invaderTexture.dispose();
+		backgroundTexture.dispose();
 	}
 }

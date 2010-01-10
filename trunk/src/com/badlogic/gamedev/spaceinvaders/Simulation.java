@@ -29,6 +29,15 @@ public class Simulation
 				invaders.add( invader );
 			}
 		}
+		
+		for( int shield = 0; shield < 3; shield++ )
+		{
+			blocks.add( new Block( new Vector( -10 + shield * 10 -1, 0, -2) ) );
+			blocks.add( new Block( new Vector( -10 + shield * 10 -1, 0, -3) ) );
+			blocks.add( new Block( new Vector( -10 + shield * 10 + 0, 0, -3) ) );
+			blocks.add( new Block( new Vector( -10 + shield * 10 + 1, 0, -3) ) );
+			blocks.add( new Block( new Vector( -10 + shield * 10 + 1, 0, -2 ) ) );
+		}
 	}
 
 	ArrayList<Shot> removedShots = new ArrayList<Shot>();
@@ -38,6 +47,7 @@ public class Simulation
 		updateShots( delta );
 		checkShipCollision( );
 		checkInvaderCollision( );
+		checkBlockCollision( );
 	}
 	
 	private void updateInvaders( float delta )
@@ -133,6 +143,31 @@ public class Simulation
 		}
 	}
 
+	private void checkBlockCollision( )
+	{
+		removedShots.clear();
+		
+		for( int i = 0; i < shots.size(); i++ )
+		{
+			Shot shot = shots.get(i);			
+									
+			for( int j = 0; j < blocks.size(); j++ )
+			{
+				Block block = blocks.get(j);
+				if( block.position.distance(shot.position) < 0.5f )
+				{					
+					removedShots.add( shot );
+					shot.hasLeftField = true;
+					blocks.remove(block);
+					break;
+				}
+			}			
+		}
+		
+		for( int i = 0; i < removedShots.size(); i++ )		
+			shots.remove( removedShots.get(i) );
+	}
+	
 	public void moveShipLeft(float delta, float scale) 
 	{	
 		ship.position.x -= delta * Ship.SHIP_VELOCITY * scale;

@@ -24,6 +24,7 @@ import com.badlogic.gamedev.samples.TextureSample;
 import com.badlogic.gamedev.samples.TransformationSample;
 import com.badlogic.gamedev.samples.TriangleSample;
 import com.badlogic.gamedev.samples.ZBufferSample;
+import com.badlogic.gamedev.spaceinvaders.SpaceInvaderTest;
 import com.badlogic.gamedev.tools.GameActivity;
 
 public class Main extends ListActivity 
@@ -32,7 +33,7 @@ public class Main extends ListActivity
 	public void onCreate(Bundle savedInstanceState) 
 	{
 		super.onCreate(savedInstanceState); 
-		String[] items = new String[]{"GameActivity", "Input Sample", "Triangle Sample",  "Color Sample",
+		String[] items = new String[]{"Space Invaders", "GameActivity", "Input Sample", "Triangle Sample",  "Color Sample",
 									  "Color Sample 2","Texture Sample", "Mesh Sample", "Texture & Mesh Sample",
 									  "Ortho Sample", "Camera Sample", "Z-Buffer Sample", "Light Sample",
 									  "Transformation Sample", "Obj Sample", "Multiple Objects Sample", "Sound Sample", "Music Sample"
@@ -48,6 +49,8 @@ public class Main extends ListActivity
 		String keyword = o.toString();
 
 		Intent intent = null;
+		if( keyword.equals( "Space Invaders" ) )
+			intent = new Intent( this, SpaceInvaderTest.class );
 		if( keyword.equals( "GameActivity" ) )
 			intent = new Intent( this, GameActivity.class );
 		if( keyword.equals( "Input Sample" ) )
