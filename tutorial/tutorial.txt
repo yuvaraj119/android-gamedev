@@ -825,7 +825,7 @@ Nachdem wir den Schritt in die dritte Dimension gewagt haben wäre es natürlich n
  
 Zum Laden übergeben wir also nur einen InputStream auf ein Obj-Asset und erhalten ein fix und fertiges Mesh zurück. So das Mesh Normalen oder Texture-Koordinaten hat werden diese natürlich mitgeladen und können dann mit einer Lichtquelle bzw. Texture verwendet werden. Ich habe in Wings3D ein kleines Raumschiff gebaut und mit Gimp dafür eine Texture erstellt. Das Obj-File und die Texture verwende ich in einem weiteren Sample das ihr unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/ObjSample.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/ObjSample.java] anschaun könnt. Es ist im Grunde das Light Sample mit dem Unterschied dass ich eine Texture und das Mesh aus dem Obj-File lade. Außerdem habe ich mir erlaubt hier die Aufgabe aus dem Transformations Kapitel umzusetzen. Das Schiff dreht sich hübsch. Hier noch ein Screenshot
 
-[[Datei:ship.png]]
+[[Datei:ship.png|320px]]
 
 Jetzt haben wir aber wirklich alles besprochen was es zu besprechen gibt. Auf zum Sound!  
 
