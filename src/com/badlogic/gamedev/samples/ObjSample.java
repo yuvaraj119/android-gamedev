@@ -22,6 +22,7 @@ public class ObjSample extends GameActivity implements GameListener
 {
     Mesh mesh;
     Texture texture;
+    float angle = 0;
 	
 	public void onCreate( Bundle savedInstance )
 	{
@@ -73,9 +74,15 @@ public class ObjSample extends GameActivity implements GameListener
 		gl.glEnable( GL10.GL_COLOR_MATERIAL );		
 		
 		gl.glEnable( GL10.GL_TEXTURE_2D );
-		texture.bind();
+		texture.bind();			
+		
+		gl.glRotatef( angle, 0, 1, 0 );
 		
 		mesh.render( PrimitiveType.Triangles );
+		
+		angle+= activity.getDeltaTime() * 180; // wir drehen uns um 180 Grad pro Sekunde
+		if( angle > 360 )
+			angle = 0;
 	}
 }
 

@@ -816,7 +816,18 @@ In Wirklichkeit gibt es für jede Matrix in OpenGL (Projektion, Model-View) nicht
 
 In Spielen geht man in der Regel so vor: jedes Objekt in der Spielwelt hat eine Orientierung (also eine Richtung in die es schaut) und eine Position. Die Meshes für die Objekte sind immer um den Ursprung definiert. Zeichnet man nun die Objekte läd man zu aller erst die Kamera-Matrix in die Model-View-Matrix. Beim zeichnen jedes Objektes pushen wir die Model-View-Matrix damit wir eine Kopie der Kamera-Matrix am Stack haben, multiplizieren dann die Transformationen auf die Model-View-Matrix, zeichnen das Mesh des Objekts, welches somit richtig transformiert wird und popen die Model-View-Matrix wieder vom Stack womit diese wieder nur die Kamera-Matrix beinhaltet. Diesen Prozess wiederholen wir für alle Objekte die wir zeichnen. So werden wir das dann auch in unserem Space Invaders Clone machen.
 
-Damit haben wir den letzten großen Brocken was OpenGL betrifft abgearbeitet. Wie für Licht gilt: experimentieren, experimentieren, experimentieren. Um Transformationen zu verstehen muß man sie in Aktion sehen. Als kleine Aufgabe könnt ihr ja eines der Samples hernehmen und ein um die y-Achse rotierendes Dreieck produzieren. Dazu müsst ihr nur in jedem Frame ''glRotatef'' mit dem aktuellen Winkel aufrufen. Den Winkel muss man natürlich in jedem Frame erhöhen und wenn er größer als 360 ist wieder auf 0 zurücksetzen. 
+Damit haben wir den letzten großen Brocken was OpenGL betrifft abgearbeitet. Wie für Licht gilt: experimentieren, experimentieren, experimentieren. Um Transformationen zu verstehen muß man sie in Aktion sehen. Als kleine Aufgabe könnt ihr ja eines der Samples hernehmen und ein um die y-Achse rotierendes Dreieck produzieren. Dazu müsst ihr nur in jedem Frame ''glRotatef'' mit dem aktuellen Winkel aufrufen. Den Winkel muss man natürlich in jedem Frame erhöhen und wenn er größer als 360 ist wieder auf 0 zurücksetzen.
+
+=== Meshes laden ===
+Nachdem wir den Schritt in die dritte Dimension gewagt haben wäre es natürlich nicht schlecht eine Möglichkeit zu besitzen Meshes aus anderen Programmen zu laden. Eines der einfachsten Mesh Formate ist das [http://en.wikipedia.org/wiki/Obj Wavefront OBJ Format]. Ich habe mir die Freiheit genommen dafür einen einfachen Loader zu schreiben. Dieser kann mit Obj-Dateien umgehen die nur Dreiecke beinhalten. Baut ihr also eure eigenen Meshes in [http://www.wings3d.com/ Wings3D] oder [http://www.blender.org/ Blender] könnt ihr eure Meshes von dort aus in eine Obj-Datei exportieren und mit dem Loader laden. Der Loader besitzt nur eine statische Methode:
+
+ Mesh MeshLoader.loadObj( GL10 gl, InputStream in )
+ 
+Zum Laden übergeben wir also nur einen InputStream auf ein Obj-Asset und erhalten ein fix und fertiges Mesh zurück. So das Mesh Normalen oder Texture-Koordinaten hat werden diese natürlich mitgeladen und können dann mit einer Lichtquelle bzw. Texture verwendet werden. Ich habe in Wings3D ein kleines Raumschiff gebaut und mit Gimp dafür eine Texture erstellt. Das Obj-File und die Texture verwende ich in einem weiteren Sample das ihr unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/ObjSample.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/ObjSample.java] anschaun könnt. Es ist im Grunde das Light Sample mit dem Unterschied dass ich eine Texture und das Mesh aus dem Obj-File lade. Außerdem habe ich mir erlaubt hier die Aufgabe aus dem Transformations Kapitel umzusetzen. Das Schiff dreht sich hübsch. Hier noch ein Screenshot
+
+[[Datei:ship.png]]
+
+Jetzt haben wir aber wirklich alles besprochen was es zu besprechen gibt. Auf zum Sound!  
 
 == SoundPool und MediaPlayer ==
 = Space Invaders =
