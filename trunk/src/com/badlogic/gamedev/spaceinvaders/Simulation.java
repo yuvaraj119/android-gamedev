@@ -2,12 +2,15 @@ package com.badlogic.gamedev.spaceinvaders;
 
 import java.util.ArrayList;
 
+import android.util.Log;
+
 public class Simulation 
-{
+{	
 	public ArrayList<Invader> invaders = new ArrayList<Invader>();
 	public ArrayList<Block> blocks = new ArrayList<Block>( );
 	public ArrayList<Shot> shots = new ArrayList<Shot>( );
-	public Ship ship;	
+	public Ship ship;
+	public Shot shipShot = null;
 	
 	public Simulation( )
 	{
@@ -58,6 +61,17 @@ public class Simulation
 			if( shot.hasLeftField )
 				removedShots.add(shot);
 		}
+		
+		if( shipShot != null && shipShot.hasLeftField )
+			shipShot = null;
+		
+		if( Math.random() < 0.01 )
+		{
+			Shot shot = new Shot( true );
+			int index = (int)(Math.random() * (invaders.size() - 1));
+			shot.position.set( invaders.get(index).position );
+			shots.add( shot );
+		}
 	}
 	
 	private void checkInvaderCollision() 
@@ -68,14 +82,15 @@ public class Simulation
 		{
 			Shot shot = shots.get(i);
 			if( shot.isInvaderShot )
-				continue;
+				continue;					
 			
 			for( int j = 0; j < invaders.size(); j++ )
 			{
-				Invader invader = invaders.get(i);
-				if( invader.position.distance(shot.position) < 0.5f )
+				Invader invader = invaders.get(j);
+				if( invader.position.distance(shot.position) < 0.75f )
 				{					
 					removedShots.add( shot );
+					shot.hasLeftField = true;
 					invaders.remove(invader);
 					break;
 				}
@@ -96,9 +111,10 @@ public class Simulation
 			if( !shot.isInvaderShot )
 				continue;
 									
-			if( ship.position.distance(shot.position) < 0.5f )
+			if( ship.position.distance(shot.position) < 1 )
 			{					
 				removedShots.add( shot );
+				shot.hasLeftField = true;
 				ship.lives--;
 				break;
 			}			
@@ -110,12 +126,36 @@ public class Simulation
 		for( int i = 0; i < invaders.size(); i++ )
 		{
 			Invader invader = invaders.get(i);
-			if( invader.position.distance(ship.position) < 0.5f )
+			if( invader.position.distance(ship.position) < 1 )
 			{
 				ship.lives--;
 				invaders.remove(invader);
 				break;
 			}
+		}
+	}
+
+	public void moveShipLeft(float delta, float scale) 
+	{	
+		ship.position.x -= delta * Ship.SHIP_VELOCITY * scale;
+		if( ship.position.x < -13 )
+			ship.position.x = -13;
+	}
+
+	public void moveShipRight(float delta, float scale ) 
+	{	
+		ship.position.x += delta * Ship.SHIP_VELOCITY * scale;
+		if( ship.position.x > 13 )
+			ship.position.x = 13;
+	}
+
+	public void shot() 
+	{	
+		if( shipShot == null )
+		{
+			shipShot = new Shot( false );
+			shipShot.position.set( ship.position );
+			shots.add( shipShot );
 		}
 	}		
 }
