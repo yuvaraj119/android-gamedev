@@ -2,8 +2,6 @@ package com.badlogic.gamedev.spaceinvaders;
 
 import java.util.ArrayList;
 
-import android.util.Log;
-
 public class Simulation 
 {	
 	public ArrayList<Invader> invaders = new ArrayList<Invader>();
@@ -65,7 +63,7 @@ public class Simulation
 		if( shipShot != null && shipShot.hasLeftField )
 			shipShot = null;
 		
-		if( Math.random() < 0.01 )
+		if( Math.random() < 0.01 && invaders.size() > 0 )
 		{
 			Shot shot = new Shot( true );
 			int index = (int)(Math.random() * (invaders.size() - 1));
