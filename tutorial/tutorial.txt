@@ -852,7 +852,7 @@ Das abspielen des eben geladenen SoundEffekts ist dann ebenso simpel:
  
 Als erstes müssen wir herausfinden wie Laut die Medienlautstärke zur Zeit ist. Diese Information bekommen wir von der Methode ''getStreamVolume'' der Klasse AudioManager deren Instanz wir wiederum über ''getSystemService'' erhalten. Als Stream geben wir wieder den Musik Stream an da wir ja mit diesem Arbeiten. Den zurückgegebenen Wert merken wir uns und verwenden ihn in der zweiten Zeile. Hier weisen wir den SoundPool an den zuvor geladenen Soundeffekt abzuspielen. Dazu geben wir als ersten Parameter die Id an die wir zuvor erhalten haben, dann die Lautstärke des linken und rechten Kanals. Der vierte Parameter gibt die Priorität an mit der der Soundeffekt abgespielt werden soll, der Wert 1 erweist uns hier gute Dienste. Der fünfte Parameter gibt an ob der Soundeffekt geloopt, also mehrere male hintereinander abgespielt werden soll. Wie geben hier 0 an da wir das nicht wollen. Der letzte Parameter gibt an mit welcher Geschwindigkeit der Soundeffekt abgespielt werden soll, 1 bedeutet in normaler Geschwindigkeit, 2 würde doppelte Geschwindigkeit bedeuten und so weiter. Damit wissen wir jetzt wie wir Soundeffekte abspielen können.
 
-Ein Sample welches beim berühren des Bildschirms ein Schießgeräusch macht findet ihr unter [ 
+Ein Sample welches beim berühren des Bildschirms ein Schießgeräusch macht findet ihr unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/SoundSample.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/SoundSample.java]. 
 
 Für das Abspielen von Musik verwenden wir den [http://developer.android.com/reference/android/media/MediaPlayer.html MediaPlayer]. Der gibt sich von der Dokumentation her recht kompliziert, ist es aber im Grunde nicht. Schaun wir uns zuerst an wie wir ihn Instanzieren:
 
@@ -876,7 +876,7 @@ Der MediaPlayer bietet alle möglichen Methoden zum pausieren, zurückspulen und s
  	mediaPlayer.release();
  }
  
-Nicht auf den Aufruf von ''super.onPause()'' vergessen!
+Nicht auf den Aufruf von ''super.onPause()'' vergessen! Ein Sample welches eine kleine Eigenkomposition spielt findet ihr unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/MusicSample.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/MusicSample.java].
 
 Das war ein erfrischend kurzes und einfaches Kapitel. Wir haben jetzt alle nötigen Tools zusammengetragen die wir für die Entwicklung eines kleinen Spiels brauchen. All die hier besprochenen Samples und Klassen findet ihr im Projekt. Ich empfehle euch damit herumzuspielen da man nur damit ein Gefühl für die Dinge erhält. Auch ist das Lesen der hier verlinkten Dokumentationen keine schlechte Idee. The more you know...
 
