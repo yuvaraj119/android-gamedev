@@ -58,6 +58,6 @@ public class Vector
 		float a = v.x - x;
 		float b = v.y - y;
 		float c = v.z - z;
-		return FloatMath.sqrt( a * a + b * b * c * c );
+		return FloatMath.sqrt( a * a + b * b + c * c );
 	}	
 }

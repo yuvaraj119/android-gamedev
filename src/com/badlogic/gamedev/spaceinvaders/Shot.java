@@ -2,7 +2,7 @@ package com.badlogic.gamedev.spaceinvaders;
 
 public class Shot 
 {
-	public static float SHOT_VELOCITY = 1;
+	public static float SHOT_VELOCITY = 10;
 	public final Vector position = new Vector();
 	public boolean isInvaderShot;
 	public boolean hasLeftField = false;
@@ -21,7 +21,7 @@ public class Shot
 		
 		if( position.z > 2 )
 			hasLeftField = true;
-		if( position.z > 20 )
+		if( position.z < -20 )
 			hasLeftField = true;
 	}
 }

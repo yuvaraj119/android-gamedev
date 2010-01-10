@@ -33,6 +33,7 @@ public class Renderer
 			shipMesh = MeshLoader.loadObj(gl, activity.getAssets().open( "ship.obj" ) );
 			invaderMesh = MeshLoader.loadObj( gl, activity.getAssets().open( "invader.obj" ) );
 			blockMesh = MeshLoader.loadObj( gl, activity.getAssets().open( "block.obj" ) );
+			shotMesh = MeshLoader.loadObj( gl, activity.getAssets().open( "block.obj" ) );
 		}
 		catch( Exception ex )
 		{
@@ -47,7 +48,7 @@ public class Renderer
 			bitmap.recycle();
 			
 			bitmap = BitmapFactory.decodeStream( activity.getAssets().open( "invader.png" ) );
-			invaderTexture = new Texture( gl, bitmap, TextureFilter.Linear, TextureFilter.Linear, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
+			invaderTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Linear, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
 			bitmap.recycle();
 		}
 		catch( Exception ex )
@@ -71,19 +72,19 @@ public class Renderer
 		gl.glEnable( GL10.GL_DEPTH_TEST );
 		gl.glEnable( GL10.GL_CULL_FACE );
 		
-		setProjectionAndCamera( gl, activity );
+		setProjectionAndCamera( gl, simulation.ship, activity );
 		setLighting( gl );
 		
 		gl.glEnable( GL10.GL_TEXTURE_2D );		
 		renderShip( gl, simulation.ship, activity );
 		renderInvaders( gl, simulation.invaders );
 		
-//		gl.glDisable( GL10.GL_TEXTURE_2D );
+		gl.glDisable( GL10.GL_TEXTURE_2D );
 //		renderBlocks( gl, simulation.blocks );
-//		renderShots( gl, simulation.shots );
+		renderShots( gl, simulation.shots );
 	}
 	
-	private void setProjectionAndCamera( GL10 gl, GameActivity activity )
+	private void setProjectionAndCamera( GL10 gl, Ship ship, GameActivity activity )
 	{
 		gl.glMatrixMode( GL10.GL_PROJECTION );
 		gl.glLoadIdentity();
@@ -92,7 +93,7 @@ public class Renderer
 		
 		gl.glMatrixMode( GL10.GL_MODELVIEW );
 		gl.glLoadIdentity();
-		GLU.gluLookAt( gl, 0, 6, 2, 0, 0, -4, 0, 1, 0 );
+		GLU.gluLookAt( gl, ship.position.x, 6, 2, ship.position.x, 0, -4, 0, 1, 0 );
 	}
 	
 	float[] direction = { 1, 0.5f, 0, 0 };	
@@ -109,7 +110,7 @@ public class Renderer
 		shipTexture.bind();
 		gl.glPushMatrix();
 		gl.glTranslatef( ship.position.x, ship.position.y, ship.position.z );
-		gl.glRotatef( 45 * (activity.getAccelerationOnYAxis() / 5), 0, 0, 1 );
+		gl.glRotatef( 45 * (-activity.getAccelerationOnYAxis() / 5), 0, 0, 1 );
 		gl.glRotatef( 180, 0, 1, 0 );
 		shipMesh.render(PrimitiveType.Triangles);
 		gl.glPopMatrix();
@@ -150,5 +151,11 @@ public class Renderer
 			shotMesh.render(PrimitiveType.Triangles);
 			gl.glPopMatrix();
 		}			
+	}
+	
+	public void dispose( )
+	{
+		shipTexture.dispose();
+		invaderTexture.dispose();
 	}
 }
