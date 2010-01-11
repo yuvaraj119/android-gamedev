@@ -97,7 +97,7 @@
                 <action android:name="android.intent.action.MAIN" />
         </intent-filter>
         </activity>  
-        <activity android:name=".spaceinvaders.SpaceInvaderTest" android:label="Space Invader Test">
+        <activity android:name=".spaceinvaders.SpaceInvaders" android:label="Space Invaders">
         <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
         </intent-filter>

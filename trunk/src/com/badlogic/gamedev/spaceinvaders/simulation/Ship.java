@@ -1,10 +1,10 @@
-package com.badlogic.gamedev.spaceinvaders;
+package com.badlogic.gamedev.spaceinvaders.simulation;
 
 public class Ship 
 {
 	public static final float SHIP_VELOCITY = 20;
 	public final Vector position = new Vector( );
-	int lives = 3;
+	public int lives = 3;
 	public boolean isExploding = false;
 	public float explodeTime = 0;
 	

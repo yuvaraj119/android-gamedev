@@ -1,18 +1,32 @@
-package com.badlogic.gamedev.spaceinvaders;
+package com.badlogic.gamedev.spaceinvaders.screens;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import android.content.Context;
+import android.content.res.AssetFileDescriptor;
+import android.media.AudioManager;
+import android.media.SoundPool;
+import android.util.Log;
+
+import com.badlogic.gamedev.spaceinvaders.GameScreen;
+import com.badlogic.gamedev.spaceinvaders.Renderer;
+import com.badlogic.gamedev.spaceinvaders.SoundManager;
+import com.badlogic.gamedev.spaceinvaders.simulation.Simulation;
+import com.badlogic.gamedev.spaceinvaders.simulation.SimulationListener;
 import com.badlogic.gamedev.tools.GameActivity;
 
-public class GameLoop implements GameModul
+public class GameLoop implements GameScreen, SimulationListener
 {
 	public Simulation simulation;
-	Renderer renderer;
+	Renderer renderer;	
+	SoundManager soundManager;
 
 	public GameLoop( GL10 gl, GameActivity activity )
 	{
 		simulation = new Simulation();
+		simulation.listener = this;
 		renderer = new Renderer( gl, activity );
+		soundManager = new SoundManager( activity );
 	}
 	
 	@Override
@@ -48,5 +62,18 @@ public class GameLoop implements GameModul
 	public void dispose( )
 	{
 		renderer.dispose();
+		soundManager.dispose();
+	}
+
+	@Override
+	public void explosion() 
+	{
+		soundManager.playExplosionSound();
+	}
+
+	@Override
+	public void shot() 
+	{	
+		soundManager.playShotSound();
 	}
 }

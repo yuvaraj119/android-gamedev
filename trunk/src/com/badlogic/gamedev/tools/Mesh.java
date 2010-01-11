@@ -270,4 +270,15 @@ public final class Mesh
 		texCoords[offset] = s;
 		texCoords[offset+1] = t;		
 	}
+
+	public int getMaximumVertices() 
+	{
+		return vertices.length / 3; 
+	}
+	
+	public void reset( )
+	{
+		dirty = true;
+		index = 0;
+	}
 }

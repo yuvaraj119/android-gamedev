@@ -9,10 +9,19 @@ import android.graphics.BitmapFactory;
 import android.opengl.GLU;
 import android.util.Log;
 
+import com.badlogic.gamedev.spaceinvaders.simulation.Block;
+import com.badlogic.gamedev.spaceinvaders.simulation.Explosion;
+import com.badlogic.gamedev.spaceinvaders.simulation.Invader;
+import com.badlogic.gamedev.spaceinvaders.simulation.Ship;
+import com.badlogic.gamedev.spaceinvaders.simulation.Shot;
+import com.badlogic.gamedev.spaceinvaders.simulation.Simulation;
+import com.badlogic.gamedev.tools.Font;
 import com.badlogic.gamedev.tools.GameActivity;
 import com.badlogic.gamedev.tools.Mesh;
 import com.badlogic.gamedev.tools.MeshLoader;
 import com.badlogic.gamedev.tools.Texture;
+import com.badlogic.gamedev.tools.Font.FontStyle;
+import com.badlogic.gamedev.tools.Font.Text;
 import com.badlogic.gamedev.tools.Mesh.PrimitiveType;
 import com.badlogic.gamedev.tools.Texture.TextureFilter;
 import com.badlogic.gamedev.tools.Texture.TextureWrap;
@@ -29,6 +38,9 @@ public class Renderer
 	Texture backgroundTexture;
 	Mesh explosionMesh;
 	Texture explosionTexture;
+	float invaderAngle = 0;
+	Font font;
+	Text text;
 	
 	public Renderer( GL10 gl, GameActivity activity )
 	{
@@ -95,6 +107,9 @@ public class Renderer
 			throw new RuntimeException( ex );
 		}
 		
+		font = new Font( gl, activity.getAssets(), "font.ttf", 16, FontStyle.Plain );
+		text = font.newText( gl );
+		
 		float[] lightColor = { 1, 1, 1, 1 };
 		float[] ambientLightColor = {0.0f, 0.0f, 0.0f, 1 };		
 		gl.glLightfv( GL10.GL_LIGHT0, GL10.GL_AMBIENT, ambientLightColor, 0 );
@@ -131,6 +146,18 @@ public class Renderer
 		
 		gl.glDisable( GL10.GL_CULL_FACE );
 		gl.glDisable( GL10.GL_DEPTH_TEST );
+	
+		set2DProjection(gl, activity);
+		
+		gl.glEnable( GL10.GL_BLEND );
+		gl.glBlendFunc( GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA );
+		gl.glTranslatef( 0, activity.getViewportHeight(), 0 );
+		text.setText( "lives: " + simulation.ship.lives + " score: " + simulation.score );
+		text.render();
+		
+		invaderAngle+=activity.getDeltaTime() * 90;
+		if( invaderAngle > 360 )
+			invaderAngle -= 360;
 	}	
 
 	private void renderBackground( GL10 gl )
@@ -153,6 +180,15 @@ public class Renderer
 		gl.glMatrixMode( GL10.GL_MODELVIEW );
 		gl.glLoadIdentity();
 		GLU.gluLookAt( gl, ship.position.x, 6, 2, ship.position.x, 0, -4, 0, 1, 0 );
+	}
+	
+	private void set2DProjection( GL10 gl, GameActivity activity )
+	{
+		gl.glMatrixMode( GL10.GL_PROJECTION );
+		gl.glLoadIdentity();
+		GLU.gluOrtho2D( gl, 0, activity.getViewportWidth(), 0, activity.getViewportHeight() );
+		gl.glMatrixMode( GL10.GL_MODELVIEW );
+		gl.glLoadIdentity();
 	}
 	
 	float[] direction = { 1, 0.5f, 0, 0 };	
@@ -186,6 +222,7 @@ public class Renderer
 			Invader invader = invaders.get(i);
 			gl.glPushMatrix();
 			gl.glTranslatef( invader.position.x, invader.position.y, invader.position.z );
+			gl.glRotatef( invaderAngle, 0, 1, 0 );
 			invaderMesh.render(PrimitiveType.Triangles);
 			gl.glPopMatrix();
 		}
