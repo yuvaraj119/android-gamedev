@@ -33,14 +33,14 @@ public class MusicSample extends GameActivity implements GameListener
 		mediaPlayer = new MediaPlayer();
 		try
 		{
-			AssetFileDescriptor descriptor = getAssets().openFd( "music.mp3" );
+			AssetFileDescriptor descriptor = getAssets().openFd( "8.12.mp3" );
 			mediaPlayer.setDataSource( descriptor.getFileDescriptor() );
 			mediaPlayer.prepare();
 			mediaPlayer.start();
 		}
 		catch( Exception ex )
 		{
-			Log.d( "Sound Sample", "couldn't load music 'music.mp3'" );
+			Log.d( "Sound Sample", "couldn't load music '8.12.mp3'" );
 			throw new RuntimeException( ex );
 		}
 	}

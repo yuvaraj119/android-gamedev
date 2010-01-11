@@ -22,7 +22,7 @@ public class SoundManager
 		soundPool = new SoundPool( 10, AudioManager.STREAM_MUSIC, 0);
 		audioManager = (AudioManager)activity.getSystemService(Context.AUDIO_SERVICE);
 		activity.setVolumeControlStream(AudioManager.STREAM_MUSIC);
-		
+		 
 		try
 		{
 			AssetFileDescriptor descriptor = activity.getAssets().openFd( "shot.wav" );
@@ -39,7 +39,7 @@ public class SoundManager
 		mediaPlayer = new MediaPlayer();
 		try
 		{
-			AssetFileDescriptor descriptor = activity.getAssets().openFd( "music.mp3" );
+			AssetFileDescriptor descriptor = activity.getAssets().openFd( "8.12.mp3" );
 			mediaPlayer.setDataSource( descriptor.getFileDescriptor() );
 			mediaPlayer.prepare();
 			mediaPlayer.setLooping(true);
