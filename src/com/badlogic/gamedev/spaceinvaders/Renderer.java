@@ -27,6 +27,8 @@ public class Renderer
 	Mesh shotMesh;
 	Mesh backgroundMesh;
 	Texture backgroundTexture;
+	Mesh explosionMesh;
+	Texture explosionTexture;
 	
 	public Renderer( GL10 gl, GameActivity activity )
 	{
@@ -46,6 +48,22 @@ public class Renderer
 			backgroundMesh.vertex(1, -1, 0 );
 			backgroundMesh.texCoord(0, 1);
 			backgroundMesh.vertex(-1, -1, 0 );
+			
+			explosionMesh = new Mesh( gl, 4 * 16, false, true, false );
+			for( int row = 0; row < 4; row++ )
+			{
+				for( int column = 0; column < 4; column++ )
+				{
+					explosionMesh.texCoord( 0.25f + column * 0.25f, 0 + row * 0.25f );
+					explosionMesh.vertex( 1, 1, 0 );
+					explosionMesh.texCoord( 0 + column * 0.25f, 0 + row * 0.25f );
+					explosionMesh.vertex( -1, 1, 0 );
+					explosionMesh.texCoord( 0f + column * 0.25f, 0.25f + row * 0.25f );
+					explosionMesh.vertex( -1, -1, 0 );
+					explosionMesh.texCoord( 0.25f + column * 0.25f, 0.25f + row * 0.25f );
+					explosionMesh.vertex( 1, -1, 0 );		
+				}
+			}					
 		}
 		catch( Exception ex )
 		{
@@ -65,6 +83,10 @@ public class Renderer
 			
 			bitmap = BitmapFactory.decodeStream( activity.getAssets().open( "planet.jpg" ) );
 			backgroundTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Linear, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
+			bitmap.recycle();
+			
+			bitmap = BitmapFactory.decodeStream( activity.getAssets().open( "explode.png" ) );
+			explosionTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Linear, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
 			bitmap.recycle();
 		}
 		catch( Exception ex )
@@ -100,12 +122,17 @@ public class Renderer
 		
 		gl.glDisable( GL10.GL_TEXTURE_2D );
 		renderBlocks( gl, simulation.blocks );
+		
+		gl.glDisable( GL10.GL_LIGHTING );
 		renderShots( gl, simulation.shots );
+		
+		gl.glEnable( GL10.GL_TEXTURE_2D );
+		renderExplosions( gl, simulation.explosions );
 		
 		gl.glDisable( GL10.GL_CULL_FACE );
 		gl.glDisable( GL10.GL_DEPTH_TEST );
-	}
-	
+	}	
+
 	private void renderBackground( GL10 gl )
 	{
 		gl.glMatrixMode( GL10.GL_PROJECTION );
@@ -139,6 +166,9 @@ public class Renderer
 	
 	private void renderShip( GL10 gl, Ship ship, GameActivity activity )
 	{
+		if( ship.isExploding )
+			return;
+		
 		shipTexture.bind();
 		gl.glPushMatrix();
 		gl.glTranslatef( ship.position.x, ship.position.y, ship.position.z );
@@ -192,10 +222,27 @@ public class Renderer
 		gl.glColor4f( 1, 1, 1, 1 );
 	}
 	
+	private void renderExplosions(GL10 gl, ArrayList<Explosion> explosions) 
+	{	
+		gl.glEnable( GL10.GL_BLEND );
+		gl.glBlendFunc( GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA );
+		explosionTexture.bind();
+		for( int i = 0; i < explosions.size(); i++ )
+		{
+			Explosion explosion = explosions.get(i);
+			gl.glPushMatrix();
+			gl.glTranslatef( explosion.position.x, explosion.position.y, explosion.position.z );
+			explosionMesh.render(PrimitiveType.TriangleFan, (int)((explosion.aliveTime / Explosion.EXPLOSION_LIVE_TIME) * 16) * 4, 4);
+			gl.glPopMatrix();
+		}			
+		gl.glDisable( GL10.GL_BLEND );
+	}
+	
 	public void dispose( )
 	{
 		shipTexture.dispose();
 		invaderTexture.dispose();
 		backgroundTexture.dispose();
+		explosionTexture.dispose();
 	}
 }

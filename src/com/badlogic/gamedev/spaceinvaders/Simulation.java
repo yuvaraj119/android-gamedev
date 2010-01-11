@@ -7,6 +7,7 @@ public class Simulation
 	public ArrayList<Invader> invaders = new ArrayList<Invader>();
 	public ArrayList<Block> blocks = new ArrayList<Block>( );
 	public ArrayList<Shot> shots = new ArrayList<Shot>( );
+	public ArrayList<Explosion> explosions = new ArrayList<Explosion>( );
 	public Ship ship;
 	public Shot shipShot = null;
 	
@@ -43,8 +44,10 @@ public class Simulation
 	ArrayList<Shot> removedShots = new ArrayList<Shot>();
 	public void update( float delta )
 	{			
+		ship.update( delta );
 		updateInvaders( delta );
 		updateShots( delta );
+		updateExplosions(delta);
 		checkShipCollision( );
 		checkInvaderCollision( );
 		checkBlockCollision( );
@@ -82,6 +85,22 @@ public class Simulation
 		}
 	}
 	
+	ArrayList<Explosion> removedExplosions = new ArrayList<Explosion>( );
+	public void updateExplosions( float delta )
+	{
+		removedExplosions.clear();
+		for( int i = 0; i < explosions.size(); i++ )
+		{
+			Explosion explosion = explosions.get(i);
+			explosion.update( delta );
+			if( explosion.aliveTime > Explosion.EXPLOSION_LIVE_TIME )
+				removedExplosions.add( explosion );
+		}
+		
+		for( int i = 0; i < removedExplosions.size(); i++ )
+			explosions.remove( explosions.get(i) );
+	}
+	
 	private void checkInvaderCollision() 
 	{	
 		removedShots.clear();
@@ -100,6 +119,7 @@ public class Simulation
 					removedShots.add( shot );
 					shot.hasLeftField = true;
 					invaders.remove(invader);
+					explosions.add( new Explosion( invader.position ) );
 					break;
 				}
 			}
@@ -124,6 +144,8 @@ public class Simulation
 				removedShots.add( shot );
 				shot.hasLeftField = true;
 				ship.lives--;
+				ship.isExploding = true;
+				explosions.add( new Explosion( ship.position ) );
 				break;
 			}			
 		}
@@ -138,6 +160,8 @@ public class Simulation
 			{
 				ship.lives--;
 				invaders.remove(invader);
+				ship.isExploding = true;
+				explosions.add( new Explosion( ship.position ) );
 				break;
 			}
 		}
@@ -170,6 +194,9 @@ public class Simulation
 	
 	public void moveShipLeft(float delta, float scale) 
 	{	
+		if( ship.isExploding )
+			return;
+		
 		ship.position.x -= delta * Ship.SHIP_VELOCITY * scale;
 		if( ship.position.x < -13 )
 			ship.position.x = -13;
@@ -177,6 +204,9 @@ public class Simulation
 
 	public void moveShipRight(float delta, float scale ) 
 	{	
+		if( ship.isExploding )
+			return;
+		
 		ship.position.x += delta * Ship.SHIP_VELOCITY * scale;
 		if( ship.position.x > 13 )
 			ship.position.x = 13;
@@ -184,7 +214,7 @@ public class Simulation
 
 	public void shot() 
 	{	
-		if( shipShot == null )
+		if( shipShot == null && !ship.isExploding )
 		{
 			shipShot = new Shot( false );
 			shipShot.position.set( ship.position );
