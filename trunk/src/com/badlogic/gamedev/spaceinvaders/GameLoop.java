@@ -4,9 +4,9 @@ import javax.microedition.khronos.opengles.GL10;
 
 import com.badlogic.gamedev.tools.GameActivity;
 
-public class GameLoop implements GameMode
+public class GameLoop implements GameModul
 {
-	Simulation simulation;
+	public Simulation simulation;
 	Renderer renderer;
 
 	public GameLoop( GL10 gl, GameActivity activity )
@@ -43,5 +43,10 @@ public class GameLoop implements GameMode
 	public boolean isDone( )
 	{
 		return simulation.ship.lives == 0;
+	}
+	
+	public void dispose( )
+	{
+		renderer.dispose();
 	}
 }
