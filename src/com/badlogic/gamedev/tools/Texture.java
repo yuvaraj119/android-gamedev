@@ -4,7 +4,6 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.graphics.Bitmap;
 import android.opengl.GLUtils;
-import android.util.Log;
 
 public class Texture {
 	/**
@@ -66,6 +65,33 @@ public class Texture {
 		buildMipmap( gl, image );
 		image.recycle();			
 	}		
+
+	public Texture(GL10 gl, int width, int height, TextureFilter minFilter, TextureFilter maxFilter,
+			TextureWrap sWrap, TextureWrap tWrap) 
+	{
+		Bitmap.Config config = Bitmap.Config.ARGB_8888;
+		Bitmap image = Bitmap.createBitmap(width, height, config);
+	
+		this.gl = gl;
+		
+		int[] textures = new int[1];
+		gl.glGenTextures(1, textures, 0);
+		textureHandle = textures[0];
+		
+		this.width = image.getWidth();
+		this.height = image.getHeight();		
+		
+		gl.glBindTexture( GL10.GL_TEXTURE_2D, textureHandle );
+		gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, getTextureFilter( minFilter ) );
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, getTextureFilter( maxFilter ) );
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, getTextureWrap( sWrap ) );
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, getTextureWrap( tWrap ) );		
+        gl.glMatrixMode( GL10.GL_TEXTURE );
+        gl.glLoadIdentity();
+		buildMipmap( gl, image );
+		image.recycle();		
+	}
+	
 
 	private int getTextureFilter( TextureFilter filter )
 	{

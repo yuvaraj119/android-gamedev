@@ -1,4 +1,4 @@
-package com.badlogic.gamedev.spaceinvaders;
+package com.badlogic.gamedev.spaceinvaders.simulation;
 
 import java.util.ArrayList;
 
@@ -10,6 +10,8 @@ public class Simulation
 	public ArrayList<Explosion> explosions = new ArrayList<Explosion>( );
 	public Ship ship;
 	public Shot shipShot = null;
+	public SimulationListener listener;
+	public int score;
 	
 	public Simulation( )
 	{
@@ -82,10 +84,12 @@ public class Simulation
 			int index = (int)(Math.random() * (invaders.size() - 1));
 			shot.position.set( invaders.get(index).position );
 			shots.add( shot );
+			if( listener != null )
+				listener.shot();
 		}
 	}
 	
-	ArrayList<Explosion> removedExplosions = new ArrayList<Explosion>( );
+	ArrayList<Explosion> removedExplosions = new ArrayList<Explosion>( );	
 	public void updateExplosions( float delta )
 	{
 		removedExplosions.clear();
@@ -120,6 +124,9 @@ public class Simulation
 					shot.hasLeftField = true;
 					invaders.remove(invader);
 					explosions.add( new Explosion( invader.position ) );
+					if( listener != null )
+						listener.explosion();
+					score += 40;
 					break;
 				}
 			}
@@ -146,6 +153,8 @@ public class Simulation
 				ship.lives--;
 				ship.isExploding = true;
 				explosions.add( new Explosion( ship.position ) );
+				if( listener != null )
+					listener.explosion();
 				break;
 			}			
 		}
@@ -162,6 +171,8 @@ public class Simulation
 				invaders.remove(invader);
 				ship.isExploding = true;
 				explosions.add( new Explosion( ship.position ) );
+				if( listener != null )
+					listener.explosion();
 				break;
 			}
 		}
@@ -219,6 +230,7 @@ public class Simulation
 			shipShot = new Shot( false );
 			shipShot.position.set( ship.position );
 			shots.add( shipShot );
+			listener.shot();
 		}
 	}		
 }

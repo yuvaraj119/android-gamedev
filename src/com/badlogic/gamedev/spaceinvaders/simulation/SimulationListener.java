@@ -1,4 +1,4 @@
-package com.badlogic.gamedev.spaceinvaders;
+package com.badlogic.gamedev.spaceinvaders.simulation;
 
 public interface SimulationListener 
 {

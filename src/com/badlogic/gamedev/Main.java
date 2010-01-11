@@ -24,7 +24,7 @@ import com.badlogic.gamedev.samples.TextureSample;
 import com.badlogic.gamedev.samples.TransformationSample;
 import com.badlogic.gamedev.samples.TriangleSample;
 import com.badlogic.gamedev.samples.ZBufferSample;
-import com.badlogic.gamedev.spaceinvaders.SpaceInvaderTest;
+import com.badlogic.gamedev.spaceinvaders.SpaceInvaders;
 import com.badlogic.gamedev.tools.GameActivity;
 
 public class Main extends ListActivity 
@@ -50,7 +50,7 @@ public class Main extends ListActivity
 
 		Intent intent = null;
 		if( keyword.equals( "Space Invaders" ) )
-			intent = new Intent( this, SpaceInvaderTest.class );
+			intent = new Intent( this, SpaceInvaders.class );
 		if( keyword.equals( "GameActivity" ) )
 			intent = new Intent( this, GameActivity.class );
 		if( keyword.equals( "Input Sample" ) )
