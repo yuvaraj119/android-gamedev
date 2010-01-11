@@ -232,7 +232,7 @@ public class Renderer
 			Explosion explosion = explosions.get(i);
 			gl.glPushMatrix();
 			gl.glTranslatef( explosion.position.x, explosion.position.y, explosion.position.z );
-			explosionMesh.render(PrimitiveType.TriangleFan, (int)((explosion.aliveTime / Explosion.EXPLOSION_LIVE_TIME) * 16) * 4, 4);
+			explosionMesh.render(PrimitiveType.TriangleFan, (int)((explosion.aliveTime / Explosion.EXPLOSION_LIVE_TIME) * 15) * 4, 4);
 			gl.glPopMatrix();
 		}			
 		gl.glDisable( GL10.GL_BLEND );
