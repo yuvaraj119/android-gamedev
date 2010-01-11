@@ -29,14 +29,12 @@ public class GameLoop implements GameMode
 	}
 	
 	private void processInput( GameActivity activity )
-	{
-		if( Math.abs(activity.getAccelerationOnYAxis()) > 1 )
-		{
-			if( activity.getAccelerationOnYAxis() < -1 )
-				simulation.moveShipLeft( activity.getDeltaTime(), Math.abs(activity.getAccelerationOnYAxis()) / 10 );
-			else
-				simulation.moveShipRight( activity.getDeltaTime(), Math.abs(activity.getAccelerationOnYAxis()) / 10 );
-		}
+	{		
+		if( activity.getAccelerationOnYAxis() < 0 )
+			simulation.moveShipLeft( activity.getDeltaTime(), Math.abs(activity.getAccelerationOnYAxis()) / 10 );
+		else
+			simulation.moveShipRight( activity.getDeltaTime(), Math.abs(activity.getAccelerationOnYAxis()) / 10 );
+	
 		
 		if( activity.isTouched() )
 			simulation.shot();
