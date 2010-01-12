@@ -31,7 +31,8 @@ public class SpaceInvaders extends GameActivity implements GameListener
 	public void onPause( )
 	{
 		super.onPause();
-		module.dispose();
+		if( module != null )			
+			module.dispose();
 	}
 	
 	public void onResume( )
