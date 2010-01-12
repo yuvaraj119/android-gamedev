@@ -93,6 +93,7 @@ public class StartScreen implements GameScreen
 	@Override
 	public void render(GL10 gl, GameActivity activity) 
 	{	
+		gl.glViewport( 0, 0, activity.getViewportWidth(), activity.getViewportHeight() );
 		gl.glClear( GL10.GL_COLOR_BUFFER_BIT );
 		gl.glEnable( GL10.GL_TEXTURE_2D );
 		gl.glMatrixMode( GL10.GL_PROJECTION );
