@@ -6,6 +6,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
 import android.opengl.GLU;
 import android.util.Log;
 
@@ -84,21 +85,21 @@ public class Renderer
 		}
 		
 		try
-		{
+		{					
 			Bitmap bitmap = BitmapFactory.decodeStream( activity.getAssets().open( "ship.png" ) );
-			shipTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Linear, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
+			shipTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Nearest, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
 			bitmap.recycle();
 			
-			bitmap = BitmapFactory.decodeStream( activity.getAssets().open( "invader.png" ) );
-			invaderTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Linear, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
+			bitmap = BitmapFactory.decodeStream( activity.getAssets().open( "invader.png" ));
+			invaderTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Nearest, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
 			bitmap.recycle();
 			
 			bitmap = BitmapFactory.decodeStream( activity.getAssets().open( "planet.jpg" ) );
-			backgroundTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Linear, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
+			backgroundTexture = new Texture( gl, bitmap, TextureFilter.Nearest, TextureFilter.Nearest, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
 			bitmap.recycle();
-			
+						
 			bitmap = BitmapFactory.decodeStream( activity.getAssets().open( "explode.png" ) );
-			explosionTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Linear, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
+			explosionTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Nearest, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
 			bitmap.recycle();
 		}
 		catch( Exception ex )
@@ -121,9 +122,10 @@ public class Renderer
 	{		
 		gl.glClear( GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT );
 		gl.glViewport( 0, 0, activity.getViewportWidth(), activity.getViewportHeight() );		
-					
-		gl.glEnable( GL10.GL_TEXTURE_2D );		
-		renderBackground( gl );
+		gl.glDisable( GL10.GL_DITHER );			
+		
+		gl.glEnable( GL10.GL_TEXTURE_2D );				
+		renderBackground( gl );		
 		
 		gl.glEnable( GL10.GL_DEPTH_TEST );
 		gl.glEnable( GL10.GL_CULL_FACE );		
@@ -152,8 +154,9 @@ public class Renderer
 		gl.glEnable( GL10.GL_BLEND );
 		gl.glBlendFunc( GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA );
 		gl.glTranslatef( 0, activity.getViewportHeight(), 0 );
-		text.setText( "lives: " + simulation.ship.lives + " score: " + simulation.score );
+//		text.setText( "lives: " + simulation.ship.lives + " score: " + simulation.score );
 		text.render();
+		gl.glDisable( GL10.GL_BLEND);
 		
 		invaderAngle+=activity.getDeltaTime() * 90;
 		if( invaderAngle > 360 )
@@ -281,5 +284,13 @@ public class Renderer
 		invaderTexture.dispose();
 		backgroundTexture.dispose();
 		explosionTexture.dispose();
+		font.dispose();
+		text.dispose();
+		explosionMesh.dispose();
+		shipMesh.dispose();
+		invaderMesh.dispose();
+		shotMesh.dispose();
+		blockMesh.dispose();
+		backgroundMesh.dispose();
 	}
 }

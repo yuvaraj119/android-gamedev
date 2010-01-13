@@ -3,8 +3,6 @@ package com.badlogic.gamedev.tools;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import com.badlogic.gamedev.samples.InputSample;
-
 import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
@@ -13,7 +11,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -106,6 +103,9 @@ public class GameActivity extends Activity implements GLSurfaceView.Renderer, On
 			listener.setup( this, gl );
 		
 		lastFrameStart = System.nanoTime();
+		String renderer = gl.glGetString( GL10.GL_RENDERER );
+		if( renderer.toLowerCase().contains("pixelflinger" ) )
+			Mesh.globalVBO = false;
 	}
 	
 	/**
@@ -143,6 +143,15 @@ public class GameActivity extends Activity implements GLSurfaceView.Renderer, On
 		
 		if( event.getAction() == MotionEvent.ACTION_UP )
 			isTouched = false;
+		
+		try
+		{
+			Thread.sleep( 16 );
+		}
+		catch( Exception ex )
+		{
+			
+		}
 		
 		return true;
 	}

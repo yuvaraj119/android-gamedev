@@ -58,11 +58,11 @@ public class StartScreen implements GameScreen
 		try
 		{
 			Bitmap bitmap = BitmapFactory.decodeStream( activity.getAssets().open( "planet.jpg" ) );
-			backgroundTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Linear, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
+			backgroundTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Nearest, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
 			bitmap.recycle();
 			
 			bitmap = BitmapFactory.decodeStream( activity.getAssets().open( "title.png" ) );
-			titleTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Linear, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
+			titleTexture = new Texture( gl, bitmap, TextureFilter.Nearest, TextureFilter.Nearest, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
 			bitmap.recycle();	
 		}
 		catch( Exception ex )
@@ -133,5 +133,8 @@ public class StartScreen implements GameScreen
 		titleTexture.dispose();
 		soundManager.dispose();
 		font.dispose();
+		text.dispose();
+		backgroundMesh.dispose();
+		titleMesh.dispose();
 	}
 }

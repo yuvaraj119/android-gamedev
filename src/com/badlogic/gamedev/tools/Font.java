@@ -348,6 +348,12 @@ public class Font
 			texture.bind();
 			mesh.render(PrimitiveType.Triangles);
 		}		
+		
+		public void dispose( )
+		{
+			if( mesh != null )
+				mesh.dispose();
+		}
 	}
 	
 	/**
