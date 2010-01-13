@@ -31,6 +31,7 @@ public class StartScreen implements GameScreen
 	SoundManager soundManager;
 	Font font;
 	Text text;
+	String pressText = "Lives: 3 Score: 12309";
 	
 	public StartScreen( GL10 gl, GameActivity activity )
 	{			
@@ -72,9 +73,9 @@ public class StartScreen implements GameScreen
 		
 		soundManager = new SoundManager(activity);
 		
-		font = new Font( gl, activity.getAssets(), "font.ttf", 30, FontStyle.Plain );
+		font = new Font( gl, activity.getAssets(), "font.ttf", 16, FontStyle.Plain );
 		text = font.newText( gl );
-		text.setText( "Touch Screen to Start!" );
+		text.setText( pressText );
 	}	
 
 	@Override
@@ -118,7 +119,7 @@ public class StartScreen implements GameScreen
 		titleMesh.render(PrimitiveType.TriangleFan);
 		
 		gl.glLoadIdentity();
-		gl.glTranslatef( activity.getViewportWidth() / 2 - font.getStringWidth( "Touch Screen to Start!" ) / 2, activity.getViewportHeight() / 2, 0 );
+		gl.glTranslatef( activity.getViewportWidth() / 2 - font.getStringWidth( pressText ) / 2, activity.getViewportHeight() / 2, 0 );
 		text.render();
 		
 		gl.glDisable( GL10.GL_TEXTURE_2D );

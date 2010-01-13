@@ -75,6 +75,7 @@ public class Font
 		paint = new Paint( );
 		paint.setTypeface(font);
 		paint.setTextSize(size);
+		paint.setAntiAlias(false);
 		metrics = paint.getFontMetrics();		
 	}
 
@@ -85,6 +86,7 @@ public class Font
 		paint = new Paint( );
 		paint.setTypeface(font);
 		paint.setTextSize(size);		
+		paint.setAntiAlias(false);
 		metrics = paint.getFontMetrics();
 	}
 
@@ -109,15 +111,14 @@ public class Font
 	}
 	
 	public Object getGlyphBitmap(char character) {
-		Rect rect = new Rect();
-		paint.getTextBounds( "" + character, 0, 1, rect );
-		Bitmap bitmap = Bitmap.createBitmap( rect.width()==0?1:rect.width(), getLineHeight(), Bitmap.Config.ARGB_8888 );
+		Rect rect = new Rect();		
+		paint.getTextBounds( "" + character, 0, 1, rect );		
+		Bitmap bitmap = Bitmap.createBitmap( rect.width()==0?1:rect.width() + 5, getLineHeight(), Bitmap.Config.ARGB_8888 );
 		Canvas g = new Canvas( bitmap );		
 		paint.setColor(0x00000000);
 		paint.setStyle(Style.FILL);
-		g.drawRect( new Rect( 0, 0, rect.width(), getLineHeight()), paint);
-		paint.setColor(0xFFFFFFFF);
-		paint.setAntiAlias(false);
+		g.drawRect( new Rect( 0, 0, rect.width() + 5, getLineHeight()), paint);
+		paint.setColor(0xFFFFFFFF);		
 		g.drawText( "" + character, 0, -metrics.ascent, paint );		
 		return bitmap;
 	}
@@ -140,7 +141,7 @@ public class Font
 	Rect tmpRect = new Rect();
 	public void getGlyphBounds(char character, Rectangle rect) {		
 		paint.getTextBounds( "" + character, 0, 1, tmpRect );
-		rect.width = tmpRect.width();
+		rect.width = tmpRect.width() + 5;
 		rect.height = getLineHeight();
 	}	
 	
