@@ -75,6 +75,7 @@ public class GameOverScreen implements GameScreen
 	@Override
 	public void dispose() 
 	{	
+		backgroundMesh.dispose();
 		backgroundTexture.dispose();
 	}
 }

@@ -14,7 +14,7 @@ public class Simulation
 	public Ship ship;
 	public Shot shipShot = null;
 	public SimulationListener listener;
-	public float speedMultiplier = 1;
+	public float multiplier = 1;
 	public int score;
 	
 	public Simulation( )
@@ -65,7 +65,7 @@ public class Simulation
 		for( int i = 0; i < invaders.size(); i++ )
 		{
 			Invader invader = invaders.get(i);
-			invader.update( delta, speedMultiplier );
+			invader.update( delta, multiplier );
 		}
 	}
 	
@@ -83,7 +83,7 @@ public class Simulation
 		if( shipShot != null && shipShot.hasLeftField )
 			shipShot = null;
 		
-		if( Math.random() < 0.01 && invaders.size() > 0 )
+		if( Math.random() < 0.01 * multiplier && invaders.size() > 0 )
 		{
 			Shot shot = new Shot( true );
 			int index = (int)(Math.random() * (invaders.size() - 1));
@@ -145,27 +145,30 @@ public class Simulation
 	{	
 		removedShots.clear();
 		
-		for( int i = 0; i < shots.size(); i++ )
+		if( !ship.isExploding )
 		{
-			Shot shot = shots.get(i);
-			if( !shot.isInvaderShot )
-				continue;
-									
-			if( ship.position.distance(shot.position) < Ship.SHIP_RADIUS )
-			{					
-				removedShots.add( shot );
-				shot.hasLeftField = true;
-				ship.lives--;
-				ship.isExploding = true;
-				explosions.add( new Explosion( ship.position ) );
-				if( listener != null )
-					listener.explosion();
-				break;
-			}			
+			for( int i = 0; i < shots.size(); i++ )
+			{
+				Shot shot = shots.get(i);
+				if( !shot.isInvaderShot )
+					continue;											
+				
+				if( ship.position.distance(shot.position) < Ship.SHIP_RADIUS )
+				{					
+					removedShots.add( shot );
+					shot.hasLeftField = true;
+					ship.lives--;
+					ship.isExploding = true;
+					explosions.add( new Explosion( ship.position ) );
+					if( listener != null )
+						listener.explosion();
+					break;
+				}			
+			}
+			
+			for( int i = 0; i < removedShots.size(); i++ )		
+				shots.remove( removedShots.get(i) );
 		}
-		
-		for( int i = 0; i < removedShots.size(); i++ )		
-			shots.remove( removedShots.get(i) );	
 		
 		for( int i = 0; i < invaders.size(); i++ )
 		{
@@ -215,7 +218,10 @@ public class Simulation
 			blocks.clear();
 			shots.clear();
 			shipShot = null;
+			Vector shipPosition = ship.position;
 			populate();
+			ship.position.set(shipPosition);
+			multiplier += 0.1f;
 		}
 	}
 	
