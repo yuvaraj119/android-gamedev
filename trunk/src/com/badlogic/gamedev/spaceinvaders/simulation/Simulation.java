@@ -32,7 +32,7 @@ public class Simulation
 			for( int column = 0; column < 8; column++ )
 			{
 				Invader invader = new Invader( );
-				invader.position.set( -7 + column * 2f, 0, -PLAYFIELD_HEIGHT + row * 1.5f );
+				invader.position.set( -7 + column * 2f, 0, -PLAYFIELD_HEIGHT + row * 2f );
 				invaders.add( invader );
 			}
 		}

@@ -841,7 +841,7 @@ Die Klasse Text hat einige Methoden zum formatieren von Text die wir aber für un
     public void render( );
  } 
  
-Die erste Methode setzt den Text den wir zeichnen wollen. Intern werden dabei die entsprechenden Dreiecke erstellt die auf die Glyphcache Texture des Fonts von dem die Instanz Text kommt mappen. Die Methode render zeichnet den Text dann beginnend im Ursprung. Wir können später einfach Transformationen verwenden um den Text am Bildschirm zu verschieben. Wichtig ist auch dass wir beim Zeichnen eine orthographische Projektion verwenden die ein 2D Pixelkoordinatensystem verwendet. Das Sample TextSample zeigt wie einfach man Text mit den beiden Klassen zeichnen kann. Die Klasse Text kann auch mehrzeiligen Text rendern, diesen linksbündig, zentriert und rechtsbündig ausrichten und so weiter. Ein wenig damit herumspielen und man hat den Dreh herausen.
+Die erste Methode setzt den Text den wir zeichnen wollen. Intern werden dabei die entsprechenden Dreiecke erstellt die auf die Glyphcache Texture des Fonts von dem die Instanz Text kommt mappen. Die Methode render zeichnet den Text dann beginnend im Ursprung. Wir können später einfach Transformationen verwenden um den Text am Bildschirm zu verschieben. Wichtig ist auch dass wir beim Zeichnen eine orthographische Projektion verwenden die ein 2D Pixelkoordinatensystem verwendet. Die Klasse Text kann auch mehrzeiligen Text rendern, diesen linksbündig, zentriert und rechtsbündig ausrichten und so weiter. Ein wenig damit herumspielen und man hat den Dreh herausen.
 
 Damit auch nur wirklich die Pixel des Textes gerendert werden müssen wir auch Blending einschalten. Blending sorgt für Transparenz, jeder Pixel in einer Texture mit einem Alphawert kleiner als 1 wird durchsichtig. Das selbe gilt auch für Polygone deren Vertices Farbwerte mit Alphawerten kleiner als 1 haben. Blending schalten wir in OpenGL so ein:
 
@@ -851,6 +851,10 @@ Damit auch nur wirklich die Pixel des Textes gerendert werden müssen wir auch Bl
 Der erste Aufruf schaltet Blending ein, der zweite legt fest wie geblendet wird. Blending ist ein sehr komplexer Themenkreis deshalb werde ich Blendfunctions hier nicht besprechen. Die oben angegebene Blendfunction reicht für 90% aller Bedürfnisse aus. Sie besagt dass die Pixel des gerade gezeichneten Dreiecks mit den Pixeln im Framebuffer geblendet werden. Diese Blendfunction brauchen wir für unseren Text aber auch für das Anzeigen von anderen durchscheinenden Objekten wie z.B. Explosionen. Zum Ausschalten von Blending reicht ein Aufruf:
 
  gl.glDisable( GL10.GL_BLEND );
+
+Ein komplettes Sample zum Zeichnen von Text unter orthographischer Projektion findet ihr unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/TextSample.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/TextSample.java].
+
+[[Datei:textsample.png]]
 
 === Meshes laden ===
 Nachdem wir den Schritt in die dritte Dimension gewagt haben wäre es natürlich nicht schlecht eine Möglichkeit zu besitzen Meshes aus anderen Programmen zu laden. Eines der einfachsten Mesh Formate ist das [http://en.wikipedia.org/wiki/Obj Wavefront OBJ Format]. Ich habe mir die Freiheit genommen dafür einen einfachen Loader zu schreiben. Dieser kann mit Obj-Dateien umgehen die nur Dreiecke beinhalten. Baut ihr also eure eigenen Meshes in [http://www.wings3d.com/ Wings3D] oder [http://www.blender.org/ Blender] könnt ihr eure Meshes von dort aus in eine Obj-Datei exportieren und mit dem Loader laden. Der Loader besitzt nur eine statische Methode:
@@ -916,7 +920,45 @@ Das war ein erfrischend kurzes und einfaches Kapitel. Wir haben jetzt alle nötig
 
 Auf zu Space Invaders! 
 = Space Invaders =
+Wer Space Invaders nicht kennt soll sich zuerst einmal selbst Ohrfeigen. Neben Asteroids war Space Invaders das erste Shot em' up welches kommerziel äußerst erfolgreich war. Ausgezeichnet hat es die für damalige Verhältnisse große Menge an Objekten die gleichzeitig am Bildschirm dargestellt wurden. Das Spielprinzip ist dabei extrem simpel. Als Kommandeur eines kleinen Raumschiffes gilt es außerirdische Raumschiffe davon abzuhalten die Erde zu überrennen. Das schafft man indem man auf die Raumschiffe schießt die dann über den Jordan gehen. Einen Clone des originals kann man unter [http://www.spaceinvaders.de/ http://www.spaceinvaders.de/] Spielen, was ich hiermit jedem empfehle. Hier noch ein kleiner Screenshot:
 
+[[Datei:spaceinvaders.jpg]]
+
+Bevor wir uns an die Umsetzung des Spiels machen wollen wir seine einzelnen Teile analysieren damit wir eine genaue Vorstellung davon haben was wir alles überhaupt implementieren müssen.
+
+== Analyse des Originals ==
+Space Invaders hat ein auf den Bildschirm begrenztes Spielfeld. Es gibt 4 Arten von Invaders, die drei die oben im Screenshot sichtbar sind sowie ein Ufo welches von Zeit zu Zeit am oberen Bildschirmrand vorbeifliegt. Die Invader sind dabei in einem Netz in gleichen Abständen angeordnet. Jede Reihe besteht aus 11 Invadern, insgesamt gibt es 5 Reihen. Die Invader fahren von links nach rechts, danach eine Reihe weit nach unten, dann von rechts nach links. Das ganze wiederholt sich, die Invader kommen dabei immer näher an das Schiff heran. Gleichzeitig schießen die Invader zufallsbasiert hin und wieder. Am unteren Bildschirmrand befinden sich Schildblöcke welche Schüsse der Invader sowie des Schiffes abfangen. Die Blöcke werden durch Schüsse zerstört. Sie bilden eine Barriere zwischen dem Schiff und den Invadern die im Spielverlauf verschwindet. Sobald ein Invader auf Höhe der Blöcke ist verschwinden die bis dahin verbleibenden Blöcke komplett. Kollidiert ein Invader mit dem Schiff so verliert dieses eines von seinen insgesamt drei Leben. Das Schiff selbst kann immer nur einen Schuss abfeuern. Der nächste kann erst abgefeuert werden wenn der erste verschwunden ist. Dies geschieht wenn ein Invader getroffen wird oder der Schuss das Spielfeld verliert. Hat der Spieler alle Invader auf dem Bildschirm vernichtet kommt eine neue Welle an Invadern die schneller sind als die vorhergehenden. Die Blöcke werden restauriert und das ganze beginnt von vorne bis der Spieler alle Leben verloren hat. Der Abschuss eines Invaders bringt Punkte. Die Anzahl der Punkte ist dabei abhängig vom Typen des Invaders. Wird das Schiff von einem Schuss getroffen explodiert es, gleich wie ein getroffener Invader und kann für einen Sekunde nicht kontrolliert werden. Es respawned an der letzten Position. Die Kontrolle des Schiffes erlaubt das Steuern nach links und rechts sowie das Abfeuern eines Schusses so noch kein Schuss des Schiffes am Spielfeld ist. 
+
+Aus all dem gesagten lassen sich die Elemente für das Spiel relativ einfach ableiten:
+
+* Schiff
+* Invader
+* Explosion
+* Block
+* Schuss
+ 
+Wir werden uns als nächstes anschaun wie wir unseren Clone strukturieren. Die hier besprochenen Elemente werden in unseren Clone einfließen, ein paar Dinge werden wir adaptieren (müssen).
+
+== Das Spielfeld ==
+Unser Space Invader Clone soll im Grunde seines Herzens nach wie vor ein 2D Spiel bleiben. Wir werden aus diesem Grund das Spielfeld selbst in unserem dreidimensionalen Raum in die x-z-Ebene verlegen. Im original wurde das Spielfeld vom Bildschirm selbst begrenzt, da wir uns in einem dreidimenionalen Raum befinden machen wir diese Begrenzung künstlich. Die untere Grenze des Spielfeldes stellt die X-Achse dar (z=0). Auf dieser werden wir später das Schiff bewegen. Den oberen Rand des Spielfeldes setzen wir auf den z=-15. Links und rechts begrenzen wir das Spielfeld auf x=-13 bzw. x=13. Unser Spielfeld ist damit (13+13)*15 Einheiten groß und liegt in der x-z-Ebene, wobei all unsere z Werte <= 0 und >= -15 sein werden, unsere x Werte >= -13 und <= 13.
+
+[[Datei:playfield.png]]
+
+Man beachte wie gesagt, dass das Spielfeld im negativen z-Bereich liegt. Ein Feld hat dabei die Abmessungen 2x2. Die y-Achse spielt in diesem Spiel keine Rolle, alle y-Werte werden gleich 0 sein.
+
+Neben den Spielfeld Dimensionen müssen wir uns auch Gedanken über die Größen der einzelnen Spielelemente machen. Der Einfachheit halber werden wir deren Radius auf 0.5 und ihren durchmesser damit auf 1 festlegen. Dies entspricht weitgehenst dem Original in dem Invaders und Schiff ungefähr gleich groß sind. Auch die initiale Positionierung der Invader und Blöcke müssen wir uns überlegen. Im Original stehen die Invader am oberen Ende des Spielfeldes mittig. Zwischen den Invadern ist immer ein kleiner Freiraum. Wir werden das nachbilden. Aus Performancegründen müssen wir die Anzahl der Invader etwas herunterschrauben. Anstatt 5 Reihen zu je 11 Invadern werden wir 4 Reihen zu je 8 Invadern haben. Die Invader haben einen Durchmesser von 1, also werden wir sie im Abstand von 2 Einheiten neben und untereinander positionieren. Die Invader der obersten Reihe haben also z-Werte von -15, die der nächsten Reihe -13 usw. Der linkeste Invader einer Reihe sitzt auf x=-7, der nächste auf -5 usw. Das ganze sieht dann initial so aus:
+
+[[Datei:invaderplacement.png]]     
+
+Auch bei den Blöcken werden wir ein wenig vom original Abweichen. In diesem Bestand ein Block aus mehreren Subblöcken. Diesen Umstand werden wir übernehmen. Aus Performancegründen werden wir die Subblöcke aber vereinfachen. Ein Block bildet aus 5 Subblöcken eine U-Form. Jeder Subblock hat dabei die größe 1x1. Anstatt 4 Blöcken wie im Original werden wir nur 3 Blöcke bauen. Diese verteilen wir gleichmäßig über das Spielfeld. Das Zentrum des ersten Blocks befindet sich dabei an Position x=-10,z=-2.5, der nächste an x=0,z=-2.5 und der dritte an x=10,z=-2.5. Die jeweils 5 Subblöcke bauen wir um die Zentren. Das ganze sieht dann wie folgt aus:
+
+[[Datei:blockplacement.png]]
+
+Das Schiff wird sich an der unteren gelben Linie des Spielfelds nach links und rechts bewegen können, die Invader werden von oben nach unten fliegen und dabei immer an der linken bzw. rechten Spielfeldlinie in die andere Richtung steuern beginnen. Damit haben wir unser Spielfeld definiert und können uns jetzt der Simulation des ganzen widmen.
+
+== Die Simulation ==
+
+ 
 [[Kategorie:Entwicklung]]
 = Einleitung =
 
