@@ -820,6 +820,38 @@ In Spielen geht man in der Regel so vor: jedes Objekt in der Spielwelt hat eine 
 
 Damit haben wir den letzten großen Brocken was OpenGL betrifft abgearbeitet. Wie für Licht gilt: experimentieren, experimentieren, experimentieren. Um Transformationen zu verstehen muß man sie in Aktion sehen. Als kleine Aufgabe könnt ihr ja eines der Samples hernehmen und ein um die y-Achse rotierendes Dreieck produzieren. Dazu müsst ihr nur in jedem Frame ''glRotatef'' mit dem aktuellen Winkel aufrufen. Den Winkel muss man natürlich in jedem Frame erhöhen und wenn er größer als 360 ist wieder auf 0 zurücksetzen.
 
+=== Text zeichnen ===
+Für die Anzeige von Scores und Ähnlichem brauchen wir eine Möglichkeit Text zu zeichnen. Dies ist in OpenGL von Haus aus nicht integriert, schließlich kann OpenGL ohne unser zutun ja wirklich nur Dreiecke zeichnen. Die herkömmliche herangehensweise für die Implementierung von Text in OpenGL funktioniert aber relativ einfach. Das Betriebssystem bietet in der Regel Möglichkeiten um an die Bitmaps für einzelne Characters, sprich Zeichen, einer bestimmten Schriftart zu kommen. Alles was wir machen müssen ist diese Bitmaps in eine Texture zu zeichnen und uns zu merken wo in der Texture wir die Bitmap für einen Character finden. Wollen wir Text zeichnen müssen wir lediglich ein Mesh erstellen welches für jeden Character im String zwei Dreiecke besitzt die ein Viereck bilden welches gleich groß ist wie die Bitmap für den Character. Weiters mappen wir diese beiden Dreiecke so mit der Character Texture das diese genau den Ausschnitt der Texture verwenden wo die Bitmap des Characters hingezeichnet wurde. Übrigens nennt man die Bitmap für so einen Character auch Glyph. Die Texture ist demzurfolge ein sogenannter GlyphCache. Um diese ganze mühselige Arbeit ein wenig zu vereinfachen habe ich eine Klasse Font sowie eine Klasse Text geschrieben die uns diese ganze Arbeit abnimmt. Die Klasse Font hat dabei nur ein paar relevante Funktionen:
+
+ public class Font
+ {
+    public Font(GL10 gl, String fontName, int size, FontStyle style)
+    public Font(GL10 gl, AssetManager assets, String file, int size, FontStyle style)
+    public Text newText( GL10 gl )
+    public void dispose( )
+ }
+  
+Die ersten beiden Methoden sind die Konstruktoren der Klasse. Der erste Konstruktor instanziert einen Font über die Angabe seines Namens. Damit kann man Fonts die im System installiert sind instanzieren. Der dritte Parameter gibt die Größe des Fonts in Punkten an, der vierte den Stil des Fonts, also z.B. italic oder bold usw. Der zweite Konstruktor erlaubt das Laden eines TrueType Fonts aus einem Asset file. Dazu geben wir den AssetManager an den wir von unserer Activity erhalten sowie den Filenamen des Font Assets. Die restlichen Parameter entsprechen dem ersten Konstruktor. Die dritte Methode instanziert eine Instanz der Klasse Text. Diese speichert die Dreiecke auf den von uns gewünschten Text. Die letzte Methode gibt den Font und seine Resourcen (Glyphcache Texture) wieder frei. 
+
+Die Klasse Text hat einige Methoden zum formatieren von Text die wir aber für unseren Space Invaders Clone nicht brauchen. Hier die relevantesten Methoden
+
+ public class Text
+ {
+    public void setText( String text );
+    public void render( );
+ } 
+ 
+Die erste Methode setzt den Text den wir zeichnen wollen. Intern werden dabei die entsprechenden Dreiecke erstellt die auf die Glyphcache Texture des Fonts von dem die Instanz Text kommt mappen. Die Methode render zeichnet den Text dann beginnend im Ursprung. Wir können später einfach Transformationen verwenden um den Text am Bildschirm zu verschieben. Wichtig ist auch dass wir beim Zeichnen eine orthographische Projektion verwenden die ein 2D Pixelkoordinatensystem verwendet. Das Sample TextSample zeigt wie einfach man Text mit den beiden Klassen zeichnen kann. Die Klasse Text kann auch mehrzeiligen Text rendern, diesen linksbündig, zentriert und rechtsbündig ausrichten und so weiter. Ein wenig damit herumspielen und man hat den Dreh herausen.
+
+Damit auch nur wirklich die Pixel des Textes gerendert werden müssen wir auch Blending einschalten. Blending sorgt für Transparenz, jeder Pixel in einer Texture mit einem Alphawert kleiner als 1 wird durchsichtig. Das selbe gilt auch für Polygone deren Vertices Farbwerte mit Alphawerten kleiner als 1 haben. Blending schalten wir in OpenGL so ein:
+
+ gl.glEnable( GL10.GL_BLEND );
+ gl.glBlendFunc( GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA );
+ 
+Der erste Aufruf schaltet Blending ein, der zweite legt fest wie geblendet wird. Blending ist ein sehr komplexer Themenkreis deshalb werde ich Blendfunctions hier nicht besprechen. Die oben angegebene Blendfunction reicht für 90% aller Bedürfnisse aus. Sie besagt dass die Pixel des gerade gezeichneten Dreiecks mit den Pixeln im Framebuffer geblendet werden. Diese Blendfunction brauchen wir für unseren Text aber auch für das Anzeigen von anderen durchscheinenden Objekten wie z.B. Explosionen. Zum Ausschalten von Blending reicht ein Aufruf:
+
+ gl.glDisable( GL10.GL_BLEND );
+
 === Meshes laden ===
 Nachdem wir den Schritt in die dritte Dimension gewagt haben wäre es natürlich nicht schlecht eine Möglichkeit zu besitzen Meshes aus anderen Programmen zu laden. Eines der einfachsten Mesh Formate ist das [http://en.wikipedia.org/wiki/Obj Wavefront OBJ Format]. Ich habe mir die Freiheit genommen dafür einen einfachen Loader zu schreiben. Dieser kann mit Obj-Dateien umgehen die nur Dreiecke beinhalten. Baut ihr also eure eigenen Meshes in [http://www.wings3d.com/ Wings3D] oder [http://www.blender.org/ Blender] könnt ihr eure Meshes von dort aus in eine Obj-Datei exportieren und mit dem Loader laden. Der Loader besitzt nur eine statische Methode:
 

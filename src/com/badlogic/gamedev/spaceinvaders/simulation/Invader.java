@@ -1,8 +1,10 @@
 package com.badlogic.gamedev.spaceinvaders.simulation;
 
 public class Invader 
-{
-	public final static float INVADER_VELOCITY = 1;
+{	
+	public static float INVADER_RADIUS = 0.75f;
+	public static float INVADER_VELOCITY = 1;
+	public static int INVADER_POINTS = 40;
 	public final static int STATE_MOVE_LEFT = 0;
 	public final static int STATE_MOVE_DOWN = 1;
 	public final static int STATE_MOVE_RIGHT = 2;
@@ -12,12 +14,12 @@ public class Invader
 	public boolean wasLastStateLeft = true;
 	public float movedDistance = 6;	
 		
-	public void update(float delta) 
+	public void update(float delta, float speedMultiplier) 
 	{			
-		movedDistance += delta * INVADER_VELOCITY;
+		movedDistance += delta * INVADER_VELOCITY * speedMultiplier;
 		if( state == STATE_MOVE_LEFT )
 		{
-			position.x -= delta * INVADER_VELOCITY;
+			position.x -= delta * INVADER_VELOCITY * speedMultiplier;
 			if( movedDistance > 12 )
 			{
 				state = STATE_MOVE_DOWN;
@@ -27,7 +29,7 @@ public class Invader
 		}
 		if( state == STATE_MOVE_RIGHT )
 		{
-			position.x += delta * INVADER_VELOCITY;
+			position.x += delta * INVADER_VELOCITY * speedMultiplier;
 			if( movedDistance > 12 )
 			{
 				state = STATE_MOVE_DOWN;
@@ -37,7 +39,7 @@ public class Invader
 		}
 		if( state == STATE_MOVE_DOWN )
 		{
-			position.z += delta * INVADER_VELOCITY;
+			position.z += delta * INVADER_VELOCITY * speedMultiplier;
 			if( movedDistance > 1 )
 			{
 				if( wasLastStateLeft )

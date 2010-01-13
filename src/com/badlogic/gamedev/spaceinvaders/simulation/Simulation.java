@@ -4,6 +4,9 @@ import java.util.ArrayList;
 
 public class Simulation 
 {	
+	public final static float PLAYFIELD_HALF_WIDTH = 13;
+	public final static float PLAYFIELD_HEIGHT = 15;
+	
 	public ArrayList<Invader> invaders = new ArrayList<Invader>();
 	public ArrayList<Block> blocks = new ArrayList<Block>( );
 	public ArrayList<Shot> shots = new ArrayList<Shot>( );
@@ -11,6 +14,7 @@ public class Simulation
 	public Ship ship;
 	public Shot shipShot = null;
 	public SimulationListener listener;
+	public float speedMultiplier = 1;
 	public int score;
 	
 	public Simulation( )
@@ -28,7 +32,7 @@ public class Simulation
 			for( int column = 0; column < 8; column++ )
 			{
 				Invader invader = new Invader( );
-				invader.position.set( -7 + column * 2f, 0, -15 + row * 1.5f );
+				invader.position.set( -7 + column * 2f, 0, -PLAYFIELD_HEIGHT + row * 1.5f );
 				invaders.add( invader );
 			}
 		}
@@ -53,6 +57,7 @@ public class Simulation
 		checkShipCollision( );
 		checkInvaderCollision( );
 		checkBlockCollision( );
+		checkNextLevel( );		
 	}
 	
 	private void updateInvaders( float delta )
@@ -60,7 +65,7 @@ public class Simulation
 		for( int i = 0; i < invaders.size(); i++ )
 		{
 			Invader invader = invaders.get(i);
-			invader.update( delta );
+			invader.update( delta, speedMultiplier );
 		}
 	}
 	
@@ -118,7 +123,7 @@ public class Simulation
 			for( int j = 0; j < invaders.size(); j++ )
 			{
 				Invader invader = invaders.get(j);
-				if( invader.position.distance(shot.position) < 0.75f )
+				if( invader.position.distance(shot.position) < Invader.INVADER_RADIUS )
 				{					
 					removedShots.add( shot );
 					shot.hasLeftField = true;
@@ -126,7 +131,7 @@ public class Simulation
 					explosions.add( new Explosion( invader.position ) );
 					if( listener != null )
 						listener.explosion();
-					score += 40;
+					score += Invader.INVADER_POINTS;
 					break;
 				}
 			}
@@ -146,7 +151,7 @@ public class Simulation
 			if( !shot.isInvaderShot )
 				continue;
 									
-			if( ship.position.distance(shot.position) < 1 )
+			if( ship.position.distance(shot.position) < Ship.SHIP_RADIUS )
 			{					
 				removedShots.add( shot );
 				shot.hasLeftField = true;
@@ -165,7 +170,7 @@ public class Simulation
 		for( int i = 0; i < invaders.size(); i++ )
 		{
 			Invader invader = invaders.get(i);
-			if( invader.position.distance(ship.position) < 1 )
+			if( invader.position.distance(ship.position) < Ship.SHIP_RADIUS )
 			{
 				ship.lives--;
 				invaders.remove(invader);
@@ -189,7 +194,7 @@ public class Simulation
 			for( int j = 0; j < blocks.size(); j++ )
 			{
 				Block block = blocks.get(j);
-				if( block.position.distance(shot.position) < 0.5f )
+				if( block.position.distance(shot.position) < Block.BLOCK_RADIUS )
 				{					
 					removedShots.add( shot );
 					shot.hasLeftField = true;
@@ -203,14 +208,25 @@ public class Simulation
 			shots.remove( removedShots.get(i) );
 	}
 	
+	private void checkNextLevel( )
+	{
+		if( invaders.size() == 0 && ship.lives > 0 )
+		{
+			blocks.clear();
+			shots.clear();
+			shipShot = null;
+			populate();
+		}
+	}
+	
 	public void moveShipLeft(float delta, float scale) 
 	{	
 		if( ship.isExploding )
 			return;
 		
 		ship.position.x -= delta * Ship.SHIP_VELOCITY * scale;
-		if( ship.position.x < -13 )
-			ship.position.x = -13;
+		if( ship.position.x < -PLAYFIELD_HALF_WIDTH )
+			ship.position.x = -PLAYFIELD_HALF_WIDTH;
 	}
 
 	public void moveShipRight(float delta, float scale ) 
@@ -219,8 +235,8 @@ public class Simulation
 			return;
 		
 		ship.position.x += delta * Ship.SHIP_VELOCITY * scale;
-		if( ship.position.x > 13 )
-			ship.position.x = 13;
+		if( ship.position.x > PLAYFIELD_HALF_WIDTH )
+			ship.position.x = PLAYFIELD_HALF_WIDTH;
 	}
 
 	public void shot() 
