@@ -42,6 +42,9 @@ public class Renderer
 	float invaderAngle = 0;
 	Font font;
 	Text text;
+	int lastScore = 0;
+	int lastLives = 0;
+	int lastWave = 0;
 	
 	public Renderer( GL10 gl, GameActivity activity )
 	{
@@ -154,7 +157,13 @@ public class Renderer
 		gl.glEnable( GL10.GL_BLEND );
 		gl.glBlendFunc( GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA );
 		gl.glTranslatef( 0, activity.getViewportHeight(), 0 );
-//		text.setText( "lives: " + simulation.ship.lives + " score: " + simulation.score );
+		if( simulation.ship.lives != lastLives || simulation.score != lastScore || simulation.wave != lastWave )
+		{
+			text.setText( "lives: " + simulation.ship.lives + " wave: " + simulation.wave + " score: " + simulation.score );
+			lastLives = simulation.ship.lives;
+			lastScore = simulation.score;
+			lastWave = simulation.wave;
+		}
 		text.render();
 		gl.glDisable( GL10.GL_BLEND);
 		

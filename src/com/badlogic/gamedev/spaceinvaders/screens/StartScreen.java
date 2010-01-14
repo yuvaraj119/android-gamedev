@@ -50,10 +50,10 @@ public class StartScreen implements GameScreen
 		titleMesh.vertex(-256, 256, 0);
 		titleMesh.texCoord(1, 0);
 		titleMesh.vertex(256, 256, 0);
-		titleMesh.texCoord(1, 1);
-		titleMesh.vertex(256, -256, 0);
-		titleMesh.texCoord(0, 1);
-		titleMesh.vertex(-256, -256, 0);
+		titleMesh.texCoord(1, 0.5f);
+		titleMesh.vertex(256, 0, 0);
+		titleMesh.texCoord(0, 0.5f);
+		titleMesh.vertex(-256, 0, 0);
 		
 		try
 		{
@@ -73,7 +73,7 @@ public class StartScreen implements GameScreen
 		
 		soundManager = new SoundManager(activity);
 		
-		font = new Font( gl, activity.getAssets(), "font.ttf", 16, FontStyle.Plain );
+		font = new Font( gl, activity.getAssets(), "font.ttf", activity.getViewportWidth() > 480?32:16, FontStyle.Plain );
 		text = font.newText( gl );
 		text.setText( pressText );
 	}	
