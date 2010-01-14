@@ -3,9 +3,11 @@ package com.badlogic.gamedev.spaceinvaders.simulation;
 import java.util.ArrayList;
 
 public class Simulation 
-{	
-	public final static float PLAYFIELD_HALF_WIDTH = 13;
-	public final static float PLAYFIELD_HEIGHT = 15;
+{		
+	public final static float PLAYFIELD_MIN_X = -14;
+	public final static float PLAYFIELD_MAX_X = 14;
+	public final static float PLAYFIELD_MIN_Z = -15;
+	public final static float PLAYFIELD_MAX_Z = 2;
 	
 	public ArrayList<Invader> invaders = new ArrayList<Invader>();
 	public ArrayList<Block> blocks = new ArrayList<Block>( );
@@ -16,7 +18,10 @@ public class Simulation
 	public SimulationListener listener;
 	public float multiplier = 1;
 	public int score;
-	public int wave = 1;	
+	public int wave = 1;
+	
+	private ArrayList<Shot> removedShots = new ArrayList<Shot>();
+	private ArrayList<Explosion> removedExplosions = new ArrayList<Explosion>( );
 	
 	public Simulation( )
 	{
@@ -25,15 +30,13 @@ public class Simulation
 	
 	private void populate( )
 	{
-		ship = new Ship();
-		ship.position.set(0, 0, 0);		
+		ship = new Ship();		
 		
 		for( int row = 0; row < 4; row++ )
 		{
 			for( int column = 0; column < 8; column++ )
 			{
-				Invader invader = new Invader( );
-				invader.position.set( -7 + column * 2f, 0, -PLAYFIELD_HEIGHT + row * 2f );
+				Invader invader = new Invader( new Vector( -PLAYFIELD_MAX_X / 2 + column * 2f, 0, PLAYFIELD_MIN_Z + row * 2f ));				
 				invaders.add( invader );
 			}
 		}
@@ -47,8 +50,7 @@ public class Simulation
 			blocks.add( new Block( new Vector( -10 + shield * 10 + 1, 0, -2 ) ) );
 		}
 	}
-
-	ArrayList<Shot> removedShots = new ArrayList<Shot>();
+	
 	public void update( float delta )
 	{			
 		ship.update( delta );
@@ -81,21 +83,22 @@ public class Simulation
 				removedShots.add(shot);
 		}
 		
+		for( int i = 0; i < removedShots.size(); i++ )		
+			shots.remove( removedShots.get(i) );
+		
 		if( shipShot != null && shipShot.hasLeftField )
 			shipShot = null;
 		
 		if( Math.random() < 0.01 * multiplier && invaders.size() > 0 )
-		{
-			Shot shot = new Shot( true );
+		{			
 			int index = (int)(Math.random() * (invaders.size() - 1));
-			shot.position.set( invaders.get(index).position );
+			Shot shot = new Shot( invaders.get(index).position, true );			
 			shots.add( shot );
 			if( listener != null )
 				listener.shot();
-		}
+		}			
 	}
 	
-	ArrayList<Explosion> removedExplosions = new ArrayList<Explosion>( );	
 	public void updateExplosions( float delta )
 	{
 		removedExplosions.clear();
@@ -112,34 +115,25 @@ public class Simulation
 	}
 	
 	private void checkInvaderCollision() 
-	{	
-		removedShots.clear();
-		
-		for( int i = 0; i < shots.size(); i++ )
-		{
-			Shot shot = shots.get(i);
-			if( shot.isInvaderShot )
-				continue;					
+	{			
+		if( shipShot == null )
+			return;							
 			
-			for( int j = 0; j < invaders.size(); j++ )
-			{
-				Invader invader = invaders.get(j);
-				if( invader.position.distance(shot.position) < Invader.INVADER_RADIUS )
-				{					
-					removedShots.add( shot );
-					shot.hasLeftField = true;
-					invaders.remove(invader);
-					explosions.add( new Explosion( invader.position ) );
-					if( listener != null )
-						listener.explosion();
-					score += Invader.INVADER_POINTS;
-					break;
-				}
+		for( int j = 0; j < invaders.size(); j++ )
+		{
+			Invader invader = invaders.get(j);
+			if( invader.position.distance(shipShot.position) < Invader.INVADER_RADIUS )
+			{									
+				shots.remove( shipShot );
+				shipShot = null;
+				invaders.remove(invader);
+				explosions.add( new Explosion( invader.position ) );
+				if( listener != null )
+					listener.explosion();
+				score += Invader.INVADER_POINTS;
+				break;
 			}
-		}
-		
-		for( int i = 0; i < removedShots.size(); i++ )		
-			shots.remove( removedShots.get(i) );		
+		}			
 	}
 
 	private void checkShipCollision() 
@@ -179,6 +173,7 @@ public class Simulation
 				ship.lives--;
 				invaders.remove(invader);
 				ship.isExploding = true;
+				explosions.add( new Explosion( invader.position ) );
 				explosions.add( new Explosion( ship.position ) );
 				if( listener != null )
 					listener.explosion();
@@ -220,8 +215,10 @@ public class Simulation
 			shots.clear();
 			shipShot = null;
 			Vector shipPosition = ship.position;
+			int lives = ship.lives;
 			populate();
 			ship.position.set(shipPosition);
+			ship.lives = lives;
 			multiplier += 0.1f;
 			wave++;
 		}
@@ -233,8 +230,8 @@ public class Simulation
 			return;
 		
 		ship.position.x -= delta * Ship.SHIP_VELOCITY * scale;
-		if( ship.position.x < -PLAYFIELD_HALF_WIDTH )
-			ship.position.x = -PLAYFIELD_HALF_WIDTH;
+		if( ship.position.x < PLAYFIELD_MIN_X )
+			ship.position.x = PLAYFIELD_MIN_X;
 	}
 
 	public void moveShipRight(float delta, float scale ) 
@@ -243,18 +240,18 @@ public class Simulation
 			return;
 		
 		ship.position.x += delta * Ship.SHIP_VELOCITY * scale;
-		if( ship.position.x > PLAYFIELD_HALF_WIDTH )
-			ship.position.x = PLAYFIELD_HALF_WIDTH;
+		if( ship.position.x > PLAYFIELD_MAX_X )
+			ship.position.x = PLAYFIELD_MAX_X;
 	}
 
 	public void shot() 
 	{	
 		if( shipShot == null && !ship.isExploding )
 		{
-			shipShot = new Shot( false );
-			shipShot.position.set( ship.position );
+			shipShot = new Shot( ship.position, false );			
 			shots.add( shipShot );
-			listener.shot();
+			if( listener != null )
+				listener.shot();
 		}
 	}		
 }

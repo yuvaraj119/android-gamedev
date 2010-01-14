@@ -2,7 +2,7 @@ package com.badlogic.gamedev.spaceinvaders.simulation;
 
 public class Explosion 
 {
-	public static float EXPLOSION_LIVE_TIME = 1;
+	public static final float EXPLOSION_LIVE_TIME = 1;
 	public float aliveTime = 0;
 	public final Vector position = new Vector( );
 	
@@ -14,6 +14,5 @@ public class Explosion
 	public void update( float delta )
 	{
 		aliveTime += delta;
-	}
-		
+	}	
 }
