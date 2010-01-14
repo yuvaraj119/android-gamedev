@@ -1,6 +1,8 @@
 package com.badlogic.gamedev.spaceinvaders.simulation;
 
-public class Block 
+import java.io.Serializable;
+
+public class Block implements Serializable
 {	
 	public final static float BLOCK_RADIUS = 0.5f;
 	

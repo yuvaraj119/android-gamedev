@@ -1,8 +1,10 @@
 package com.badlogic.gamedev.spaceinvaders.simulation;
 
+import java.io.Serializable;
+
 import android.util.FloatMath;
 
-public class Vector 
+public class Vector implements Serializable
 {
 	public float x, y, z;
 	
@@ -15,7 +17,7 @@ public class Vector
 	
 	public Vector( )
 	{
-		x = y = z = 0;
+		x = y = z = 0; 
 	}
 	
 	public Vector( Vector v )

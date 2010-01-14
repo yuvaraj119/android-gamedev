@@ -1,6 +1,8 @@
 package com.badlogic.gamedev.spaceinvaders.simulation;
 
-public class Ship 
+import java.io.Serializable;
+
+public class Ship implements Serializable
 {
 	public static final float SHIP_RADIUS = 1;
 	public static final float SHIP_VELOCITY = 20;

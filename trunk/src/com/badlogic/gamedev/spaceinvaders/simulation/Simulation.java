@@ -1,8 +1,9 @@
 package com.badlogic.gamedev.spaceinvaders.simulation;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Simulation 
+public class Simulation implements Serializable
 {		
 	public final static float PLAYFIELD_MIN_X = -14;
 	public final static float PLAYFIELD_MAX_X = 14;
@@ -15,7 +16,7 @@ public class Simulation
 	public ArrayList<Explosion> explosions = new ArrayList<Explosion>( );
 	public Ship ship;
 	public Shot shipShot = null;
-	public SimulationListener listener;
+	public transient SimulationListener listener;
 	public float multiplier = 1;
 	public int score;
 	public int wave = 1;

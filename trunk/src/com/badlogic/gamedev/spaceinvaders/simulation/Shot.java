@@ -1,6 +1,8 @@
 package com.badlogic.gamedev.spaceinvaders.simulation;
 
-public class Shot 
+import java.io.Serializable;
+
+public class Shot implements Serializable 
 {
 	public static float SHOT_VELOCITY = 10;
 	public final Vector position = new Vector();
