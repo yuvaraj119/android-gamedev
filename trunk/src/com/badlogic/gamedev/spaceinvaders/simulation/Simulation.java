@@ -16,6 +16,7 @@ public class Simulation
 	public SimulationListener listener;
 	public float multiplier = 1;
 	public int score;
+	public int wave = 1;	
 	
 	public Simulation( )
 	{
@@ -222,6 +223,7 @@ public class Simulation
 			populate();
 			ship.position.set(shipPosition);
 			multiplier += 0.1f;
+			wave++;
 		}
 	}
 	
