@@ -29,6 +29,14 @@ public class GameLoop implements GameScreen, SimulationListener
 		soundManager = new SoundManager( activity );
 	}
 	
+	public GameLoop(GL10 gl, GameActivity activity, Simulation simulation) 
+	{
+		this.simulation = simulation;
+		this.simulation.listener = this;
+		renderer = new Renderer( gl, activity );
+		soundManager = new SoundManager( activity );
+	}
+
 	@Override
 	public void render(GL10 gl, GameActivity activity) 
 	{	

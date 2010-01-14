@@ -1,6 +1,8 @@
 package com.badlogic.gamedev.spaceinvaders.simulation;
 
-public class Invader 
+import java.io.Serializable;
+
+public class Invader implements Serializable
 {	
 	public static float INVADER_RADIUS = 0.75f;
 	public static float INVADER_VELOCITY = 1;

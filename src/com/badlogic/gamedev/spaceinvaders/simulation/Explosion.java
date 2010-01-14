@@ -1,6 +1,8 @@
 package com.badlogic.gamedev.spaceinvaders.simulation;
 
-public class Explosion 
+import java.io.Serializable;
+
+public class Explosion implements Serializable
 {
 	public static final float EXPLOSION_LIVE_TIME = 1;
 	public float aliveTime = 0;

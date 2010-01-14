@@ -10,12 +10,14 @@ import android.view.WindowManager;
 import com.badlogic.gamedev.spaceinvaders.screens.GameLoop;
 import com.badlogic.gamedev.spaceinvaders.screens.GameOverScreen;
 import com.badlogic.gamedev.spaceinvaders.screens.StartScreen;
+import com.badlogic.gamedev.spaceinvaders.simulation.Simulation;
 import com.badlogic.gamedev.tools.GameActivity;
 import com.badlogic.gamedev.tools.GameListener;
 
 public class SpaceInvaders extends GameActivity implements GameListener
 {
 	GameScreen module;
+	Simulation simulation = null;
 	
 	public void onCreate( Bundle bundle )
 	{
@@ -24,8 +26,19 @@ public class SpaceInvaders extends GameActivity implements GameListener
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN );
 		
 		super.onCreate( bundle );
-		setGameListener( this );
+		setGameListener( this );		
+		
+//		if( bundle != null && bundle.containsKey( "simulation" ) )
+//			simulation = (Simulation)bundle.getSerializable( "simulation" );
 	}
+	
+//	@Override
+//	public void onSaveInstanceState( Bundle outState )
+//	{
+//		super.onSaveInstanceState( outState );
+////		if( module instanceof GameLoop )
+////			outState.putSerializable( "simulation", ((GameLoop)module).simulation );
+//	}
 
 	@Override
 	public void onPause( )
@@ -43,7 +56,14 @@ public class SpaceInvaders extends GameActivity implements GameListener
 	@Override
 	public void setup(GameActivity activity, GL10 gl) 
 	{	
-		module = new StartScreen(gl, activity);
+//		if( simulation != null )
+//		{
+//			module = new GameLoop( gl, activity ); //, simulation );
+//			simulation = null;
+//			Log.d( "Space Invaders", "resuming previous game" );
+//		}
+//		else
+			module = new StartScreen(gl, activity);
 	}
 
 	long start = System.nanoTime();
