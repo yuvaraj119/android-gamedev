@@ -489,6 +489,7 @@ Für euer Seelenheil hab ich zwei Klassen gestrickt die ihr sehr einfach verwende
     public void color( float r, float g, float b, float a )	
     public void normal( float x, float y, float z )	
     public void texCoord( float s, float t )
+    public void dispose( );
 }
 
 Ihr könnt sie über den Konstruktor einfach instanzieren. Den ersten Parameter erhaltet ihr in der ''GameListener.setup()'' bzw. ''GameListener.render()'' Methode. Der zweite Parameter gibt an wieviele Vertices das Mesh insgesamt haben soll. Der dritte Parameter besagt ob das Mesh auch Colors definiert, der vierte ob Texture-Koordinaten dabei sein sollen und der vierte ob [http://www.flipcode.com/archives/Vertex_Normals.shtml Normalen] vorhanden sind. Moment, Normalen? Die erklären wir an dieser Stelle nicht. Sie werden für die Beleuchtung von Meshes durch Lichtquellen benötigt. Damit wir in späteren Teilen einmal darauf eingehen können habe ich sie gleich in den Source miteingebaut.
@@ -510,6 +511,8 @@ Als Richtlinie gilt hier: zuerst immer alle Komponenten ungleich der Position fü
 PrimitiveType ist wie oben zu sehen ein enum welches mehrere Arten von Primitiven definiert. Wir haben bis jetzt nur die Dreiecke besprochen, es sind aber auch andere Primitive möglich. Ihr könnt diese im Netz nachschlagen (z.B. Triangle Strip) um einen Einblick zu erlangen. 
 
 Ein schönes Feature der Klasse ist das ihr das Mesh nachdem ihr es einmal gerendert habt wieder neu definieren könnt. Ihr verwendet dazu einfach wieder die Methoden ''color'', ''texCoord'' usw. wie vorher gezeigt. Wichtig dabei ist aber, dass das Mesh mindestens einmal zuvor gerendert wurde da ansonsten ein interner Zeiger noch zurückgesetzt wird. Ihr könnt euch den Code zur Mesh Klasse unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/tools/Mesh.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/tools/Mesh.java] ansehen. Wirklich was neues mache ich dort nicht. Die Grundlagen dafür habt ihr bereits oben gesehen. Den Source Code zu einem Beispiel Programm welches die Mesh Klasse verwendet findet ihr unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/MeshSample.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/MeshSample.java]. Durch die Verwendung der Klasse wird der Code um einiges schlanker und verständlicher.
+
+Als kleinen Bonus hab ich die Klasse auch noch etwas aufgedrösselt und Vertex Buffer Objects implementiert. Diese werden verwendet wenn das Device diese unterstützt. Sie geben ein wenig mehr Performance. Auch Devices mit Android Version <= 1.5 sind sie auch die einzige Lösung das permanente Garbage Collecten welches mit Vertex Arrays auftritt zu beenden. Leider ist da den Entwicklern von Android ein kleiner Bug unterlaufen der direct Buffer leaken lässt. Das ganze erfolgt transparent ihr müsst euch also nicht darum kümmern. Seit ihr mit der Verwendung eines Mesh fertig müsst ihr dieses per Aufruf der Methode ''Mesh.dispose()'' freigeben!
 
 Die Texture Klasse ist noch einfacher:
 
@@ -957,8 +960,589 @@ Auch bei den Blöcken werden wir ein wenig vom original Abweichen. In diesem Best
 Das Schiff wird sich an der unteren gelben Linie des Spielfelds nach links und rechts bewegen können, die Invader werden von oben nach unten fliegen und dabei immer an der linken bzw. rechten Spielfeldlinie in die andere Richtung steuern beginnen. Damit haben wir unser Spielfeld definiert und können uns jetzt der Simulation des ganzen widmen.
 
 == Die Simulation ==
+Kernstück jedes Spiels ist die Simulation der Spielewelt selbst. Diese sollte so unabhängig wie möglich von allen anderen Modulen sein, wie zum Beispiel dem Grafikmodul. Ziel ist es die oben genannten Aspekte des Spiels zu simulieren, d.h. die Invader, das Schiff, die Blöcke, Schüsse und Explosionen. Wir werden jedes dieser Elemente in einer eigenen Klasse abbilden. Als große Klammer bauen wir auch noch eine Simulationsklasse die all die Elemente beherbergt und für den eigentlich Spielablauf sorgt, d.h. dafür sorgt dass sich die Invader bewegen, Schüsse ihr Ziel treffen und so weiter. Die Simulation wird dabei im im letzten Kapitel beschriebenen Koordinaten-System ablaufen, also in der x-z-Ebene. Wir werden hier jede Klasse der Simulation im Detail besprechen. Die Simulation werden wir später dann in unserem Main Loop verwenden und ausführen. Hier ergibt sich ein Henne-Ei Problem: was beschreib ich zuerst. Meiner Meinung nach ist die Struktur des Programmes zu diesem Zeitpunkt unerheblich, das verstehen der Simulation ist erstmal der wichtigste Aspekt. Darum stürzen wir uns gleich einmal auf die Klassen der Simulation. 
 
+'''Randnotizen''': Wir brauchen eine Klasse die es uns erlaubt vektoriel zu arbeiten. Zu diesem Zweck hab ich eine äußerst simple Vektor Klasse implementiert. Diese besitzt Methoden die sich mit den mathematischen Ausdrücken im Mathematik Kapitel decken. Die Klasse könnt ihr euch vorab unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/spaceinvaders/simulation/Vector.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/spaceinvaders/simulation/Vector.java] anschaun. Am wichtigsten dabei wird für uns die Methode zum messen der Distanz zwischen zwei Punkten (hier fälschlich auch Vektoren gennant) sein. Des weiteren werden wir von herkömmlichen Best Practices der Softwareentwicklung ein wenig abweichen. Anstatt Getter und Setter Methoden für jede Klasse zu erstellen machen wir sämtliche Member public. Alle Methoden unserer Klassen haben einen rein funktionalen Charakter und Kapseln Arbeitsgänge. Hintergrund dafür ist der Performancezuwachs den wir dadurch gewinnen. Die Dalvik Virtual Machine ist zwar bereits relativ gut, Methodenaufrufe kosten aber doch Zeit die wir speziel in Spielen nicht haben. Getter und Setter Methoden sind in diesem Rahmen meist Overkill und sollten vermieden werden. In unserem simplen Space Invader Clone mag dies noch keine große Auswirkung auf die Performance haben, gestaltet man aber komplexere Spiele kann es zu Laufzeiteinbußen kommen. Wir sind uns also des schlechten Stils vollkommen bewußt nehmen ihn aber aus Gründen der Performance in kauf.
  
+Fangen wir mit der Klasse für Blöcke an. 
+
+=== Block Klasse ===
+Springen wir gleich in ein wenig Code. Hier die Block Klasse:
+
+ public class Block 
+ {	
+    public final static float BLOCK_RADIUS = 0.5f; 	
+    public Vector position = new Vector( );
+    
+    public Block(Vector position) 
+    {
+       this.position.set( position );
+    }
+ }
+ 
+Eine Instanz dieser Klasse beschreibt einen der (Sub)Blöcke wie im Spielfeld Kapitel beschrieben. Dieser besitzt eine Position die wir als Member speichern (''position''). Zusätzlich haben wir eine statische finale Member Variable die den Radius eines Blocks definiert, in diesem Fall 0.5f Einheiten. Diese Art von Konstanten werden uns in den Simulationsklassen öfter begegnen. Sie legen die oben definierten Maße und Einheiten fest die wir zum Ausführen der Simulation benötigen. Der Konstruktor ist keine Rocket Science: es wird lediglich die Position des Blocks gesetzt. Mehr tut die Klasse nicht. Die Blöcke bewegen sich nicht, daher bedarf es keines Updates der Position. Auch Schüsse gibt der Block keine ab. Die Klasse dient lediglich zum Speichern der Position eines Blockes. Auf zur nächsten Klasse.
+
+=== Explosion Klasse ===
+Mit der Explosion Klasse modelieren wir Explosionen... Eine Explosion besitzt eine Position im Raum sowie eine Lebenszeit. Diese misst wie lange die Explosion bereits gedauert hat. Nach einer bestimmten Zeitspanne soll die Explosion schießlich wieder verschwinden. Hier begegnet uns der zweite Mechanismus den man in der Regel neben Konstanten wie dem Radius in Simulationsklassen findet: die ''update'' Methode. In jeder Iteration des Main Loop stoßen wir die Simulation selbst mit dem Aufruf ihrer ''update'' Methode an. Der Methode übergibt man die Zeitspanne die man simulieren möchte, normalerweise die Delta Time die wir ja schon brav in der GameActivity messen. Die Simulation wiederum ruft von jedem Element dessen ''update'' Methode auf. Die Elemente sorgen dann dafür das sie ihren Status entsprechend der vergangenen Zeit anpassen. Das kann das Zeit-basierte ändern von Positionen sein, die Reaktion auf Spielereignisse wie Schüsse und so weiter. Im Fall unserer Explosion ändert sich nur deren Lebensdauer. Diese erhöhen wir einfach bei jedem Aufruf um die übergebene Delta Time. Hier der Code zur Klasse:
+
+ public class Explosion 
+ {
+    public static final float EXPLOSION_LIVE_TIME = 1;
+    public float aliveTime = 0;
+    public final Vector position = new Vector( );
+ 
+    public Explosion( Vector position )
+    {
+       this.position.set( position );
+    }
+ 	
+    public void update( float delta )
+    {
+       aliveTime += delta;
+    }	
+ }
+ 
+Keine Überraschungen. Die maximale Lebensdauer einer Explosion definieren wir wieder über einen statischen finalen Member der Klasse und setzen diesen auf 1 für eine Sekunde. Weiters besitzt jede Instanz der Klasse einen Member zur Speicherung ihrer bereits abgelaufenen Lebensdauer sowie ihrer Position. Zweitere wird einmal im Konstruktor gesetzt. Zum Konstruktor geselt sich eine weiter Methode, die bereits besprochene ''update'' Methode. Diese bekommt die Delta Time übergeben welche sie auf den Lebensdauer Member aufaddiert. Diesen Member werden wir später in der Simulation dazu verwenden zu prüfen ob die Explosion beendet ist oder nicht. Auch diese Klasse ist wieder sehr simpel, wenden wir uns also einer etwas weniger simplen Klasse zu.
+
+=== Shot Klasse ===
+Wie der Name besagt simuliert diese Klasse einen Schuss in unserem Spiel. Ein Schuss definiert sich wieder über eine Position im Raum. Auch bewegt sich ein Schuss, d.h. wir brauchen wieder eine ''update'' Methode die die Position des Schusses in Abhängigkeit von der vergangenen Zeit (Delta Time) ändert. Der Schuss muß auch eine Richtung besitzen in die er fliegt. Diese ist abhängig davon ob er vom Schiff oder von einem Invader stammt. Im ersten Fall bewegt sich der Schuss immer weiter in den negativen Bereich (z wird kleiner), im zweiten Fall bewegt sich der Schuss in den positiven Bereich (z wird größer). Auch wollen wir, dass der Schuss weiß ob er das Spielfeld verlassen hat. All dies implementieren wir wie folgt:
+
+ public class Shot 
+ {
+    public static float SHOT_VELOCITY = 10;
+    public final Vector position = new Vector();
+    public boolean isInvaderShot;
+    public boolean hasLeftField = false;
+ 
+    public Shot( Vector position, boolean isInvaderShot )
+    {
+       this.position.set( position );
+       this.isInvaderShot = isInvaderShot;
+    }
+ 
+    public void update(float delta) 
+    {	
+       if( isInvaderShot )
+          position.z += SHOT_VELOCITY * delta;
+       else
+          position.z -= SHOT_VELOCITY * delta;
+ 	
+       if( position.z > Simulation.PLAYFIELD_MAX_Z )
+          hasLeftField = true;
+       if( position.z < Simulation.PLAYFIELD_MIN_Z )
+          hasLeftField = true;
+    }
+ }
+    
+Gehen wir zuerst die Member durch. Die statische Konstante ''SHOT_VELOCITY'' definiert die Geschwindigkeit in Einheiten pro Sekunde mit der ein Schuss fliegt. Übersetzt bedeutet der Wert: in einer Sekunde fliegt der Schuss 10 Einheiten weit. Weiters besitzt die Klasse einen Member für die Position, ein Flag ob der Schuss vom Schiff stammt oder von einem Invader sowie ein Flag ob der Schuss das Spielfeld verlassen hat. Der Konstruktor bietet wieder keine Überraschungen und setzt lediglich zwei Member. Schaun wir uns also die ''update'' Methode genauer an.
+
+Als erster ändern wir die Position des Schusses. Schüsse fliegen immer entlang der z-Achse, daher müssen wir auch nicht diese Koordinate der Position ändern. Die Änderungen erfolgt über das subtrahieren/addieren der Geschwindigkeit mal der vergangenen Zeit. Die Geschwindigkeit haben wir als Konstante definiert (''SHOT_VELOCITY'') die Zeit bekommen wir als Parameter und entsprich der Delta Time. Ein Schuss bewegt sich also pro Frame um SHOT_VELOCITY * Delta Time entlang der z-Achse. Die Richtung ist abhängig vom Typen des Schusses, also ob er von einem Invader kommt oder vom Schiff. 
+
+In der ''update'' Methode prüfen wir auch ob der Schuss das Spielfeld verlassen hat. Nachdem er sich nur entlang der z-Achse bewegt und wir davon ausgehen können das er von einem Schiff/Invader abgefeuert wurde und somit valide x/y Koordinaten hat prüfen wir auch nur ob der das Spielfeld in der z-Achse verlassen hat. Dazu bietet die Klasse Simulation zwei statische Member die die maximale und minimale z-Koordinate des Spielfeldes angeben. Ergibt die Prüfung dass der Schuss nicht mehr im Spielfeld ist setzen wir den Member ''hasLeftField'' auf true. Die Simulation wird diesen Wert später, gleich wie die Lebensdauer der Explosion, dazu verwenden zu bewerten ob der Schuss aus der Simulation entfernt werden kann oder nicht.
+
+Das wichtigste an dieser Klasse ist das Zeit-basierte Update der Position. Diese Prinzip müsst ihr euch verinnerlichen, es wird uns noch ein paar mal begegnen. 
+    
+=== Ship Klasse ===
+Und das Muster setzt sich fort. Auch unser Schiff braucht natürlich eine Position. Gleich wie Blöcke hat es auch einen Radius und eine Höchstgeschwindigkeit. Zusätzlich kann sich ein Schiff auch gerade in Luft auflösen, sprich explodieren. Dies müssen wir irgendwie vermerken da in dieser Zeit das Schiff ja nicht beschossen werden kann. Auch hat ein Schiff eine Anzahl an Leben (3 als Standard). Schaun wir uns an wie wir das implementieren:
+
+ public class Ship 
+ {
+    public static final float SHIP_RADIUS = 1;
+    public static final float SHIP_VELOCITY = 20;
+    public final Vector position = new Vector( );
+    public int lives = 3;
+    public boolean isExploding = false;
+    public float explodeTime = 0;
+ 	
+    public void update( float delta )
+    {
+       if( isExploding )
+       {
+          explodeTime += delta;
+          if( explodeTime > Explosion.EXPLOSION_LIVE_TIME )
+          {
+             isExploding = false;
+             explodeTime = 0;
+          }
+       }
+    }
+ }
+ 
+Wieder begegnen uns zwei Konstanten, der Schiffradius sowie die maximale Schiffgeschwindigkeit. Die Position merken wir uns in Form eines Vektors. Ein weiterer Member hält fest wieviele Leben das Schiff noch besitzt. Das Flag ''isExploding'' speichert ob das Schiff gerade explodiert, der Member ''explodeTime'' vermerkt wie lange die Explosion schon dauert, analog zur ''aliveTime'' der Explosion. Konstruktor haben wir keinen da die Position bereits auf (0,0,0) initialisiert wird (Konstruktor des Vektors). Schaun wir uns die ''update'' Methode an.
+
+Wieder bekommen wir als Parameter die Delta Time. Explodiert das Schiff rechnen wir diese einfach auf den Member ''explodeTime'' auf. Ist das Schiff lange genug explodiert setzen wir das Flag ''isExploding'' sowie den Member ''explodeTime'' wieder zurück. Das Schiff befindet sich danach wieder im normal Zustand.
+
+Aufmerksame Leser werden bemerken dass das Schiff nicht bewegt wird. Das machen wir dann später in der Simulation auf Basis des User Input. Auch das Abziehen von Leben im Fall einer Kollision mit einem Schuss oder Invader wird in der Simulation erledigt.  
+
+=== Invader Klasse ===
+Jetzt kommt die erste etwas komplexere Simulationsklasse. Der Invader hat wie alles andere natürlich erstmal eine Position. Auch Konstanten für Radius und Geschwindigkeit gibt es wieder. Das schwierige am Invader ist sein komplexes Bewegungsmuster. Rekapitulieren wir diese schnell: zu Beginn bewegt sich ein Invader nach links. Nach einer bestimmten Distanz bewegt er sich um eine Einheit nach unten (positiv z) um danach nach rechts einzuschlagen. Nach einer bestimmten Strecke nach rechts fährt er wieder nach unten und dann nach links, das ganze wiederholt sich. Der Invader hat also drei Zustände: fahr nach links, nach unten und nach rechts. In Abhängigkeit des Zustands verändert er seine Position entlang der x- bzw. z-Achse. Die Distanzen die ein Invader nach links, und rechts zurücklegen muss damit er in den nächsten Zustand wechseln kann können wir schön aus der Beschreibung des Spielfeldes ablesen. Schaun wir uns nochmal das Bild dazu an:
+
+[[Datei:invadermovement.png]]
+
+Anfangs legt der Invader 6 Einheiten nach links zurück. Danach eine Einheit nach unten, dann 13 Einheiten nach rechts, eine Einheit nach unten, 13 Einheiten nach links ad infinitum. Dies zu implementieren scheint anfänglich etwas komplex ist aber bei genauerer Betrachtung relativ simpel. Wir merken uns für den aktuellen state (links, rechts, runter) wie weit der Invader schon gewandert ist. Hat er die maximale Distanz für den State erreicht (13 oder 1) wechseln wir in den nächsten State. Den State selbst müssen wir uns natürlich auch merken. 
+
+Die Bewegung des Invaders erfolgt natürlich wieder Zeit-basiert über die Multiplikation der Geschwindigkeit mit der Delta Time. Das Ergebnis rechnen wir dann entsprechend dem State auf die Position auf, entweder auf die x-Koordinate (links, rechts) oder die z-Koordinate (runter). Hier der gesamte Code:
+
+ public class Invader 
+ {	
+    public static float INVADER_RADIUS = 0.75f;
+    public static float INVADER_VELOCITY = 1;
+    public static int INVADER_POINTS = 40;
+    public final static int STATE_MOVE_LEFT = 0;
+    public final static int STATE_MOVE_DOWN = 1;
+    public final static int STATE_MOVE_RIGHT = 2;
+ 	
+    public final Vector position = new Vector();
+    public int state = STATE_MOVE_LEFT;
+    public boolean wasLastStateLeft = true;
+    public float movedDistance = Simulation.PLAYFIELD_MAX_X / 2;	
+ 		
+    public Invader( Vector position )
+    {
+       this.position.set( position );
+    } 	
+ 		
+    public void update(float delta, float speedMultiplier) 
+    {			
+       movedDistance += delta * INVADER_VELOCITY * speedMultiplier;
+       if( state == STATE_MOVE_LEFT )
+       {
+          position.x -= delta * INVADER_VELOCITY * speedMultiplier;
+          if( movedDistance > Simulation.PLAYFIELD_MAX_X )
+          {
+             state = STATE_MOVE_DOWN;
+             movedDistance = 0;
+             wasLastStateLeft = true;
+          }
+       }
+       if( state == STATE_MOVE_RIGHT )
+       { 
+          position.x += delta * INVADER_VELOCITY * speedMultiplier;
+          if( movedDistance > Simulation.PLAYFIELD_MAX_X )
+          {
+             state = STATE_MOVE_DOWN;
+             movedDistance = 0;
+             wasLastStateLeft = false;
+          }
+       }
+       if( state == STATE_MOVE_DOWN )
+       {
+          position.z += delta * INVADER_VELOCITY * speedMultiplier;
+          if( movedDistance > 1 )
+          {
+             if( wasLastStateLeft )
+                state = STATE_MOVE_RIGHT;
+             else
+                state = STATE_MOVE_LEFT;
+             movedDistance = 0;
+          }
+       }		
+    }
+ }
+ 
+Die Definition der Konstanten für den Radius und die Geschwindigkeit sollten keine große Überraschung sein. Die nächsten drei Konstanten stehen für die drei States in der sich ein Invader befinden kann. Natürlich haben wir auch wieder einen Member für die Position. Ein weiterer Member hält den aktuellen Status des Invaders, den setzen wir zu Beginn auf STATE_MOVE_LEFT. Aus organisatorischen Gründen merken wir uns auch ob der letzte State nach links oder nach rechts geführt hat. Der letzte Member speichert die gefahrene Distanz für den aktuellen State. den Initialisieren wir auf die Hälfte des maximalen x-Wertes der Simulation (siehe Grafik). Den Konstruktor kennen wir in der Form auch schon. Schaun wir uns also die ''update'' Methode an.
+
+Was als erster auffällt ist ein zweiter Parameter namens ''speedMultiplier''. Unser Clone soll ja auf Dauer etwas fordernder werden. Dazu lassen wir einfach die Invader schneller werden. Nach jeder Welle erhöhen wir diesen Speedmultiplier etwas was wiederum Auswirkungen auf die Geschwindigkeit der Invader hat. Dazu mehr in der Beschreibung der Simulation Klasse. Wir merken uns nur das wir diesen Wert bei der Zeit-basierten bewegung aufmultiplizieren müssen.
+
+Als erster addieren wir in dieser Methode die im letzten Frame zurückgelegt Strecke auf ''movedDistance''. Keine große Sache, wir berechnen einfach den Zeit-basierten Weg (mal Speedmultiplier). Als nächstes Checken wir in welchem State wir uns befinden.
+
+Sind wir im STATE_MOVE_LEFT State bewegen wir unseren Invader Zeit-basiert ein Stück nach links (Geschwindigkeit * Delta Time * Speedmultiplier = Im Frame zurückgelegte Strecke). Danach checken wir ob wir die maximale Distanz für diesen State zurückgelegt haben. Ist dem der Fall wechseln wir auf den STATE_MOVE_DOWN State und setzen ''movedDistance'' auf 0. Auch merken wir uns das der letzte horizontale State nach links ging. 
+
+Das selbe Spiel spielen wir wenn wir uns im STATE_MOVE_RIGHT State befinden. Anstatt nach links bewegen wir uns nach rechts. Sollte die maximale Distanz für den State überschritten sein setzen wir den State wieder auf STATE_MOVE_DOWN, ''movedDistance'' auf 0  und merken uns dass wir nach rechts gefahren sind. 
+
+Das Handling des States STATE_MOVE_DOWN läuft ein wenig anders ab. Zuerst bewegen wir uns einmal Zeit-basiert nach unten. Haben wir die maximale Distanz für den State überschritten (>1) wechseln wir in einen der horizontalen States. Fuhren wir zuvor nach links müssen wir jetzt nach rechts fahren und vice versa. Natürlich setzen wir auch ''movedDistance'' wieder zurück. 
+
+Pfuh, ganz schönes Stück Arbeit so ein Invader. Damit haben wir aber die letzte Klasse fertig besprochen und können uns der eigentlichen Simulationsklasse widmen. 
+
+=== Simulation Klasse ===
+Die Aufgabe der Klasse ist das Zusammenspiel der verschiedenen Spielelemente zu regeln. Zum einen sorgt die Klasse dafür dass alle Elemente die eine ''update'' Methode besitzen auf updated werden. Zum anderen checkt sie verschiedene Ereignisse wie die Kollision von Schüssen und führt entsprechende Reaktionen aus, wie das verschwinden lassen von Invadern, das Erzeugen von Explosionen und so weiter. In unserem Fall bietet die Klasse auch drei Methoden die von außen angesteuert werden und für die Bewegung des Schiffes sowie das Feuern eines Schusses verantwortlich sind. Wir werden die Klasse in kleinen Stückchen sezieren um ihre Funktionsweise zu verstehen. Beginnen wir mit den Membern:
+
+ public class Simulation 
+ {		
+    public final static float PLAYFIELD_MIN_X = -14;
+    public final static float PLAYFIELD_MAX_X = 14;
+    public final static float PLAYFIELD_MIN_Z = -15;
+    public final static float PLAYFIELD_MAX_Z = 2;
+ 	
+    public ArrayList<Invader> invaders = new ArrayList<Invader>();
+    public ArrayList<Block> blocks = new ArrayList<Block>( );
+    public ArrayList<Shot> shots = new ArrayList<Shot>( );
+    public ArrayList<Explosion> explosions = new ArrayList<Explosion>( );
+ 
+    public Ship ship;
+    public Shot shipShot = null;
+ 
+    public SimulationListener listener;
+     
+    public float multiplier = 1;
+    public int score;
+    public int wave = 1;
+    
+    private ArrayList<Shot> removedShots = new ArrayList<Shot>();
+    private ArrayList<Explosion> removedExplosions = new ArrayList<Explosion>( );
+ 
+ ... to be continued ...
+ 
+Die ersten 4 Member sind wieder Konstanten für unser Spielfeld, die ersten beiden geben die Begrenzung auf der x-Achse an, die anderen beiden die Begrenzung auf der z-Achse. 
+
+Es folgen die Listen für die verschiedenen Spielelemente. Wieder keine große Überraschung, wir verwenden einfach ArrayLists für Invader, Blocks, Shots und Explosionen.
+
+Auch das Schiff müssen wir speichern, genauso wie den aktuellen Schuss des Schiffs. Dieser kommt auch in die ''shots'' Liste, wird aber seperat nochmal gespeichert damit wir wissen ob es ein Schiffschuss gibt oder nicht.
+ 
+Die Simulation erlaubt auch das einhängen eines Listeners. Der Sinn dahinter: außenstehende Klassen bekommen so essentielle Ereignisse in der Simulation mit wie Explosionen oder das Abfeuern von Schüssen. Wir werden später einen solchen Listener einhängen der die entsprechenden Soundeffekt für bestimmte Ereignisse abspielt. 
+
+Der Multiplikator ist uns im Invader schon begegnet als Parameter für die ''update'' Methode. Zu Beginn der Simulation setzen wir diesen auf 1, d.h. Invader werden mit der Geschwindigkeit ''Invader.INVADER_VELOCITY'' fliegen. Später werden wir diesen Multiplier erhöhen damit die Invader schneller werden.
+
+Natürlich speichern wir auch die aktuelle Score, ohne die wäre das Spiel nur halb so lustig. Desweiteren speichern wir noch wieviele Waves an Invadern bereits aufgetreten sind. Reine Statistik ohne große Funktion.
+
+Die letzten beiden ArrayList ist eine Utility Member den wir zum löschen von Schüssen und Explosionen benötigen. Wir wollen diese nicht immer neu Instanzieren da sonst der Garbage Collector permanent anspringt. 
+
+Instanzieren wir eine Simulation so wollen wir ein fix fertiges Spielfeld darin vorfinden indem alle Elemente so positioniert sind wie im Abschnitt Spielfeld dargelegt. Das befüllen der Simulation werden wir in eine eigene Methode namens ''populate'' packen. Schaun wir uns Konstruktor und ''populate'' an:
+
+ ... continued ...
+ public Simulation( )
+ {
+    populate( );
+ }
+  
+ private void populate( )
+ {
+    ship = new Ship();    
+ 
+    for( int row = 0; row < 4; row++ )
+    {
+       for( int column = 0; column < 8; column++ )
+       {
+          Invader invader = new Invader( new Vector( -PLAYFIELD_MAX_X / 2 + column * 2f, 0, PLAYFIELD_MIN_Z + row * 2f ));				
+          invaders.add( invader );
+       }
+    }
+ 		
+    for( int shield = 0; shield < 3; shield++ )
+    {
+       blocks.add( new Block( new Vector( -10 + shield * 10 -1, 0, -2) ) );
+       blocks.add( new Block( new Vector( -10 + shield * 10 -1, 0, -3) ) );
+       blocks.add( new Block( new Vector( -10 + shield * 10 + 0, 0, -3) ) );
+       blocks.add( new Block( new Vector( -10 + shield * 10 + 1, 0, -3) ) );
+       blocks.add( new Block( new Vector( -10 + shield * 10 + 1, 0, -2 ) ) );
+    }
+ }
+ ... to be continued ...
+
+Im Konstruktor rufen wir lediglich ''populate'' auf welches das Befüllen der Simulation übernimmt. In der Methode ''populate'' beginnen wir damit das Schiff zu instanzieren. Als nächster platzieren wir die Invader auf dem Spielfeld wie vorher schon beschrieben. Die erste Schleife geht dabei über die 4 Reihen, die nächste über die jeweiles 8 Invader pro Reihe. Die neu erstellten Invader geben wir in unseren Member ''invaders'' damit wir auch später noch verfügbar haben. Danach erstellen wir die 3 * 5 Blöcke, ebenfalls so positioniert wie im Abschnitt Spielfeld beschrieben. Als Übung könnt ihr euch ja die Positionen so wie sie sich aus dem Code ergeben errechnen und mit der Beschreibung im Spielfeldabschnitt vergleichen.
+
+Die Hauptarbeit der Simulation ist das Zeit-basierte updaten aller Spielelemente. Dazu haben wir wie gehabt eine ''update'' Methode die von außen die Delta Time reinbekommt. Schaun wir uns die Methode an:
+
+ ... continued ...
+ public void update( float delta )
+ {			
+    ship.update( delta );
+    updateInvaders( delta );
+    updateShots( delta );
+    updateExplosions(delta);
+    checkShipCollision( );
+    checkInvaderCollision( );
+    checkBlockCollision( );
+    checkNextLevel( );		
+ }
+ ... to be continued ...
+	        
+Schön aufgeräumt mit Methodenaufrufen gehen wir die einzelnen Elemente durch. Als erster updaten wir das Schiff. Wir erinnern uns dass im Update im Fall einer Explosion deren Zeit gemessen wird und ein entsprechendes Flag gesetzt wird. Anschließend updaten wir die Invader, die Schüsse und die Explosionen. Wir sehen uns die drei Methoden gleich im Detail an. Als nächster schaun wir ob es Kollisionen zwischen dem Schiff und Schüssen bzw. Invadern gab (''checkShipCollision''). Das selbe tun wir dann auch für die Invader (''checkInvaderCollision'') und für die Blöcke (''checkBlockCollision''). Zu guter letzt schaun wir ob alle Invader der aktuellen Welle zerstört wurden und befüllen das Spielfeld mit neuen Invadern (''checkNextLevel'') und damit mit der nächsten Welle.
+
+Das ist die große Klammer die in jeder Iteration einen Schritt in der Simulation ausführt. Wie wollen uns jetzt mit den in ''update'' aufgerufenen Methoden auseinander setzen. Gehen wir sie der Reihe durch:
+
+ ... continued ...
+ private void updateInvaders( float delta )
+ {
+    for( int i = 0; i < invaders.size(); i++ )
+    {
+       Invader invader = invaders.get(i);
+       invader.update( delta, multiplier );
+    }
+ }
+ ... to be continued ...
+ 
+Wie gehen einfach durch alle Invader durch und rufen deren ''update'' Methode auf mit der aktuellen Delta Time sowie dem Wert des Multiplikators (der die Geschwindigkeit je nach Nummer der aktuellen Welle etwas erhöht). Wir verwenden keine Iteratoren in der Schleife da diese unter Android bzw. Dalvik Objekte instanzieren die wiederum den Garbage Collector anwerfen würden. Wir werden uns das verinnerlichen.
+
+Als nächster schaun wir uns ''updateShots'' an:
+
+ ... continued ...
+ private void updateShots( float delta )
+ {
+    removedShots.clear();
+    for( int i = 0; i < shots.size(); i++ )
+    {
+       Shot shot = shots.get(i);
+       shot.update(delta);
+       if( shot.hasLeftField )
+          removedShots.add(shot);
+    }
+ 	
+    for( int i = 0; i < removedShots.size(); i++ )		
+       shots.remove( removedShots.get(i) );
+ 		
+    if( shipShot != null && shipShot.hasLeftField )    
+       shipShot = null;
+ 
+    if( Math.random() < 0.01 * multiplier && invaders.size() > 0 )
+    {			
+       int index = (int)(Math.random() * (invaders.size() - 1));
+       Shot shot = new Shot( invaders.get(index).position, true );			
+       shots.add( shot );
+       if( listener != null )
+          listener.shot();
+    }
+    
+ }
+ ... to be continued ...
+
+Hier passiert schon ein wenig mehr. Zuerst rufen wir die ''update'' Methode von jedem Schuss auf. Wir erinnern uns, diese checked ob der Schuss außerhalb des Spielfelds ist und bewegt den Schuss. In der Schleife schaun wir nach dem Update ob der Schuss das Spielfeld verlassen hat indem wir das entsprechende Flag checken und geben ihn in diesem Fall in die Liste der zu löschenden Schüsse.
+
+Die nächste Schleife löscht alle Schüsse die wir gerade in die Liste ''removedShots'' gegeben haben aus der Liste ''shots''. Damit verschwinden sie komplett aus dem Spiel. Da wir nicht über Iteratoren arbeiten müssen wir dies mit etwas umständlich mit dieser ''removedShots'' Liste machen.
+
+Als nächstes schaun wir ob auch ein Schuss vom Schiff auf dem Spielfeld ist und ob dieser das Spielfeld verlassen hat. Ist dies der Fall setzen wir ''shipShot'' auf null womit wir später wissen das kein Schuss des Schiffes mehr am Spielfeld ist. Das entfernen des Schusses passierte schon zuvor in der Schleife da der Schiffschuss ja auch in der ''shots'' Liste ist.
+
+Der nächste Teil ist ein wenig schwieriger zu verstehen. Die Invader sollen ja ebenfalls hin und wieder passieren. Dieses hin und wieder ist zufallsbasiert. Dazu holen wir uns über ''Math.random()'' eine Zahl zwischen 0 und 1. Ist die Zahl kleiner als 0.01 * multiplier und gibt es mehr als einen Invader erzeugen wir einen neuen Schuss. D.h. die Wahrscheinlichkeit dass in einem Simulationsupdate ein Schuss von einem Invader abgegeben wird beträgt ein Prozent. 
+
+Im Körper der If-Abfrage suchen wir uns dann ebenfalls randomisiert einen der Invader aus und erzeugen an dessen Position einen neuen Schuss den wir in die ''shots'' Liste hinzufügen. Außerdem rufen wir hier zum ersten Mal einen eventuellen Listener auf der so weiß dass ein Schuss abgegeben wurde. Damit hätten wir schonmal einen essentiellen Mechanismus, nämlich das Schießen der Invader abgehackt. Die Schüsse die wir hier neu hinzufügen werden im nächsten Update über die vorhergehende Schleife wieder verarbeitet.
+
+Als nächster schaun wir uns an was wir mit den Explosions machen:
+
+ ... continued ...
+ public void updateExplosions( float delta )
+ {
+    removedExplosions.clear();
+    for( int i = 0; i < explosions.size(); i++ )
+    {
+       Explosion explosion = explosions.get(i);
+       explosion.update( delta );
+       if( explosion.aliveTime > Explosion.EXPLOSION_LIVE_TIME )
+          removedExplosions.add( explosion );
+    }
+ 
+    for( int i = 0; i < removedExplosions.size(); i++ )
+       explosions.remove( explosions.get(i) );
+ }  
+ ... to be continued ...
+ 
+Wie schon bei den Invadern gehen wir über alle Explosionen am Spielfeld und updaten sie. Waren sie lange genug am Leben geben wir sie in die ''removedExplosion'' Liste über die wir sie in der nächsten Schleife dann endgültig vom Spielfeld entfernen. 
+
+Damit haben wir alle Update-Methoden abgehandelt. Es verbleiben noch die Kollisions Routinen. Starten wir mit ''checkInvaderCollision'':
+
+ ... continued ...
+ private void checkInvaderCollision() 
+ {		
+    if( shipShot == null )
+       return;							
+ 			
+    for( int j = 0; j < invaders.size(); j++ )
+    {
+       Invader invader = invaders.get(j);
+       if( invader.position.distance(shipShot.position) < Invader.INVADER_RADIUS )
+       {									
+          shots.remove( shipShot );
+          shipShot = null;
+          invaders.remove(invader);
+          explosions.add( new Explosion( invader.position ) );
+          if( listener != null )
+             listener.explosion();
+          score += Invader.INVADER_POINTS;
+          break;
+       }
+    }			
+ }
+ ... to be continued ...
+ 
+Unsere Aufgabe hier ist es einen eventuell vorhandenen Schuss des Schiffes mit allen Invadern gegenzuprüfen. Befindet sich der Schuss innerhalb des Radius eines Invaders so geht der in einer Explosion hoch.
+
+Als erster schaun wir ob es überhaupt einen Schiffschuss gibt. Ist dem nicht der Fall verabschieden wir uns gleich wieder. Danach gehen wir jeden Invader durch. Ist die Distanz zwischen Invader und Schiffschuss kleiner als der Radius eines Invader löschen wir den Schiffschuss aus ''shots'' und setzen ''shipShot'' auf null. Danach löschen wir auch den getroffenen Invader und erzeugen eine neue Explosion an der Position des toten Invaders. Ist ein Listener gesetzt rufen wir den auf und teilen ihm mit dass eine Explosion stattgefunden hat. Zu guter letzt erhöhen wir den Score und brechen die Schleife ab.
+
+Es sei hier angemerkt das wir einen kleinen Shortcut genommen haben. Nachdem wir die Invader von hinten nach vorne in die ''invaders'' Liste eingefügt haben kommen wir mit dieser Methode aus. Wären die Invader nicht nach tiefe sortiert müssten wir die Distanz zu jedem Invader prüfen und uns den am nächsten getroffenen merken. Das bleibt uns aber erspart da wir ja schlau sind.
+
+Das Schiff müssen wir sowohl auf Kollisionen mit Schüssen wie auch mit Invadern selbst prüfen:
+
+ ... continued ...
+ private void checkShipCollision() 
+ {	
+    removedShots.clear();
+ 	
+    if( !ship.isExploding )
+    {
+       for( int i = 0; i < shots.size(); i++ )
+       {
+          Shot shot = shots.get(i);
+          if( !shot.isInvaderShot )
+             continue;											
+ 		
+          if( ship.position.distance(shot.position) < Ship.SHIP_RADIUS )
+          {					
+             removedShots.add( shot );
+             shot.hasLeftField = true;
+             ship.lives--;
+             ship.isExploding = true;
+             explosions.add( new Explosion( ship.position ) );
+             if( listener != null )
+                 listener.explosion();
+             break;
+          }			
+       }
+ 	
+       for( int i = 0; i < removedShots.size(); i++ )		
+          shots.remove( removedShots.get(i) );
+    }
+ 		 
+    for( int i = 0; i < invaders.size(); i++ )
+    {
+       Invader invader = invaders.get(i);
+       if( invader.position.distance(ship.position) < Ship.SHIP_RADIUS )
+       {
+          ship.lives--;
+          invaders.remove(invader);
+          ship.isExploding = true;
+          explosions.add( new Explosion( invader.position ) );
+          explosions.add( new Explosion( ship.position ) );
+          if( listener != null )
+             listener.explosion();
+          break;
+       }
+    }
+ }  
+ ... to be continued ...
+ 
+Zuerst prüfen wir ein Invaderschuss das Schiff getroffen hat. Das ganze tun wir aber nur wenn das Schiff nicht explodiert. Würde das Schiff getroffen löschen wir den Schuss, vermindern die Leben des Schiffes um eins und erzeugen eine Explosion. Außerdem sagen wir dem Schiff das es bitte explodieren soll indem wir das entsprechende Flag setzen. Der Listener wird aufgerufen und die Schleife abgebrochen. Mehr als einmal kann das Schiff nicht getroffen werden.
+
+Als nächster prüfen wir ob ein Invader mit dem Schiff kollidiert ist. Hier machen wir das gleiche wie bei den Shots, Distanz checken, Leben abziehen, Explosionen erzeugen (für Invader und Schiff) und Invader löschen. Zum Schluss rufen wir wieder den Listener auf und brechen die Schleife ab. Eigentlich alles nicht so schlimm.
+
+Als letzer müssen wir noch die Blöcke auf Kollisionen mit Schüssen checken:
+
+ ... continued ...
+ private void checkBlockCollision( )
+ {
+    removedShots.clear();
+ 	
+    for( int i = 0; i < shots.size(); i++ )
+    {
+       Shot shot = shots.get(i);			
+ 							
+       for( int j = 0; j < blocks.size(); j++ )
+       {
+          Block block = blocks.get(j);
+          if( block.position.distance(shot.position) < Block.BLOCK_RADIUS )
+          {					
+             removedShots.add( shot );
+             shot.hasLeftField = true;
+             blocks.remove(block);
+             break;
+          }
+       }			
+    }
+ 	
+    for( int i = 0; i < removedShots.size(); i++ )		
+       shots.remove( removedShots.get(i) );
+ }
+ ... to be continued ...
+ 
+Selbes Spiel wie immer. Wir checken jeden Schuss mit jedem Block. Wurde ein Block getroffen löschen wir sowohl Block als auch Schuss. Explosion gibt es in diesem Fall keine. 
+
+Schaun wir uns an wie wir die nächste Welle lostreten:
+
+ ... continued ...
+ private void checkNextLevel( )
+ {
+    if( invaders.size() == 0 && ship.lives > 0 )
+    {
+       blocks.clear();
+       shots.clear();
+       shipShot = null;
+       Vector shipPosition = ship.position;
+       int lives = ship.lives;
+       populate();
+       ship.lives = lives;
+       ship.position.set(shipPosition);
+       multiplier += 0.1f;
+       wave++;
+    }
+ }
+ ... to be continued ...
+  	        
+Eine erfrischend kurze Methode. Sind alle Invader explodiert und hat das Schiff noch mindestens ein Leben befüllen wir die Simulation neu. Dazu löschen wir alle vorhandenen Blöcke und Schüsse und setzen ''shipShot'' auf null. Dann merken wir uns die aktuelle Schiffsposition. Diese wird ja im folgenden Aufruf der Methode ''populate'' auf (0,0,0) gesetzt, selbiges machen wir für die Anzahl der Leben. Nach Aufruf der ''populate'' Methode ist die Simulation mit neuen Invadern und Blöcken befüllt und besitzt eine neue Instanz der Klasse Ship. Dieser setzen wir die letzte Position sowie die Anzahl der Leben. Danach gehen wir den Multiplier an und erhöhen diesen um 0.1. Dies entspricht einer Erhöhung der Invader Geschwindigkeit um 10 Prozent. Abschließend erhöhen wir noch den Wave Counter womit die Simulation für eine neue Runde bereit ist.
+
+Als letztes Puzzlestück müssen wir uns noch anschaun wie das Schiff bewegt wird und wir einen Schuss abfeuern können. Beginnen wir mit der Bewegung nach links:
+
+ ... continued ...
+ public void moveShipLeft(float delta, float scale) 
+ {	
+    if( ship.isExploding )
+       return;
+ 	
+    ship.position.x -= delta * Ship.SHIP_VELOCITY * scale;
+    if( ship.position.x < PLAYFIELD_MIN_X )
+       ship.position.x = PLAYFIELD_MIN_X;
+ } 
+ ... to be continued ...
+ 
+Als Parameter erhalten wir die Delta Time sowie einen Faktor ''scale''. Was es mit zweiterem auf sich hat erfahren wir gleich. Zuerst checken wir aber einmal ob das Schiff explodiert. Ist dem der Fall brauchen wir erst gar nichts zu tun, explodierende Schiffe bewegen sich nicht mehr.
+
+Haben wir den Check überlebt wird das Schiff nach links verschoben. Dazu multiplizieren wir wie gewohnt die Delta Time mit der Schiffsgeschwindigkeit. Zusätzlich multiplizieren wir auch noch den Faktor scale dazu. Dieser kommt von außen und bewegt sich im Bereich (0,1). Aufmerksame Leser werden erahnen woher der Wert kommt: der Accelerometer gibt uns diesen. Mehr dazu später im Kapitel GameLoop wo wir die Verarbeitung der Accelerometerdaten zur Steuerung des Schiffes besprechen.
+
+Als letzter checken wir ob das Schiff das Spielfeld verlassen hat. Ist dem der Fall setzen wir es auf den äußersten erlaubten Punkt auf der x-Achse zurück. 
+
+Für die Bewegung nach rechts gibt es eine analoge Methode die ich hier nicht anführe da sie das gleiche nur nach rechts macht.
+
+Zu guter letzt die Methode zum Abfeuern eines Schusses:
+
+ ... continued ...
+ public void shot() 
+ {	
+    if( shipShot == null && !ship.isExploding )
+    {
+       shipShot = new Shot( ship.position, false );			
+       shots.add( shipShot );
+       if( listener != null )
+          listener.shot();
+    }
+ }
+ 		
+Zuerst checken wir ob es bereits einen Schiffschuss gibt bzw. das Schiff explodiert. Ist dem nicht der Fall bauen wir einen neuen Schuss an der aktuellen Schiffsposition, geben ihn in die Liste ''shots'' und signalisieren dem Listener das ein Schuss abgefeuert wurde. Das wars auch schon!
+
+Damit haben wir alle Klassen der Simulation besprochen. Abgesehen von der Eingabe der Accelerometerdaten und Touch-Events haben wir hiermit eine voll funktionstüchtige Spielewelt die unabhängig von jeglicher anderen Komponente funktioniert. Unser Ziel ist also erreicht. Was noch bleibt ist das Schreiben eines Renderers der unsere Simulation zeichnet sowie des GameLoops und des Start und Game Over Screens. Widmen wir uns zuerst dem Renderer, die größte Klasse nach der Simulation.
+
+== Das Rendering ==
+Nachdem wir die Simulation so hübsch gekapselt haben wollen wir jetzt das ganze auch auf den Bildschirm zaubern. Dazu brauchen wir für jedes Element im Spiel verschiedene Resourcen, d.h. Meshes und Texturen. Bevor wir uns Code anschaun widmen wir uns kurz der Erstellung der Resourcen.
+
+Am Spielfeld gibt es 4 verschiedene sichtbare Elemente: das Schiff, die Invader, Schüsse und Blöcke. Für alle vier brauchen wir ein Mesh und eventuell auch Texturen. Ich habe für den Space Invaders Clone [http://www.wings3d.org Wings3D] verwendet, ein Polygonmodeller zum Nulltarif. Für die Erstellung der Texturen habe ich [http://www.gimp.org Gimp] verwendet, eine Open-Source Grafikapplikation. Der Einfachheit halber gibt es nur ein einziges Model für Invader, eine fliegende Untertasse. Für das Schiff gibt es auch ein kleines Mesh. Die Blöcke habe ich als abgeflachte Würfel modelliert und die Schüsse sind ebenfalls kleine Würfel. Hier ein paar Screenshots der Modelle in Wings3D sowie die verwendeten Texturen:
+
+[[Datei:wingsship.png]]
+[[Datei:wingsinvader.png]]
+[[Datei:wingsblock.png]]
+[[Datei:wingsshot.png]]
+[[Datei:shiptexture.png]]
+[[Datei:invadertexture.png]]
+
+Wie zu erkennen sind die einzelnen Meshes schon richtig skaliert. Ein Feld des Gitters hat die Abmessung 1x1. Texturen gibt es nur für Invader und das Schiff, Blöcke und Schüsse färben wir später über ''glColor4f'' ein. Alle Meshes besitzen Normalen zur Lichtberechnung welche wir natürlich auch verwenden wollen. 
+
+Zusätzlich zu den Spielobjekten brauchen wir auch noch einen hübschen Hintergrund als Grundlage der Darstellung. Dazu hat mein schwedischer [http://www.apistudios.com Freund Zire] (auch bekannt als Killergoat from hell) ein hübsches Bild seines Spieles [http://www.godsandidols.com Gods and Idols] beigesteuert, an Dankeschön an dieser Stelle.
+
+[[Datei:planet.png]]
+
+Für hübsche Explosionen habe ich einen frei im Netz erhältlichen [http://www.positech.co.uk/content/explosion/explosiongenerator.html Generator] verwendet. Das Ergebnis sieht so aus
+
+[[Datei:explode.png]]
+
+Man sieht mehrere Animationsphasen der Explosion. Wir werden später sehen wie wir diese auf ein Mesh klatschen und die Explosionen damit zeichnen.
+
+Als Font zur Darstellung der Score, der Leben und der aktuellen Welle hab ich mir aus dem Internet einen frei verwendbaren namens [http://www.fontspace.com/category/space+invaders "Cosmic Alien"] besorgt. 
+
+Wie die Meshes und das Texturieren im Detail funktionieren kann ich hier leider nicht erklären, das würde den Rahmen des Tutorials mehr als sprengen. Im Netz gibt es dazu aber mehr als genug Material, ich verweise den geneigten Leser daher an dieser Stelle auf Google.
+
+Mit all den Resourcen bewaffnet wenden wir uns jetzt dem Renderer zu.
+
+=== Renderer Klasse ===
+Ziel der Klasse ist es erstens alle benötigten Resourcen zu laden und zu verwalten und zweitens die Simulation mit diesen Resourcen zu rendern. Darunter fällt das Zeichnen des Hintergrunds, der Statistiken sowie der Invader, des Schiffes, der Schüsse, der Explosionen und der Blöcke. Nach getaner Arbeit soll der Renderer auch wieder all die Resourcen freigeben können. 
+
+Unsere Spielwelt werden wir in 3D Zeichnen, mit einer direktionalen Lichtquelle die alle Elemente beleuchtet. Die Kamera soll dabei immer etwas über den Schiff schweben und leicht nach unten auf das Spielfeld blicken. Außerdem soll sie sich mit dem Schiff mitbewegen. Die Invader sollen sich drehen, das Schiff soll sich je nach Ausrichtung des Android Devices neigen. Als kleiner Motivator hier ein Bild der fertigen Szene:
+
+[[Datei:gameworld.png]]     
+
 [[Kategorie:Entwicklung]]
-= Einleitung =
 

@@ -91,6 +91,9 @@ public class GameActivity extends Activity implements GLSurfaceView.Renderer, On
 	{	
 		this.width = width;
 		this.height = height;
+		
+		if( listener != null )
+			listener.setup( this, gl );		
 	}
 
 	/**
@@ -98,10 +101,7 @@ public class GameActivity extends Activity implements GLSurfaceView.Renderer, On
 	 */
 	@Override
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) 
-	{	
-		if( listener != null )
-			listener.setup( this, gl );
-		
+	{			
 		lastFrameStart = System.nanoTime();
 		String renderer = gl.glGetString( GL10.GL_RENDERER );
 		if( renderer.toLowerCase().contains("pixelflinger" ) )
