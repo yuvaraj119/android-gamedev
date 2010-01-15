@@ -1544,5 +1544,712 @@ Unsere Spielwelt werden wir in 3D Zeichnen, mit einer direktionalen Lichtquelle 
 
 [[Datei:gameworld.png]]     
 
+Schaun wir uns zuerst die Member der Klasse an:
+
+ public class Renderer 
+ {
+    Mesh shipMesh;
+    Texture shipTexture;
+    Mesh invaderMesh;
+    Texture invaderTexture;
+    Mesh blockMesh;
+    Mesh shotMesh;
+    Mesh backgroundMesh;
+    Texture backgroundTexture;
+    Mesh explosionMesh;
+    Texture explosionTexture;
+    Font font;
+    Text text;
+    float invaderAngle = 0;
+    int lastScore = 0;
+    int lastLives = 0;
+    int lastWave = 0;
+ ... to be continued ...
+ 
+Für das Schiff und Invader haben wir jeweils ein Mesh sowie eine Texture. Blöcke und Schüsse besitzen nur ein Mesh, die färben wir später händisch ein. Für den Hintergrund haben wir ebenfalls ein Mesh sowie eine Texture, selbiges gilt für Explosionen. Da wir auch ein paar Statistiken anzeigen wollen besitzt der Renderer auch einen Font sowie eine Text Klasse. Der Member ''invaderAngle'' wird zur Speicherung des aktuellen Drehwinkels der Invader benötigt. Die restlichen drei Member merken sich die letzten Werte für Leben, Wave und Punktestand. Die verwenden wir später um Änderungen dieser Werte zu registrieren und nur bei Änderungen bauen wir die Text Klasse neu. Dem Garbage Collector passt das besser.
+
+Bevor wir irgendetwas zeichnen müssen wir zuerst einmal all unsere Resourcen laden. Das ganze machen wir relativ überraschungslos im Konstruktor:
+ 
+ ... continued ...
+ public Renderer( GL10 gl, GameActivity activity )
+ {
+    try
+    {
+       shipMesh = MeshLoader.loadObj(gl, activity.getAssets().open( "ship.obj" ) );
+       invaderMesh = MeshLoader.loadObj( gl, activity.getAssets().open( "invader.obj" ) );
+       blockMesh = MeshLoader.loadObj( gl, activity.getAssets().open( "block.obj" ) );
+       shotMesh = MeshLoader.loadObj( gl, activity.getAssets().open( "shot.obj" ) );
+ 		
+       backgroundMesh = new Mesh( gl, 4, false, true, false );
+       backgroundMesh.texCoord(0, 0);
+       backgroundMesh.vertex(-1, 1, 0 );
+       backgroundMesh.texCoord(1, 0);
+       backgroundMesh.vertex(1, 1, 0 );
+       backgroundMesh.texCoord(1, 1);
+       backgroundMesh.vertex(1, -1, 0 );
+       backgroundMesh.texCoord(0, 1);
+       backgroundMesh.vertex(-1, -1, 0 );
+ 		
+       explosionMesh = new Mesh( gl, 4 * 16, false, true, false );
+       for( int row = 0; row < 4; row++ )
+       {
+          for( int column = 0; column < 4; column++ )
+          {
+             explosionMesh.texCoord( 0.25f + column * 0.25f, 0 + row * 0.25f );
+             explosionMesh.vertex( 1, 1, 0 );
+             explosionMesh.texCoord( 0 + column * 0.25f, 0 + row * 0.25f );
+             explosionMesh.vertex( -1, 1, 0 );
+             explosionMesh.texCoord( 0f + column * 0.25f, 0.25f + row * 0.25f );
+             explosionMesh.vertex( -1, -1, 0 );
+             explosionMesh.texCoord( 0.25f + column * 0.25f, 0.25f + row * 0.25f );
+             explosionMesh.vertex( 1, -1, 0 );		
+          }
+       }					
+    }
+    catch( Exception ex )
+    {
+       Log.d( "Space Invaders", "couldn't load meshes" );
+       throw new RuntimeException( ex );
+    }
+ 	
+    try
+    {					
+       Bitmap bitmap = BitmapFactory.decodeStream( activity.getAssets().open( "ship.png" ) );
+       shipTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Nearest, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
+       bitmap.recycle();
+ 
+       bitmap = BitmapFactory.decodeStream( activity.getAssets().open( "invader.png" ));
+       invaderTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Nearest, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
+       bitmap.recycle();
+ 
+       bitmap = BitmapFactory.decodeStream( activity.getAssets().open( "planet.jpg" ) );
+       backgroundTexture = new Texture( gl, bitmap, TextureFilter.Nearest, TextureFilter.Nearest, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
+       bitmap.recycle();
+ 			
+       bitmap = BitmapFactory.decodeStream( activity.getAssets().open( "explode.png" ) );
+       explosionTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Nearest, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
+       bitmap.recycle();
+    }
+    catch( Exception ex )
+    {
+       Log.d( "Space Invaders", "couldn't load textures" );
+       throw new RuntimeException( ex );
+    }
+ 	
+    font = new Font( gl, activity.getAssets(), "font.ttf", 16, FontStyle.Plain );
+    text = font.newText( gl );
+ 	
+    float[] lightColor = { 1, 1, 1, 1 };
+    float[] ambientLightColor = {0.0f, 0.0f, 0.0f, 1 };		
+    gl.glLightfv( GL10.GL_LIGHT0, GL10.GL_AMBIENT, ambientLightColor, 0 );
+    gl.glLightfv( GL10.GL_LIGHT0, GL10.GL_DIFFUSE, lightColor, 0 );
+    gl.glLightfv( GL10.GL_LIGHT0, GL10.GL_SPECULAR, lightColor, 0 );
+ }
+ ... to be continued ...
+ 
+Viel Code zum Laden. Gehen wir es der Reihe nach durch. Zuerst laden wir die Meshes für das Schiff, Invader, Blöcke und Schüsse. Diese liegen wie gehabt als Assets vor, dementsprechend laden wir sie auch. Als nächstes basteln wir uns ein Mesh für das Hintergrundbild. Dieses ist ein Rechteck bestehend aus zwei Dreiecken die auf die ganze Hintergrundtexture mappen. Die linke obere Ecke des Rechtecks liegt bei (-1, 1, 0), die untere Ecke bei (1, -1, 0). Wir erinnern uns, dass wenn wir keine Projektionsmatrix setzen der sichtbare Teil des Koordinatensystems am Bildschirm die selben Abmessungen. Später müssen wir also lediglich die Projektionsmatrix auf Identity setzen und die beiden Dreiecke zeichnen, schon haben wir das Hintergrundbild über den ganzen Bildschirm gespannt. 
+
+Als nächstes bauen wir das Mesh für die Explosionen. Hier wirds wieder ein wenig schwieriger. In der Explosions-Texture befinden sich 4 * 4 = 16 Animationsstufen der Explosion. Für jede dieser Animationsstufen bauen wir im Mesh ein eigenes Rechteck aus zwei Dreiecken, beginnend bei der obersten linken Animationsstufe. Ein solches Rechteck hat die Abmessungen 1x1 was ungefähr den Abmessungen der Invader bzw. des Schiffes in der x-y-Achse entspricht. Insgesamt haben wir in dem Mesh also 16 Rechtecke in Sequenz der Animation der Explosion. Diesen Umstand nutzen wir dann später beim Zeichnen der Explosionen aus. Die Technik nennt man auch [http://en.wikipedia.org/wiki/Sprite_%28computer_graphics%29 Sprite] Rendering und funktioniert ähnlich wie in einem Trickfilm. Mehr dazu später.
+
+Nachdem wir jetzt alle Meshes geladen bzw. gebaut haben können wir uns den Texturen widmen. Auch diese laden wir wieder unspektakulär aus den Assets. Man beachte hier die Angabe von Mipmapping beim Laden. Dies führt zu einem großen Performance-Gewinn und sollte so gut wie immer verwendet werden.
+
+Abschließend laden wir noch den Font den wir verwenden wollen und erstellen eine neue Instanz der Klasse Text die wir später zum Rendern der Statistiken verwenden werden. 
+
+Licht brauchen wir auch darum setzen wir die Lichttyp-Farben für die Lichtquelle 0 schon einmal im Konstruktor. Wie im Licht Kapitel beschrieben müssen wir diese Werte nicht jedesmal neu setzen, OpenGL merkt sich das für uns.
+
+Nachdem jetzt alles geladen ist können wir uns gleich das Rendering selbst anschaun. Dazu besitzt der Renderer die Methode ''render'' welche eine GL10 Instanz, die GameActivity und die Instanz der Simulation entgegen nimmt. Die Simulation brauchen wir natürlich um zu wissen wo welches Objekt gezeichnet werden soll:
+
+ ... continued ...
+ public void render( GL10 gl, GameActivity activity, Simulation simulation )
+ {		
+    gl.glClear( GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT );
+    gl.glViewport( 0, 0, activity.getViewportWidth(), activity.getViewportHeight() );		    
+ 		
+    gl.glEnable( GL10.GL_TEXTURE_2D );				
+    renderBackground( gl );		
+ 		
+    gl.glEnable( GL10.GL_DEPTH_TEST );
+    gl.glEnable( GL10.GL_CULL_FACE );		
+ 		
+    setProjectionAndCamera( gl, simulation.ship, activity );
+    setLighting( gl );
+ 			
+    renderShip( gl, simulation.ship, activity );
+    renderInvaders( gl, simulation.invaders );
+ 
+    gl.glDisable( GL10.GL_TEXTURE_2D );
+    renderBlocks( gl, simulation.blocks );
+ 
+    gl.glDisable( GL10.GL_LIGHTING );
+    renderShots( gl, simulation.shots );
+ 
+    gl.glEnable( GL10.GL_TEXTURE_2D );
+    renderExplosions( gl, simulation.explosions );
+ 
+    gl.glDisable( GL10.GL_CULL_FACE );
+    gl.glDisable( GL10.GL_DEPTH_TEST );
+ 
+    set2DProjection(gl, activity);
+ 	
+    gl.glEnable( GL10.GL_BLEND );
+    gl.glBlendFunc( GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA );
+    gl.glTranslatef( 0, activity.getViewportHeight(), 0 );
+    if( simulation.ship.lives != lastLives || simulation.score != lastScore || simulation.wave != lastWave )
+    {
+       text.setText( "lives: " + simulation.ship.lives + " wave: " + simulation.wave + " score: " + simulation.score );
+       lastLives = simulation.ship.lives;
+       lastScore = simulation.score;
+       lastWave = simulation.wave;
+    }
+    text.render();
+    gl.glDisable( GL10.GL_BLEND);
+    gl.glDisable( GL10.GL_TEXTURE_2D );
+ 	
+    invaderAngle+=activity.getDeltaTime() * 90;
+    if( invaderAngle > 360 )
+       invaderAngle -= 360;
+ }	  
+ ... to be continued ...
+ 
+Wir beginnen damit den Framebuffer und den Z-Buffer zu löschen. Danach setzen wir wie gehabt den Viewport. Als nächstes wollen wir den Hintergrund zeichnen. Dazu müssen wir zuerst Texturing einschalten und springen dann in eine Methode die das Rendering selbst übernimmt. Diese werden wir uns später anschaun. 
+
+Nachdem der Hintergrund kein 3D Objekt ist und immer ganz gezeichnet werden soll haben wir bis zu diesem Zeitpunkt den Z-Buffer noch nicht eingeschaltet. Das Machen wir jetzt da wir die 3D Objekte wie Invader und das Schiff zeichnen wollen. Auch schalten wir sogenanntes [http://www.gamedev.net/reference/articles/article1088.asp Backface Culling] dazu. Dieses sorgt dafür das nur jene Dreiecke gezeichnet werden die in Richtung des Betrachters "blicken".
+
+Bevor wir unsere 3D Objekte zeichnen müssen wir noch die Kamera einrichten und die Lichtquelle setzen. Das übernehmen die Methoden ''setProjectionAndCamera'' und ''setLighting'' für uns die wir uns später im Detail anschaun werden.
+
+Wir haben jetzt also den Z-Buffer aktiviert, Backface Culling eingeschaltet, die Projektions- und Kamera-Matrix gesetzt sowie das Licht eingeschalten. Auch Texturing ist noch in Betrieb. Jetzt sind wir bereit die 3D Objekte zu zeichnen. Das Zeichnen des Schiffes und der Invader übernehmen die Methoden ''renderShip'' und ''renderInvader''. Als nächstes schalten wir Texturing aus da wir die Blöcke  und die Schüsse zeichnen die ja keine Texturen besitzen. Hier helfen uns die Methoden ''renderBlocks'' und ''renderShots'' aus. Bevor wir die Schüsse zeichnen schalten wir das Licht wieder aus, diese sollen ja keinen Schatten haben. Als letzte 3D Objekte zeichnen wir die Explosionen. Für diese müssen wir Texturing wieder einschalten. Wir zeichnen sie deshalb als letzter in der Reihenfolge weil diese ja transparent sind. Wie wir uns erinnern müssen wir transparente Objekte immer zuletzt zeichnen da es sonst zu Problemen mit dem Z-Buffer kommt. Auch hier haben wir wieder eine handliche Methode namens ''renderExplosions'' die uns die Arbeit abnimmt.
+
+Alle 3D Objekte sind gezeichnet, daher können wir Backface Culling und den Z-Buffer wieder ausschalten. Wir wollen nun die Statistiken zeichnen die ja 2D Elemente sind. Dazu setzen wir eine entsprechende Projektionsmatrix die für ein 2D Koordinaten-System sorgt. Das macht die Methode ''set2DProjection''. Als nächstes schalten wir Blending ein, da unser Text ja transparente Stellen besitzt und setzen eine Transformation damit der Text in der oberen linken Ecke des Bildschirms gezeichnet wird. Bevor wir den Text zeichnen prüfen wir noch ob sich die Statistikwerte im Vergleich zu den zuletzt gespeicherten Werten geändert haben. Ist dem der Fall so sagen wir der Text Instanz das sie bitte einen neuen String darstellen soll und merken uns die neuen Werte. Die Methode ''Text.setText'' baut intern auf Basis des übergebenen Strings neue Dreiecke zusammen was eine etwas kostspielige Operation ist wenn man es jedes Frame macht. Auch wäre der Garbage Collector wenig erfreut wenn wir in jedem Frame einen neuen String erzeugen. Darum machen wir das hier etwas umständlich. Der Text ist also gesetzt und wir können ihn einfach zeichnen. Danach schalten wir Blending wieder ab.
+
+Zu guter letzt erhöhen wir den Member ''invaderAngle'' noch zeit-basiert. Diesen verwenden wir als Rotationswinkel um die y-Achse für die Invader die sich damit drehen. In einer Sekunde drehen sie sich dabei um 90 Grad, wofür die Multiplikation der Delta Time mit 90 sorgt.
+
+Machen wir uns noch schnell bewusst welchen Status OpenGL nach verlassen der ''render'' Methode hat. Z-Buffer, Beleuchtung,Texturing und Blending sind ausgeschalten. Die Projektions-Matrix ist auf eine 2D Projektion gesetzt, die Model-View-Matrix auf die Transformation zur Verschiebung in die obere linke Ecke. OpenGL behält diesen Status bis zum nächsten Render aufruf. Es ist immer wichtig sich über diesen Status im klaren zu sein und ihn so sauber wie möglich zu halten es können sonst ''unerklärbare'' Probleme auftreten wie das Fehlen von Texturen die aber eigentlich nur daraus resultieren dass das Texturing nicht eingeschalten ist. Selbiges gilt auch für die Matrizen welche dafür sorgen können das Objekte aus dem Blickfeld verschoben werden nur weil man vergessen hat zuerst eine Identity-Matrix zu laden und damit den alten Inhalt zu ''löschen''.
+
+Schaun wir uns jetzt noch die in der ''render'' Methode verwendeten Helfer-Methoden an. Wir machen das in der Reihenfolge des Auftretens in ''render'':
+
+ ... continued ...
+ private void renderBackground( GL10 gl )
+ {
+    gl.glMatrixMode( GL10.GL_PROJECTION );
+    gl.glLoadIdentity();
+    gl.glMatrixMode( GL10.GL_MODELVIEW );
+    gl.glLoadIdentity();
+    backgroundTexture.bind();
+    backgroundMesh.render(PrimitiveType.TriangleFan);
+ } 
+ ... to be continued ...
+ 
+Beim Rendering des Backgrounds setzen wir zuerst Projektions- und Model-View-Matrix auf Identity. Damit schaffen wir ein 2D Koordinatensystem dessen sichtbarer teil in x-y bei (-1,1) bis (1,-1) geht. Unser Mesh für den Hintergrund hat genau die selben Abmessungen. Wir brauchen daher nur mehr die Hintergrund-Texture zu binden und das Mesh zu zeichnen, schon haben wir den ganzen Bildschirm mit dem Hintergrundbild gefüllt. Einen kleinen ''Fehler'' hat das ganze: Das Hintergrundbild hat die Abmessungen 512x512 Pixel. Der Bildschirm hat diese zu 100% nicht, das Bild wird also gestaucht. Als Übung könnt ihr ja versuchen dieses Problem zu lösen.
+
+ ... continued ...
+ private void setProjectionAndCamera( GL10 gl, Ship ship, GameActivity activity )
+ {
+    gl.glMatrixMode( GL10.GL_PROJECTION );
+    gl.glLoadIdentity();
+    float aspectRatio = (float)activity.getViewportWidth() / activity.getViewportHeight();
+    GLU.gluPerspective( gl, 67, aspectRatio, 1, 1000 );					
+ 
+    gl.glMatrixMode( GL10.GL_MODELVIEW );
+    gl.glLoadIdentity();
+    GLU.gluLookAt( gl, ship.position.x, 6, 2, ship.position.x, 0, -4, 0, 1, 0 );
+ }
+ ... to be continued ...
+
+Auch hier passiert nichts neues. Wie im Kapitel zu Projektionen beschrieben setzen wir zuerst eine perspektivische Projektions-Matrix. Die Model-View-Matrix setzen wir über ''GLU.gluLookAt'' auf eine Kamera-Matrix. Die Kamera befindet sich dabei etwas oberhalb des Schiffes und schaut schräg nach unten auf das Spielfeld. Interessant dabei ist, dass die x-Position der Kamera von der x-Position des Schiffes abhängt. Mit diesem Kniff lassen wir die Kamera dem Schiff folgen.
+
+ ... continued ...
+ float[] direction = { 1, 0.5f, 0, 0 };	
+ private void setLighting( GL10 gl )
+ {
+    gl.glEnable( GL10.GL_LIGHTING );
+    gl.glEnable( GL10.GL_LIGHT0 );				
+    gl.glLightfv( GL10.GL_LIGHT0, GL10.GL_POSITION, direction, 0 );
+    gl.glEnable( GL10.GL_COLOR_MATERIAL );		
+ } 
+ ... to be continued ...
+
+Auch das setzen des Lichtes birgt keine Neuerungen. Zuerst schalten wir das Licht ein, dann im speziellen das Licht mit Nummer 0. Als nächstes setzen wir die Richtung des Lichtes welches ein direktionales ist. Den Array der die Richtung hält instanzieren wir dabei nicht jedesmal neu, wir denken an den Garbage Collector. Das Licht kommt in diesem Fall von rechts oben. Abschließend schalten wir Color Materials noch ein und sind fertig.
+
+ ... continued ...
+ private void renderShip( GL10 gl, Ship ship, GameActivity activity )
+ {
+    if( ship.isExploding )
+       return;
+ 
+    shipTexture.bind();
+    gl.glPushMatrix();
+    gl.glTranslatef( ship.position.x, ship.position.y, ship.position.z );
+    gl.glRotatef( 45 * (-activity.getAccelerationOnYAxis() / 5), 0, 0, 1 );
+    gl.glRotatef( 180, 0, 1, 0 );
+    shipMesh.render(PrimitiveType.Triangles);
+    gl.glPopMatrix();
+ }
+ ... to be continued ...
+
+Explodiert das Schiff gerade brauchen wir es natürlich nicht zeichnen. Das Zeichnen der entsprechenden Explosion regeln wir dann in ''renderExplosions''. Explodiert das Schiff nicht binden wir zuerst die Texture für das Schiff. Danach folgt was immer folgen sollte, wir pushen die Model-View-Matrix (die wir zuvor in ''setProjectionAndCamera'' aktiviert haben). Die nächsten drei Aufrufe verschieben und rotieren das Schiff. Wir erinnern uns wieder das wir die Reihenfolge umkehren müssen. Beginnen wir also bei der letzten Transformation. Diese rotiert das Schiff um 180 Grad um die y-Achse. Da ich das Schiff in Wings3D so gebaut habe dass es entlang der positiven z-Achse schaut müssen wir es hier in die entgegengesetzte Richtung rotieren. Als nächstes Sorgen wir mit einer weiteren Rotation für ein wenig Eyecandy. Abhängig wie das Gerät entlang seiner y-Achse geneigt ist rotieren wir das Schiff um die z-Achse. Hält man das Device im Landscape-Modus und neigt es wie ein Lenkrad nach links und rechts schlägt der Accelerometer entlang der y-Achse im Bereich (-10,10) aus. Diesen Werte negieren wir (wegen der Rotationsrichtung) und dividieren in durch 5 womit wir in einen Wertebereich von (-2,2) kommen. Diesen Werte multiplizieren wir dann noch mit 45 Grad womit wir auf den wirklichen Rotationswinkel des Schiffes um die z-Achse kommen. Dieser Winkel liegt somit im Bereich (45*-2, 45*2). Diese maximal Werte werden erreich wenn man das Gerät im Portrait-Modus hält. Als letzte Transformation verschieben wir das rotierte Schiff noch an seine Position im Spielfeld. Es folgt das Rendern des Meshes und das popen der Model-View-Matrix. Die hat danach wieder nur die Kamera-Matrix gesetzt und wir können die nächsten Objekte zeichnen.
+
+ ... continued ...
+ private void renderInvaders( GL10 gl, ArrayList<Invader> invaders )
+ {
+    invaderTexture.bind();
+    for( int i = 0; i < invaders.size(); i++ )
+    {
+       Invader invader = invaders.get(i);
+       gl.glPushMatrix();
+       gl.glTranslatef( invader.position.x, invader.position.y, invader.position.z );
+       gl.glRotatef( invaderAngle, 0, 1, 0 );
+       invaderMesh.render(PrimitiveType.Triangles);
+       gl.glPopMatrix();
+    }
+ }   
+ ... to be continued ...
+
+Beim Zeichnen der Invader gehen wir ähnlich vor. Zuerst setzen wir die Invader-Texture. Danach gehen wir über all Invader in der Simulation (die wir ja als Parameter in der ''Renderer.render'' Methode bekommen haben). Für jeden Invader pushen wir zuerst wieder die Model-View-Matrix, transformieren den Invader an seinen richtigen Platz und zeichnen das Invader-Mesh. Danach popen wir wieder die Model-View-Matrix. Wie ersichtlich rotieren wir jeden Invader auch um die y-Achse. Den Winkel erhöhen wir in der ''Renderer.render'' Methode ja zeit-basiert.
+
+ ... continued ...
+ private void renderBlocks( GL10 gl, ArrayList<Block> blocks )
+ {		
+    gl.glEnable( GL10.GL_BLEND );
+    gl.glBlendFunc( GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA );
+    gl.glColor4f( 0.2f, 0.2f, 1, 0.7f );
+    for( int i = 0; i < blocks.size(); i++ )
+    {
+       Block block = blocks.get(i);
+       gl.glPushMatrix();
+       gl.glTranslatef( block.position.x, block.position.y, block.position.z );
+       blockMesh.render(PrimitiveType.Triangles);
+       gl.glPopMatrix();
+    }
+    gl.glColor4f( 1, 1, 1, 1 );
+    gl.glDisable( GL10.GL_BLEND );
+ } 
+ ... to be continued ...
+
+Wie auf dem Bild oben ersichtlich scheinen die Blöcke leicht durch. Deswegen aktivieren wir zuerst Blending. Auch Texture haben wir für die Blöcke keine, Texturing ist zu diesem Zeitpunkt schon disabled. Wir färben die Blöcke daher händisch mit ''glColor4f'' mit einem hübschen Blau ein. Danach gehen wir wieder über alle Blöcke, pushen die Model-View-Matrix, transformieren den Block, rendern das Block-Mesh und popen die Model-View-Matrix. Abschließend setzen wir die Zeichenfarbe wieder auf weiß und schalten Blending aus.
+
+ ... continued ...
+ private void renderShots( GL10 gl, ArrayList<Shot> shots )
+ {
+    gl.glColor4f( 1, 1, 0, 1 );
+    for( int i = 0; i < shots.size(); i++ )
+    {
+       Shot shot = shots.get(i);
+       gl.glPushMatrix();
+       gl.glTranslatef( shot.position.x, shot.position.y, shot.position.z );
+       shotMesh.render(PrimitiveType.Triangles);
+       gl.glPopMatrix();
+    }		
+    gl.glColor4f( 1, 1, 1, 1 );
+ }
+ ... to be continued ...
+
+Auch die Schüsse sind schnell gezeichnet. Farbe setzen, über alle Schüsse gehen, push, transform, render, pop und die Farbe wieder zurück setzen. Langsam wirds langweilig.
+
+ private void renderExplosions(GL10 gl, ArrayList<Explosion> explosions) 
+ {	
+    gl.glEnable( GL10.GL_BLEND );
+    gl.glBlendFunc( GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA );
+    explosionTexture.bind();
+    for( int i = 0; i < explosions.size(); i++ )
+    { 
+       Explosion explosion = explosions.get(i);
+       gl.glPushMatrix();
+       gl.glTranslatef( explosion.position.x, explosion.position.y, explosion.position.z );
+       explosionMesh.render(PrimitiveType.TriangleFan, (int)((explosion.aliveTime / Explosion.EXPLOSION_LIVE_TIME) * 15) * 4, 4);
+       gl.glPopMatrix();
+    }			
+    gl.glDisable( GL10.GL_BLEND );
+ }
+
+Für die Explosionen brauchen wir wieder Blending welches wir gleich einmal einschalten. Dann binden wir die Explosions-Texture und gehen über jede Explosion. Hier wirds interessant. Wie gehabt pushen wir zuerst und transformieren. Beim rendern des Meshes wenden wir aber einen kleinen Trick an. Abhängig davon wie lang die Explosion schon am leben ist Zeichnen wir nur eines der Rechtecke im Explosions-Mesh. Wir erinnern uns das wir dort ja für die 16 Animationsphasen jeweils ein Rechteck definiert haben. Die Mesh Klasse bietet neben der einfachen ''Mesh.render(PrimitiveType type)'' Methode auch noch eine zweite die es erlaubt einen Offset in das Mesh anzugeben sowie die Anzahl der Vertices die ab diesem Offset verwendet werden sollen. Wir errechnen uns einfach den Offset des passenden Rechtecks und verwenden dessen 4 Vertices zum Zeichnen der aktuellen Explosion. Der Offset ergibt sich aus der Lebensdauer der Explosion durch die maximale Lebensdauer was einen Wert zwischen 0 und 1 ergibt. Diesen Wert multiplizieren wir dann mit 15 und casten in auf einen int. Nach dieser einfachen Formel lässt sie die Animationsstufe sehr einfach berechnen. Ist die Explosion z.B. seit einer Sekunde am Leben wählen wir Rechteck Nummer (int)(1.0 / 2 * 15) = 7. Dies multiplizieren wir noch mit 4 da wir den Offset in Vertices angeben müssen. Und schon haben wir unsere Explosionen animiert! Natürlich popen wir dann wieder die Model-View-Matrix und schalten Blending wieder aus.
+
+Damit haben wir eigentlich das ganze Rendering der Simulation besprochen. Wir brauchen nur noch eine Methode die die ganzen Meshes und Texturen aufräumt:
+
+ ... continued ...
+ public void dispose( )
+ {
+    shipTexture.dispose();
+    invaderTexture.dispose();
+    backgroundTexture.dispose();
+    explosionTexture.dispose();
+    font.dispose();
+    text.dispose();
+    explosionMesh.dispose();
+    shipMesh.dispose();
+    invaderMesh.dispose();
+    shotMesh.dispose();
+    blockMesh.dispose();
+    backgroundMesh.dispose();
+ }
+
+Wir geben einfach alle geladenen Texturen und Meshes wieder frei, keine große Sache. 
+
+Der Renderer in Kombination mit einer Simulations-Instanz wäre jetzt schon vollständig einsetzbar. Wir müssten das ganze nur in eine GameActivity packen, die Simulation in jedem Frame updaten und den Renderer anwerfen. Bevor wir dass aber tun wollen wir uns noch kurz um den Sound kümmern. Soll ja schließlich auch krachen.
+
+== Sound und Musik ==
+Dieses Kapitel wird wieder erfrischend einfach. Ähnlich dem Renderer brauchen wir eine Klasse die uns das Laden der Soundeffekt und Musik schön kapselt. Auch muss sie uns die Möglichkeit bieten on-demand einen Soundeffekt abzuspielen bzw. die Musik zu stoppen. Wir basteln dazu eine Klasse namens SoundManager die wir ins gleich im Detail anschaun werden. 
+
+Die Soundeffekte für den Space Invaders Clone habe ich mit einem netten Tool namens [http://www.drpetter.se/project_sfxr.html sfxr]. Dieses erlaubt das simple erstellen von 8-Bit artigen Soundeffekten mit einem einzigen Mausklick. Die so entstandenen Effekte habe ich ein wenig mit [http://www.audacity.org Audacity] nachbearbeitet. Es gibt einen Effekt für die Explosionen und einen Effekt für die Schüsse.
+
+Die Musik habe ich vor Urzeiten daheim mit Cubase eingespielt. Ist ein unaufregender Rock Track. 
+
+=== SoundManager Klasse ===
+Wie im Renderer müssen wir zuerst einmal alles laden. Das machen wir wieder im Konstruktor:
+
+ public class SoundManager 
+ {
+    SoundPool soundPool;
+    AudioManager audioManager;
+    MediaPlayer mediaPlayer;
+    int shotId;
+    int explosionId;
+ 	
+    public SoundManager( GameActivity activity )
+    {
+       soundPool = new SoundPool( 10, AudioManager.STREAM_MUSIC, 0);
+       audioManager = (AudioManager)activity.getSystemService(Context.AUDIO_SERVICE);
+       activity.setVolumeControlStream(AudioManager.STREAM_MUSIC);
+ 		  
+       try
+       {
+          AssetFileDescriptor descriptor = activity.getAssets().openFd( "shot.wav" );
+          shotId = soundPool.load( descriptor, 1 );
+          descriptor = activity.getAssets().openFd( "explosion.wav" );
+          explosionId = soundPool.load( descriptor, 1 );
+       }
+       catch( Exception ex )
+       {
+          Log.d( "Sound Sample", "couldn't load sound 'shot.wav'" );
+          throw new RuntimeException( ex );
+       }
+ 		
+       mediaPlayer = new MediaPlayer();
+       try
+       {
+          AssetFileDescriptor descriptor = activity.getAssets().openFd( "8.12.mp3" );
+          mediaPlayer.setDataSource( descriptor.getFileDescriptor() );
+          mediaPlayer.prepare();
+          mediaPlayer.setLooping(true);
+          mediaPlayer.start();			
+       }
+       catch( Exception ex )
+       {
+          ex.printStackTrace();
+          Log.d( "Sound Sample", "couldn't load music 'music.mp3'" );
+          throw new RuntimeException( ex );
+       }
+    }
+ ... to be continued ...
+ 
+Als Member halten wir uns einen SoundPool, den AudioManager einen MediaPlayer sowie die später initialisierten ids der beiden Soundeffekte. Im Konstruktor bauen wir zuerst einen SoundPool der 10 Effekte gleichzeitig spielen können soll. Als nächstes holen wir uns den AudioManager den brauchen wir später noch. Dann sagen wir Android dass bei Betätigung der Volume-Tasten die Medienlautstärke geändert werden soll. Das ist wichtig, sonst wird nur die Klingeltonlautstärke über die Tasten geregelt.
+
+Als nächstes Laden wir die beiden Soundeffekte in den SoundPool. Diese liegen als Assets vor. Die beiden erhaltenen ids speichern wir in den entsprechenden Membern. 
+
+Nach dem Instanzieren des MediaPlayers lassen wir diesen das Musik-File abspielen und zwar geloopt. 
+
+Natürlich gibts noch ein paar andere Methoden:
+
+ ... continued ...
+ public void playShotSound( )
+ {
+    int volume = audioManager.getStreamVolume( AudioManager.STREAM_MUSIC );
+    soundPool.play(shotId, volume, volume, 1, 0, 1);
+ }
+ 	
+ public void playExplosionSound( )
+ {
+    int volume = audioManager.getStreamVolume( AudioManager.STREAM_MUSIC );
+    soundPool.play(explosionId, volume, volume, 1, 0, 1);
+ }
+ ... to be continued ...
+ 
+Zwei Methoden werden es uns später erlauben die Effekte für Schüsse und Explosionen abzuspielen. Auch hier sollten wir schon alles kennen. Wir holen uns jeweils die aktuelle Medienlautstärke und spielen dann den Effekt mit der entsprechenden id ab.
+
+Zu guter letzt müssen wir natürlich wieder aufräumen:
+
+ public void dispose( )
+ {
+    soundPool.release();
+    mediaPlayer.release();
+ }
+  
+Wir geben sowohl den SoundPool als auch den MediaPlayer frei. Letzteres ist wichtig da sonst die Musik auch nach dem schließen der Applikation weiterläuft. Wir dürfen also später nicht vergessen die ''SoundManager.dispose'' Methode aufzurufen.
+
+== SpaceInvaders Activity & Screens ==
+Endlich können wir uns dem letzten Baustein unserers Spiels widmen, der Activity und den sogenannten Screens. Ein Screen stellt einen Zustand im Spiel dar, in unserem Fall ist das der Start-Bildschirm der das Spiellogo zeigt sowie eine Aufforderung den Bildschirm zu berühren, den eigentlichen Spiel-Bildschirm der die Simulation laufen lässt und rendert und den Game-Over-Bildschirm der den erreichten Punktestand anzeigt. Die Aufteilung in Screens erlaubt es uns die verschiedenen Stati des Spiels in der eigentlich Activity zu managen. Auf einen Screen folgt ein anderer. Ein neuer Screen wird aktiviert sobald der aktuelle beendet ist. Ich habe dazu folgendes Interface definiert:
+
+ public interface GameScreen 
+ {
+    public void update( GameActivity activity );
+    public void render( GL10 gl, GameActivity activity );
+    public boolean isDone( );
+    public void dispose( );
+ }  
+ 
+Die ''update'' Methode soll den Zustand des Screens aktualisieren. Darunter fällt z.B. des laufen lassen der Simulation. Die Methode ''render'' sollte selbsterklärend sein. Die Methode ''isDone'' erlaubt es uns den Screen zu fragen ob er fertig ist und der nächste Screen angezeigt werden kann. Die Methode ''dispose'' werden wir aufrufen wenn wir auf den nächsten Screen schalten damit die Resourcen des alten wieder freigegeben werden (SoundManager, Renderer).
+
+Wie bereits erwähnt besitzt unser Space Invaders Clone drei Screens die jeweils von GameScreen ableiten. Wir werden diese zuerst besprechen und dann als letzten Punkt die Activity die all dies managed betrachten.
+
+=== StartScreen Klasse ===
+Der Start-Bildschirm soll zum einen unser Hintergrundbild darstellen sowie ein Logo und den Hinweis dass der Benutzer den Schirm berühren soll. Der Screen wird beendet sobald der User den Screen berührt hat. Das ganze ist nicht alt zu schwer zu implementieren, schaun wir es uns an:
+
+ public class StartScreen implements GameScreen
+ {	
+    Mesh backgroundMesh;
+    Texture backgroundTexture;
+    Mesh titleMesh;
+    Texture titleTexture;
+    boolean isDone = false;
+    SoundManager soundManager;
+    Font font;
+    Text text;
+    String pressText = "Touch Screen to Start!";
+ ... to be continued ...
+  
+Erstmal leiten wir von GameScreen ab. Als nächstes definieren wir uns ein paar Member. Dazu zählt die Texture und das Mesh für den Hintergrund bzw. für das Logo. Ein Flag namens ''isDone'' speichert ob der Screen fertig ist. Einen SoundManager brauchen wir auch da wir Hintergundmusik abspielen wollen. Auch eine Instanz von Font und Text brauchen wir zur Touch-Aufforderung. Der letzte Member ist im Endeffekt nur eine Konstante die den Aufforderungstext hält.
+
+ public StartScreen( GL10 gl, GameActivity activity )
+ {			
+    backgroundMesh = new Mesh( gl, 4, false, true, false );
+    backgroundMesh.texCoord(0, 0);
+    backgroundMesh.vertex(-1, 1, 0 );
+    backgroundMesh.texCoord(1, 0);
+    backgroundMesh.vertex(1, 1, 0 );
+    backgroundMesh.texCoord(1, 1);
+    backgroundMesh.vertex(1, -1, 0 );
+    backgroundMesh.texCoord(0, 1);
+    backgroundMesh.vertex(-1, -1, 0 );
+ 		
+    titleMesh = new Mesh( gl, 4, false, true, false );
+    titleMesh.texCoord(0, 0);
+    titleMesh.vertex(-256, 256, 0);
+    titleMesh.texCoord(1, 0);
+    titleMesh.vertex(256, 256, 0);
+    titleMesh.texCoord(1, 0.5f);
+    titleMesh.vertex(256, 0, 0);
+    titleMesh.texCoord(0, 0.5f);
+    titleMesh.vertex(-256, 0, 0);
+ 
+    try
+    {
+       Bitmap bitmap = BitmapFactory.decodeStream( activity.getAssets().open( "planet.jpg" ) );
+       backgroundTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Nearest, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
+       bitmap.recycle();
+ 
+       bitmap = BitmapFactory.decodeStream( activity.getAssets().open( "title.png" ) );
+       titleTexture = new Texture( gl, bitmap, TextureFilter.Nearest, TextureFilter.Nearest, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
+       bitmap.recycle();	
+    } 
+    catch( Exception ex )
+    {
+       Log.d( "Space Invaders", "couldn't load textures" );
+       throw new RuntimeException( ex );
+    }
+ 	
+    soundManager = new SoundManager(activity);
+ 		
+    font = new Font( gl, activity.getAssets(), "font.ttf", activity.getViewportWidth() > 480?32:16, FontStyle.Plain );
+    text = font.newText( gl );
+    text.setText( pressText );
+ }
+ ... to be continued ...
+ 
+Wie gewohnt laden wir hier alle unsere Resourcen. Zuerst bauen wir das Hintergrund-Mesh gleich wie im Renderer. Als nächstes bauen wir das Mesh für das Logo. Dieses definieren wir um den Ursprung in Pixelkoordinaten. Es hat die Abmessungen 512x256 und mapped auf den oberen Teil folgender Texture:
+
+[[Datei:title.png]]
+
+Als nächstes laden wir die Texturen für Hintergrund und Logo. Danach instanzieren wir einen neuen SoundManager. Abschließend bauen wir uns noch einen Font und eine Text Instanz der wir den Aufforderungstext setzen. Interessant hierbei ist das ich die Größe des Fonts abhängig von der Viewport Breite mache. Android unterstützt ja mittlerweile mehrere Bildschirmauflösungen. Ein 16 Pixel Font sieht auf 800x480 zu klein aus deswegen machen wir im Fall einer hohen Bildschirmauflösung den Font doppelt so groß.
+
+ ... continued ...
+ @Override
+ public boolean isDone() 
+ {	
+    return isDone;
+ }
+ ... to be continued ...
+ 
+Die erste Interface Methode ist relativ einfach, sie liefert nur den Inhalt des ''isDone'' Flags zurück und signalisiert so nach außen ob der Screen fertig ist oder nicht.
+
+ ... continued ...
+ @Override
+ public void update(GameActivity activity) 
+ {	
+    if( activity.isTouched() )
+    isDone = true;
+ }
+ ... to be continued ...
+ 
+Auch ''update'' hält sich simpel. Wir erfragen lediglich von der GameActivity ob der Screen aktuell berührt wird und setzen ''isDone'' entsprechend. Damit haben wir auch schon die Logik dieses Screens komplett implementiert. Fehlt noch das Rendern:
+
+ ... continued ...
+ @Override
+ public void render(GL10 gl, GameActivity activity) 
+ {	
+    gl.glViewport( 0, 0, activity.getViewportWidth(), activity.getViewportHeight() );
+    gl.glClear( GL10.GL_COLOR_BUFFER_BIT );
+    gl.glEnable( GL10.GL_TEXTURE_2D );
+    gl.glMatrixMode( GL10.GL_PROJECTION );
+    gl.glLoadIdentity();
+    gl.glMatrixMode( GL10.GL_MODELVIEW );
+    gl.glLoadIdentity();
+ 		
+    gl.glEnable( GL10.GL_BLEND );
+    gl.glBlendFunc( GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA );
+ 	
+    backgroundTexture.bind();
+    backgroundMesh.render(PrimitiveType.TriangleFan );
+ 
+    gl.glMatrixMode( GL10.GL_PROJECTION );
+    GLU.gluOrtho2D( gl, 0, activity.getViewportWidth(), 0, activity.getViewportHeight() );
+    gl.glMatrixMode( GL10.GL_MODELVIEW );
+    gl.glLoadIdentity();
+ 	
+    gl.glLoadIdentity();
+    gl.glTranslatef( activity.getViewportWidth() / 2, activity.getViewportHeight() - 256, 0 );
+    titleTexture.bind();
+    titleMesh.render(PrimitiveType.TriangleFan);
+ 
+    gl.glLoadIdentity();
+    gl.glTranslatef( activity.getViewportWidth() / 2 - font.getStringWidth( pressText ) / 2, 100, 0 );
+    text.render();
+ 	
+    gl.glDisable( GL10.GL_TEXTURE_2D );
+    gl.glDisable( GL10.GL_BLEND );
+ }
+ ... to be continued ...
+ 
+Wir starten wie immer mit dem setzen des Viewport und dem Löschen des Framebuffers. Als nächstes setzen wir die Projektions- und Model-View-Matrix für das Zeichnen des Hintergrunds. Das selbe haben wir ja schon im Renderer gemacht. Blending und Texturing schalten wir auch ein. Es folgt das Rendern des Hintergrunds. Danach setzen wir eine orthographische Projektion damit wir uns wieder im Bildschirmkoordinatensystem befinden. Das Logo zeichnen wir zentriert am oberen Ende des Bildschirms. Den Text zeichnen wir zentriert 100 Pixel über dem unteren Bildschirmrand. Abschließend schalten wir Texturing und Blending wieder aus und sind fertig.
+
+Eine Methode fehlt uns noch:
+ 
+ ... continued ...
+ public void dispose() 
+ {	
+    backgroundTexture.dispose();
+    titleTexture.dispose();
+    soundManager.dispose();
+    font.dispose();
+    text.dispose();
+    backgroundMesh.dispose();
+    titleMesh.dispose();
+ }
+	 
+Wie nicht anders zu erwarten geben wir hier wieder alle Resourcen frei. Augenmerk soll auch auf das Disposen des SoundManagers gelegt werden. Damit drehen wir auch wieder die Muskik ab die sonst weiterlaufen würde!
+
+=== GameOverScreen Klasse ===
+Die GameOverScreen Klasse ist nahezu ident mit der StartScreen Klasse. Einziger Unterschied ist das wir anstatt des Logos in großen Lettern Game Over anzeigen und anstatt der Aufforderung zum Berühren des Bildschirms die erreichte Punktezahl anzeigen die wir über den Konstruktor hereinbekommen. Logik und Rendering sind ident mit der der StartScreen Klasse. Ich erspare mir hier also die Auflistung des Codes.
+
+=== GameLoop Klasse ===
+Der Interessanteste Screen ist der GameLoop Screen. Hier instanzieren wir den Renderer und die Simulation und prozessieren den Input des Accelerometers um das Schiff zu bewegen. Durch die schöne Kapselung ist diese Klasse extrem klein:
+
+ public class GameLoop implements GameScreen, SimulationListener
+ {
+    public Simulation simulation;
+    Renderer renderer;	
+    SoundManager soundManager;
+ ... to be continued ...
+    
+Wir haben nur drei Member: die Simulation, den Renderer und einen SoundManager. Sehr hübsch.
+
+ ... continued ...
+ public GameLoop( GL10 gl, GameActivity activity )
+ {
+    simulation = new Simulation();
+    simulation.listener = this;
+    renderer = new Renderer( gl, activity );
+    soundManager = new SoundManager( activity );
+ }
+ 
+ public GameLoop(GL10 gl, GameActivity activity, Simulation simulation) 
+ {
+    this.simulation = simulation;
+    this.simulation.listener = this;
+    renderer = new Renderer( gl, activity );
+    soundManager = new SoundManager( activity );
+ }
+ ... to be continued ... 
+
+Konstruktoren gibt es zwei an der Zahl. Der erste instanziert seine Simulation selbst, der zweite nimmt eine Simulation von außen entgegen. Zweiteren werden wir später dazu verwenden ein pausiertes Spiel fort zu setzen. Nach dem Aufruf des Konstruktors haben wir einen voll geladenen Renderer, eine Simulation und einen SoundManager der bereits die Hintergrundmusik abspielt.
+
+ .... continued ...
+ @Override
+ public void update(GameActivity activity) 
+ {	
+    processInput( activity );
+    simulation.update( activity.getDeltaTime() );
+ }
+ ... to be continued ...
+
+Die ''update'' Methode des Screens ist wieder denkbar einfach. Zuerst rufen wir die Methode ''processInput'' auf die die Accelerometereingabe in Schiffbewegungen umsetzt. Danach updaten wir einfach die Simulation mit der aktuellen Delta Time.
+
+ ... continued ...
+ private void processInput( GameActivity activity )
+ {		
+    if( activity.getAccelerationOnYAxis() < 0 )
+       simulation.moveShipLeft( activity.getDeltaTime(), Math.abs(activity.getAccelerationOnYAxis()) / 10 );
+    else
+       simulation.moveShipRight( activity.getDeltaTime(), Math.abs(activity.getAccelerationOnYAxis()) / 10 );
+ 		
+    if( activity.isTouched() )
+       simulation.shot();
+ }
+ ... to be continued ...
+
+In dieser Methode nehmen wir den User Input entgegen. Wir erinnern uns noch an die Methoden ''moveShipLeft/moveShipRight'' der Simulation. Diese befeuern wir jetzt in Abhängigkeit vom Ausschlag des Accelerometers auf der y-Achse des Gerätes. Wie wir aus dem Rendering Kapitel wissen liegt dieser im Bereich (-10,10). Durch die Division mit 10 normieren wir diesen auf (-1,1). Dieser Faktor bestimmt dann wieviel von der Schiffsgeschwindigkeit ''Ship.SHIP_VELOCITY'' wirklich herangezogen wird um das Schiff zu bewegen. Je mehr der User das Gerät neigt desto schneller fährt das Schiff nach links und rechts. Das ist alles was wir brauchen um das Schiff zu bewegen. Sehr einfach dank unserer Kapselung.
+
+Auch Schüsse wollen wir abgeben. Dazu fragen wir die GameActivity ob der Screen berührt wird und rufen in diesem Fall ''Simulation.shot'' die für uns das erstellen eines Schusses sowie das Prüfen ob schon ein Schuss des Schiffes am Spielfeld ist übernimmt. Mehr Code brauchen wir für die Verarbeitung des User Inputs nicht!
+ 
+ ... continued ...
+ public boolean isDone( )
+ {
+    return simulation.ship.lives == 0;
+ }  
+ ... to be continued ...
+
+Der Screen ist fertig sobald das Schiff kein Leben mehr hat. Simpel.
+
+ ... continued ...
+ @Override
+ public void render(GL10 gl, GameActivity activity) 
+ {	
+    renderer.render( gl, activity, simulation);
+ }
+ ... to be continued ...
+ 
+Das Rendering übernimmt für uns die Renderer Klasse der wir einfach die Simulation übergeben.
+
+ ... continued ...
+ @Override
+ public void dispose( )
+ {
+    renderer.dispose();
+    soundManager.dispose();
+ }
+ ... to be continued ...
+ 
+Und auch das aufräumen gestaltet sich wieder sehr einfach.
+
+Aufmerksamen Lesern ist vielleicht aufgefallen das die Klasse zum einen das Interface SimulationListener implementiert und wir in den Konstruktoren der Simulation die Instanz der Klasse auch als Listener setzen. Das nützen wir aus um die Soundeffekte abzuspielen!
+ 
+ ... continued ...
+ @Override
+ public void explosion() 
+ {
+    soundManager.playExplosionSound();
+ }
+ 
+ @Override
+ public void shot() 
+ {	
+    soundManager.playShotSound();
+ }
+
+Jedesmal wenn in der Simulation ein Schuss fällt oder eine Explosion erzeugt wird rufen wir ja den Listener auf. In diesem Fall nutzen wir das um dem SoundManager zu sagen dass er bitte den entsprechenden Effekt abspielen soll. 
+
+Und das war das gesamte Spiel. Es fehlt nur noch die Activity dann sind wir komplett fertig!
+
+=== SpaceInvaders Activity ===
+
+
 [[Kategorie:Entwicklung]]
 

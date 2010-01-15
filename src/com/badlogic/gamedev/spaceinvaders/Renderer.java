@@ -38,10 +38,10 @@ public class Renderer
 	Mesh backgroundMesh;
 	Texture backgroundTexture;
 	Mesh explosionMesh;
-	Texture explosionTexture;
-	float invaderAngle = 0;
+	Texture explosionTexture;	
 	Font font;
 	Text text;
+	float invaderAngle = 0;
 	int lastScore = 0;
 	int lastLives = 0;
 	int lastWave = 0;
@@ -124,8 +124,7 @@ public class Renderer
 	public void render( GL10 gl, GameActivity activity, Simulation simulation )
 	{		
 		gl.glClear( GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT );
-		gl.glViewport( 0, 0, activity.getViewportWidth(), activity.getViewportHeight() );		
-		gl.glDisable( GL10.GL_DITHER );			
+		gl.glViewport( 0, 0, activity.getViewportWidth(), activity.getViewportHeight() );					
 		
 		gl.glEnable( GL10.GL_TEXTURE_2D );				
 		renderBackground( gl );		
@@ -166,6 +165,7 @@ public class Renderer
 		}
 		text.render();
 		gl.glDisable( GL10.GL_BLEND);
+		gl.glDisable( GL10.GL_TEXTURE_2D );
 		
 		invaderAngle+=activity.getDeltaTime() * 90;
 		if( invaderAngle > 360 )

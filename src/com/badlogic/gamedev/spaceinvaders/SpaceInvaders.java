@@ -16,7 +16,7 @@ import com.badlogic.gamedev.tools.GameListener;
 
 public class SpaceInvaders extends GameActivity implements GameListener
 {
-	GameScreen module;
+	GameScreen screen;
 	Simulation simulation = null;
 	
 	public void onCreate( Bundle bundle )
@@ -28,42 +28,57 @@ public class SpaceInvaders extends GameActivity implements GameListener
 		super.onCreate( bundle );
 		setGameListener( this );		
 		
-//		if( bundle != null && bundle.containsKey( "simulation" ) )
-//			simulation = (Simulation)bundle.getSerializable( "simulation" );
+		if( bundle != null && bundle.containsKey( "simulation" ) )
+			simulation = (Simulation)bundle.getSerializable( "simulation" );
+		
+		Log.d( "Space Invaders", "created, simulation: " + (simulation != null) );
 	}
 	
-//	@Override
-//	public void onSaveInstanceState( Bundle outState )
-//	{
-//		super.onSaveInstanceState( outState );
-////		if( module instanceof GameLoop )
-////			outState.putSerializable( "simulation", ((GameLoop)module).simulation );
-//	}
+	@Override
+	public void onSaveInstanceState( Bundle outState )
+	{
+		super.onSaveInstanceState( outState );
+		if( screen instanceof GameLoop )
+			outState.putSerializable( "simulation", ((GameLoop)screen).simulation );
+		Log.d( "Space Invaders", "saved game state" );
+	}
 
 	@Override
 	public void onPause( )
 	{
 		super.onPause();
-		if( module != null )			
-			module.dispose();
+		if( screen != null )			
+			screen.dispose();
+		if( screen instanceof GameLoop )
+			simulation = ((GameLoop)screen).simulation;
+		Log.d( "Space Invaders", "paused" );
 	}
 	
+	@Override
 	public void onResume( )
 	{
 		super.onResume();		
+		Log.d( "Space Invaders", "resumed" );
+	}	
+	
+	@Override
+	public void onDestroy( )
+	{
+		super.onDestroy();
+		Log.d( "Space Invaders", "destroyed" );
 	}
 	
 	@Override
 	public void setup(GameActivity activity, GL10 gl) 
 	{	
-//		if( simulation != null )
-//		{
-//			module = new GameLoop( gl, activity ); //, simulation );
-//			simulation = null;
-//			Log.d( "Space Invaders", "resuming previous game" );
-//		}
-//		else
-			module = new StartScreen(gl, activity);
+		if( simulation != null )
+		{
+			screen = new GameLoop( gl, activity, simulation );
+			simulation = null;
+			Log.d( "Space Invaders", "resuming previous game" );
+		}
+		else
+			screen = new StartScreen(gl, activity);
 	}
 
 	long start = System.nanoTime();
@@ -71,20 +86,20 @@ public class SpaceInvaders extends GameActivity implements GameListener
 	@Override
 	public void mainLoopIteration(GameActivity activity, GL10 gl) {		
 		
-		module.update( activity );
-		module.render( gl, activity);
+		screen.update( activity );
+		screen.render( gl, activity);
 		
-		if( module.isDone() )
+		if( screen.isDone() )
 		{
-			module.dispose();
-			if( module instanceof StartScreen )
-				module = new GameLoop( gl, activity );
+			screen.dispose();
+			if( screen instanceof StartScreen )
+				screen = new GameLoop( gl, activity );
 			else
-			if( module instanceof GameLoop )	
-				module = new GameOverScreen( gl, activity,((GameLoop)module).simulation.score );
+			if( screen instanceof GameLoop )	
+				screen = new GameOverScreen( gl, activity,((GameLoop)screen).simulation.score );
 			else
-			if( module instanceof GameOverScreen )
-				module = new StartScreen( gl, activity );			
+			if( screen instanceof GameOverScreen )
+				screen = new StartScreen( gl, activity );			
 		}
 		
 		frames++;
