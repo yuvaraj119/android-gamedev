@@ -126,7 +126,7 @@ public class GameActivity extends Activity implements GLSurfaceView.Renderer, On
 	protected void onResume() {
 		super.onResume();
 		glSurface.onResume();		
-	}
+	}	
 	
 	/**
 	 * Called when a touch event occurs.
