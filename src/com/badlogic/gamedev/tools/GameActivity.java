@@ -59,7 +59,8 @@ public class GameActivity extends Activity implements GLSurfaceView.Renderer, On
 	{
 		super.onCreate(savedInstanceState);
 		
-		glSurface = new GLSurfaceView( this );		
+		glSurface = new GLSurfaceView( this );
+		glSurface.setEGLConfigChooser(5, 6, 5, 0, 24, 0);
 		glSurface.setRenderer( this );
 		this.setContentView( glSurface );
 				
@@ -155,9 +156,7 @@ public class GameActivity extends Activity implements GLSurfaceView.Renderer, On
 		catch( Exception ex )
 		{
 			
-		}
-		
-		Log.d( "Space Invaders", "touched" );
+		}			
 		
 		return true;
 	}
