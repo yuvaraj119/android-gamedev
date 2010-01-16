@@ -90,19 +90,19 @@ public class Renderer
 		try
 		{					
 			Bitmap bitmap = BitmapFactory.decodeStream( activity.getAssets().open( "ship.png" ) );
-			shipTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Nearest, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
+			shipTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Linear, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
 			bitmap.recycle();
 			
 			bitmap = BitmapFactory.decodeStream( activity.getAssets().open( "invader.png" ));
-			invaderTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Nearest, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
+			invaderTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Linear, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
 			bitmap.recycle();
 			
 			bitmap = BitmapFactory.decodeStream( activity.getAssets().open( "planet.jpg" ) );
-			backgroundTexture = new Texture( gl, bitmap, TextureFilter.Nearest, TextureFilter.Nearest, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
+			backgroundTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Linear, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
 			bitmap.recycle();
 						
 			bitmap = BitmapFactory.decodeStream( activity.getAssets().open( "explode.png" ) );
-			explosionTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Nearest, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
+			explosionTexture = new Texture( gl, bitmap, TextureFilter.MipMap, TextureFilter.Linear, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge );
 			bitmap.recycle();
 		}
 		catch( Exception ex )
@@ -129,13 +129,13 @@ public class Renderer
 		gl.glEnable( GL10.GL_TEXTURE_2D );				
 		renderBackground( gl );		
 		
+		gl.glDisable( GL10.GL_DITHER );
 		gl.glEnable( GL10.GL_DEPTH_TEST );
 		gl.glEnable( GL10.GL_CULL_FACE );		
 		
 		setProjectionAndCamera( gl, simulation.ship, activity );
 		setLighting( gl );
-		
-			
+					
 		renderShip( gl, simulation.ship, activity );
 		renderInvaders( gl, simulation.invaders );
 		

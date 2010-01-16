@@ -19,38 +19,38 @@ public class SoundManager
 	
 	public SoundManager( GameActivity activity )
 	{
-		soundPool = new SoundPool( 10, AudioManager.STREAM_MUSIC, 0);
+		soundPool = new SoundPool( 5, AudioManager.STREAM_MUSIC, 0);
 		audioManager = (AudioManager)activity.getSystemService(Context.AUDIO_SERVICE);
 		activity.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		 
 		try
 		{
-			AssetFileDescriptor descriptor = activity.getAssets().openFd( "shot.wav" );
+			AssetFileDescriptor descriptor = activity.getAssets().openFd( "shot.ogg" );
 			shotId = soundPool.load( descriptor, 1 );
-			descriptor = activity.getAssets().openFd( "explosion.wav" );
+			descriptor = activity.getAssets().openFd( "explosion.ogg" );
 			explosionId = soundPool.load( descriptor, 1 );
 		}
 		catch( Exception ex )
 		{
-			Log.d( "Sound Sample", "couldn't load sound 'shot.wav'" );
+			Log.d( "Sound Sample", "couldn't load sound 'shot.ogg'" );
 			throw new RuntimeException( ex );
 		}
 		
-		mediaPlayer = new MediaPlayer();
-		try
-		{
-			AssetFileDescriptor descriptor = activity.getAssets().openFd( "8.12.mp3" );
-			mediaPlayer.setDataSource( descriptor.getFileDescriptor() );
-			mediaPlayer.prepare();
-			mediaPlayer.setLooping(true);
-			mediaPlayer.start();			
-		}
-		catch( Exception ex )
-		{
-			ex.printStackTrace();
-			Log.d( "Sound Sample", "couldn't load music 'music.mp3'" );
-			throw new RuntimeException( ex );
-		}
+//		mediaPlayer = new MediaPlayer();
+//		try
+//		{
+//			AssetFileDescriptor descriptor = activity.getAssets().openFd( "8.12.mp3" );
+//			mediaPlayer.setDataSource( descriptor.getFileDescriptor() );
+//			mediaPlayer.prepare();
+//			mediaPlayer.setLooping(true);
+//			mediaPlayer.start();			
+//		}
+//		catch( Exception ex )
+//		{
+//			ex.printStackTrace();
+//			Log.d( "Sound Sample", "couldn't load music 'music.mp3'" );
+//			throw new RuntimeException( ex );
+//		}
 	}
 	
 	public void playShotSound( )
@@ -68,6 +68,7 @@ public class SoundManager
 	public void dispose( )
 	{
 		soundPool.release();
-		mediaPlayer.release();
+//		mediaPlayer.stop();
+//		mediaPlayer.release();
 	}
 }

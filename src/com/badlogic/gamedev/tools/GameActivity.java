@@ -1,6 +1,8 @@
 package com.badlogic.gamedev.tools;
 
+import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.app.Activity;
@@ -10,7 +12,9 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.opengl.GLSurfaceView;
+import android.opengl.GLSurfaceView.EGLConfigChooser;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -55,7 +59,7 @@ public class GameActivity extends Activity implements GLSurfaceView.Renderer, On
 	{
 		super.onCreate(savedInstanceState);
 		
-		glSurface = new GLSurfaceView( this );
+		glSurface = new GLSurfaceView( this );		
 		glSurface.setRenderer( this );
 		this.setContentView( glSurface );
 				
@@ -146,12 +150,14 @@ public class GameActivity extends Activity implements GLSurfaceView.Renderer, On
 		
 		try
 		{
-			Thread.sleep( 16 );
+			Thread.sleep( 30 );
 		}
 		catch( Exception ex )
 		{
 			
 		}
+		
+		Log.d( "Space Invaders", "touched" );
 		
 		return true;
 	}
