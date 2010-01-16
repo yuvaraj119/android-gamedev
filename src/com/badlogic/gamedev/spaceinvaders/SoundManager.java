@@ -36,21 +36,21 @@ public class SoundManager
 			throw new RuntimeException( ex );
 		}
 		
-//		mediaPlayer = new MediaPlayer();
-//		try
-//		{
-//			AssetFileDescriptor descriptor = activity.getAssets().openFd( "8.12.mp3" );
-//			mediaPlayer.setDataSource( descriptor.getFileDescriptor() );
-//			mediaPlayer.prepare();
-//			mediaPlayer.setLooping(true);
-//			mediaPlayer.start();			
-//		}
-//		catch( Exception ex )
-//		{
-//			ex.printStackTrace();
-//			Log.d( "Sound Sample", "couldn't load music 'music.mp3'" );
-//			throw new RuntimeException( ex );
-//		}
+		mediaPlayer = new MediaPlayer();
+		try
+		{
+			AssetFileDescriptor descriptor = activity.getAssets().openFd( "8.12.mp3" );
+			mediaPlayer.setDataSource( descriptor.getFileDescriptor() );
+			mediaPlayer.prepare();
+			mediaPlayer.setLooping(true);
+			mediaPlayer.start();			
+		}
+		catch( Exception ex )
+		{
+			ex.printStackTrace();
+			Log.d( "Sound Sample", "couldn't load music 'music.mp3'" );
+			throw new RuntimeException( ex );
+		}
 	}
 	
 	public void playShotSound( )
@@ -68,7 +68,7 @@ public class SoundManager
 	public void dispose( )
 	{
 		soundPool.release();
-//		mediaPlayer.stop();
-//		mediaPlayer.release();
+		mediaPlayer.stop();
+		mediaPlayer.release();
 	}
 }
