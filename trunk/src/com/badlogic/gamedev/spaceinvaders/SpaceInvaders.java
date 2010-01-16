@@ -78,7 +78,10 @@ public class SpaceInvaders extends GameActivity implements GameListener
 			Log.d( "Space Invaders", "resuming previous game" );
 		}
 		else
+		{
 			screen = new StartScreen(gl, activity);
+			Log.d( "Space Invaders", "starting a new game" );
+		}
 	}
 
 	long start = System.nanoTime();
@@ -92,6 +95,7 @@ public class SpaceInvaders extends GameActivity implements GameListener
 		if( screen.isDone() )
 		{
 			screen.dispose();
+			Log.d( "Space Invaders", "switching screen: " + screen );
 			if( screen instanceof StartScreen )
 				screen = new GameLoop( gl, activity );
 			else
@@ -100,6 +104,7 @@ public class SpaceInvaders extends GameActivity implements GameListener
 			else
 			if( screen instanceof GameOverScreen )
 				screen = new StartScreen( gl, activity );			
+			Log.d("Space Invaders", "switched to screen: " + screen );
 		}
 		
 		frames++;

@@ -37,7 +37,7 @@ public class GameActivity extends Activity implements GLSurfaceView.Renderer, On
 	private int width, height;
 	
 	/** GameListener **/
-	private GameListener listener;
+	private GameListener listener;	
 	
 	/** start time of last frame in nano seconds **/
 	long lastFrameStart;
@@ -81,7 +81,7 @@ public class GameActivity extends Activity implements GLSurfaceView.Renderer, On
 	{						
 		long currentFrameStart = System.nanoTime();
 		deltaTime = (currentFrameStart-lastFrameStart) / 1000000000.0f;
-		lastFrameStart = currentFrameStart;
+		lastFrameStart = currentFrameStart;			
 		
 		if( listener != null )
 			listener.mainLoopIteration( this, gl );		
@@ -94,10 +94,7 @@ public class GameActivity extends Activity implements GLSurfaceView.Renderer, On
 	public void onSurfaceChanged(GL10 gl, int width, int height) 
 	{	
 		this.width = width;
-		this.height = height;
-		
-		if( listener != null )
-			listener.setup( this, gl );		
+		this.height = height;		
 	}
 
 	/**
@@ -110,6 +107,9 @@ public class GameActivity extends Activity implements GLSurfaceView.Renderer, On
 		String renderer = gl.glGetString( GL10.GL_RENDERER );
 		if( renderer.toLowerCase().contains("pixelflinger" ) )
 			Mesh.globalVBO = false;
+		
+		if( listener != null )
+			listener.setup( this, gl );
 	}
 	
 	/**
@@ -130,7 +130,7 @@ public class GameActivity extends Activity implements GLSurfaceView.Renderer, On
 	protected void onResume() {
 		super.onResume();
 		glSurface.onResume();		
-	}	
+	}		
 	
 	/**
 	 * Called when a touch event occurs.
@@ -188,7 +188,7 @@ public class GameActivity extends Activity implements GLSurfaceView.Renderer, On
 	 */
 	public void setGameListener(GameListener listener) 
 	{	
-		this.listener = listener;
+		this.listener = listener;		
 	}
 	
 	/**
