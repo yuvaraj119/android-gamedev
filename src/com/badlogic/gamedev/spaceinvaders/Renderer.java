@@ -134,7 +134,7 @@ public class Renderer
 		gl.glEnable( GL10.GL_CULL_FACE );		
 		
 		setProjectionAndCamera( gl, simulation.ship, activity );
-		setLighting( gl );
+//		setLighting( gl );
 					
 		renderShip( gl, simulation.ship, activity );
 		renderInvaders( gl, simulation.invaders );
