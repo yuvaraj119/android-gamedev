@@ -112,7 +112,7 @@ public class Simulation implements Serializable
 		}
 		
 		for( int i = 0; i < removedExplosions.size(); i++ )
-			explosions.remove( explosions.get(i) );
+			explosions.remove( removedExplosions.get(i) );
 	}
 	
 	private void checkInvaderCollision() 
