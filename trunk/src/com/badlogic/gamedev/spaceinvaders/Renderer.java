@@ -134,7 +134,7 @@ public class Renderer
 		gl.glEnable( GL10.GL_CULL_FACE );		
 		
 		setProjectionAndCamera( gl, simulation.ship, activity );
-//		setLighting( gl );
+		setLighting( gl );
 					
 		renderShip( gl, simulation.ship, activity );
 		renderInvaders( gl, simulation.invaders );
@@ -234,7 +234,7 @@ public class Renderer
 			Invader invader = invaders.get(i);
 			gl.glPushMatrix();
 			gl.glTranslatef( invader.position.x, invader.position.y, invader.position.z );
-			gl.glRotatef( invaderAngle, 0, 1, 0 );
+//			gl.glRotatef( invaderAngle, 0, 1, 0 );
 			invaderMesh.render(PrimitiveType.Triangles);
 			gl.glPopMatrix();
 		}
