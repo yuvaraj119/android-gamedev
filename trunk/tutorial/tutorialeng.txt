@@ -102,11 +102,11 @@ Our first activity has a couple of tasks to perform
 
 We'll simple derrive a new class from the class Activity and call it GameActivity. We give this class a member of the type GLSurfaceView which we create and attach to the activity in the ''onCreate'' method. Our derrived GameActivity also implements the interface Renderer. We store the current size of the GLSurfaceView we receive when ''onSurfaceCreated'' is called in two additional members. The area to which we can draw and for which we receive the size in ''onSurfaceCreated'' is also called [http://en.wikipedia.org/wiki/Viewport Viewport]. We will remember this term! To allow access to the viewports dimensions we add two getter methods to our activity.
 
-To implement the activity life cycle in a clean manner we also have to implement the ''onPause'' and ''onResume'' methods. In these methods we call the respective methods of the GLSurfaceView which needs this per documentation to pause and resume the rendering thread. 
+To implement the activity life cycle in a clean manner we also have to override the ''onPause'' and ''onResume'' methods. In these methods we call the respective methods of the GLSurfaceView which needs this per documentation to pause and resume the rendering thread. 
 
-In unserer Activity werden wir auch gleich die Frame Rate und die Zeitspanne zwischen dem aktuellen und dem letzten Frame messen. Die Zeitspanne nennt man auch Delta Time, wieder ein Begriff den wir uns ab jetzt merken werden. Um eine genaue Zeitmessung im Millisekundenbereich zu gewährleisten verwenden wir die [http://java.sun.com/j2se/1.5.0/docs/api/java/lang/System.html#nanoTime%28%29 System.nanoTime] Methode. Diese liefert uns die aktuelle Zeit in Nanosekunden als long Typ zurück. Für die Delta Time merken wir uns den Zeitpunkt des letzten Frames als eigenen Member in der Klasse. Die Delta Time selbst errechnen wir dann in der ''onDrawFrame'' Methode indem wir einfach die aktuelle Zeit minus der zuvor gespeicherten Zeit nehmen. Diese Delta Time speichern wir in eine weitere Member Variable um später dann im Spiel einfach darauf zugreifen zu können, wir benötigen sie ja für das Frame Independant Movement. Zum Abschluss schreiben wir die aktuelle Zeit wieder in unsere dafür vorgesehene Member Variable für die nächste Delta Time Berechnung im nächsten Frame. 
+We will also measure the delta time between the current and last frame in the GameActivity. For precise measurements we used the [  [http://java.sun.com/j2se/1.5.0/docs/api/java/lang/System.html#nanoTime%28%29 System.nanoTime] method. It returns the current time in nanoseconds as a long. We store the timestamp of the last frame in a meber of the GameActivity class. The delta time is calculated in the ''onDrawFrame'' method were we simply substract the last time stamp from the current time stamp. The delta time is then stored in another member so that we can access is later on for frame independent movement. Finally we write the current time stamp into the apropriate member. 
 
-Als letzten Puzzle Stein werden wir noch an unserem Design etwas failen. Wir wollen unsere Activity ja nicht jedesmal neu schreiben, darum führen wir ein eigenes Listener Konzept ein. Dies machen wir über eine simples Interface welches zwei Methoden hat:
+For a clean design we will add our own listener concept to the GameActivity. Here's the simple interface:
 
  public interface GameListener
  {
@@ -114,147 +114,147 @@ Als letzten Puzzle Stein werden wir noch an unserem Design etwas failen. Wir wol
     public void mainLoopIteration( GameActivity activity, GL10 gl );
  }
 
-Der GameActivity spendieren wir eine Methode ''setGameListener'' der wir eine GameListener Implementierung übergeben können. Die Activity merkt sich diesen Listener und ruft seine Methoden entsprechend auf. Die Methode ''setup'' wird dabei nach dem Start des Spiels aufgerufen und ermöglicht es uns Resourcen zu laden die wir dann später im Main Loop gebrauchen. In der GameActivity rufen wir diese Methode in ''onSurfaceCreated'' auf, so ein GameListener gesetzt wurde. Die Methode mainLoopIteration implementiert den Körper des Main Loop. Hier werden wir später dann alles für unser Spiel nötige erledigen wie die Welt zu simulieren oder diese zu Zeichnen. Diese Methode wird in der Activity in ''onDrawFrame'' aufgerufen. Fangen wir mit der Programmierung eines neuen Spiels an implementieren wir lediglich eine Activity die direkt von GameActivity ableitet und setzen ihr einen GameListener in der onCreate Methode. Der GameListener ist also das eigentlich Spiel. 
+The GameActivity receives a method called ''setGameListener'' via which we can set an instance of the GameListener interface. Die GameActivity calls the ''setup'' method of the listener each time the GLSurfaceView surface is created anew. The ''mainLoopIteration'' is called during each invocation of the ''onDrawFrame'' method the GameActivity implements which in turn is called by the renderer thread of the GLSurfaceView. When we start implementing a new game we simply derive a class from GameActivity and set a GameListener which implements the actual game code. 
 
-Damit haben wir vorerst den Grundstock für unser erstes Spiel gelegt, eine voll Funktionsfähige Activity die uns die Verwendung von OpenGL erlaubt. Wir werden die GameActivity Klasse gleich noch ein wenig ausbauen um dort auch Eingaben entgegen zu nehmen. Den Source für die Klasse könnt ihr euch unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/tools/GameActivity.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/tools/GameActivity.java] ansehen.  
+We now have a fully functional activity which we can simply derive from to write our awesome game. It also initiates OpenGL for us and makes it rather simple to implement the main loop logic we need for our game. The source for the complete GameActivity class is available at [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/tools/GameActivity.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/tools/GameActivity.java]. Go check it out and make sure you understand what's happening. 
 
 == Touch Screen & Accelerometer ==
-Das Lesen von User Eingaben auf Android ist wie vieles anderes wieder über ein Listener Konzept implementiert. Wir vernachlässigen hier Eingaben über den Trackball, die Tastatur oder das D-Pad da dies den Rahmen dieses Artikels wohl sprengen würde. Wir konzentrieren uns zuerst auf Touch Eingaben und gehen später zum Accelerometer über.
+Reading user input on Android is implemented as a listener concept (like a lot of other functionality). We do not treat input via the trackball, keyboard or D-Pas here and will rather focus on the touch screen and the accelerometer.
 
-Für die Eingabe per Touch brauchen wir ein GUI Element das diese auch entgegennimmt. Mit der GLSurfaceView in unserer GameActivity haben wir bereits einen geeigneten Kandidaten. Es gilt somit nur einen entsprechenden Listener bei der GLSurfaceView zu registrieren. Das Interface das wir implementieren müssen nennt sich [http://developer.android.com/reference/android/view/View.OnTouchListener.html OnTouchListener] und hat nur eine einzige Methode
+For receiving touch input we need a GUI element that receives those inputs. The GLSurfaceView we instantiate in the GameActivity is our number one candidate for this task. The interface we have to implement is called http://developer.android.com/reference/android/view/View.OnTouchListener.html OnTouchListener] and has only a single method we have to implement
 
  public abstract boolean onTouch(View v, MotionEvent event)
 
-Für uns interessant ist der Parameter event vom Typ [http://developer.android.com/reference/android/view/MotionEvent.html MotionEvent]. Dieser beinhaltet die Koordinaten des Touch events sowie die Aktion, also ob der Finger gerade aufgesetzt wurde, ob er gezogen wird oder ob er wieder hochgegangen ist. Die Koordinaten sind dabei zweidimensional und relativ zum View für den wir den Listener registriert haben. Über die Methoden [http://developer.android.com/reference/android/view/MotionEvent.html#getX%28%29 MotionEvent.getX()] und [http://developer.android.com/reference/android/view/MotionEvent.html#getY%28%29 MotionEvent.getY()] erhalten wird die Werte. Abhängig davon ob wir im Landscape oder Portrait Modus sind sind die X und Y Achse ausgerichtet. Die positive X Achse zeigt dabei immer nach rechts, die positive Y Achse nach '''unten'''. Dies ist ein wichtiges Faktum welches vielen Beginnern am Anfang Probleme macht da es nicht mit dem in der Schule gelernten klassischen cartesischen Koordinatensystem übereinstimmt. Die Koordinaten werden dabei wieder in Pixel angegeben. 
+For our purpose only the Parameter ''event'' of the type [http://developer.android.com/reference/android/view/MotionEvent.html MotionEvent] is of interest. This parameter contains the coordinates of the touch event as well as the action, that is wheter a finger has just pressed the display or has been lifted. The coordinates are twodimensional and relativ to the GLSurfaceView. Via the methods [http://developer.android.com/reference/android/view/MotionEvent.html#getX%28%29 MotionEvent.getX()] and [http://developer.android.com/reference/android/view/MotionEvent.html#getY%28%29 MotionEvent.getY()] we obtain the coordinates. The direction of the x and y-axis depend on wheter we are in landscape or portrait mode. The positive x-axis always points to the right, the positive y-axis always points downwards. This is an important fact many beginners are confused about when they start coding graphical applications. The coordinates are given in pixels. 
 
-Welche Aktion gerade aktuell ist liefert uns die Methode ''MotionEvent.getAction()''. Wir werden auf die Aktionen 
-''MotionEvent.ACTION_DOWN'', ''MotionEvent.ACTION_UP'' und ''MotionEvent.ACTION_MOVE'' reagieren. Die GameActivity lassen wir das interface ''OnMotionListener'' implementieren. Wir spendieren ihr auch drei neue Member variablen, ''touchX'', ''touchY'' und ''isTouched'' in denen wir den aktuellen Status des Touch-Screen speichern. Kommt ein ''MotionEvent.ACTION_DOWN'' Event daher speichern wir die x und y Koordinate in ''touchX'' bzw. ''touchY'' und setzen ''isTouched'' auf true, bei einem ''MotionEvent.ACTION_MOVE'' machen wir das selbe und im Falle von ''MotionEvent.ACTION_UP'' setzen wir ''isTouched'' auf false. Damit wir im GameListener auf den aktuellen Status zugreifen können geben wir der GameActivity auch noch Getter Methoden um auslesen zu können. Dieses auslesen des aktuellen Status nennt man allgemein auch [http://de.wikipedia.org/wiki/Polling_%28Informatik%29 Polling]. 
+The method ''MotionEvent.getAction()'' tells us which action happened. We will react on the actions 
+''MotionEvent.ACTION_DOWN'', ''MotionEvent.ACTION_UP'' und ''MotionEvent.ACTION_MOVE''. To store the current state of the touch screen we add three new members to the GameActivity called ''touchX'', ''touchY'' and ''isTouched''. When a ''MotionEvent.ACTION_DOWN'' event arrives we store it's x and y coordinate in the members ''touchX'' and ''touchY'' and set ''isTouched'' to true. In case of a ''MotionEvent.ACTION_MOVE'' event we simply update the touch coordinates. Finally, when a ''MotionEvent.ACTION_UP'' event arrives we set ''isTouched'' to false. Within the GameListener instance we can access the current touch coordinates as well as wheter the screen is actually touched via apropriate getter methods from the GameActivity. This method of processing input is also called [http://de.wikipedia.org/wiki/Polling_%28Informatik%29 polling]. 
 
-Es sei angemerkt das die ''onTouch'' Methode im GUI Thread und nicht im Render Thread der GLSurfaceView vom Betriebssystem aufgerufen wird. Normalerweise müßte man sich hier Sorgen um etwaige Thread Synchronisierung machen. Da es sich bei den Member Variablen die den Status halten aber um Plain Old Datatypes handelt und das schreiben auf diese atomar ist können wir das hier einfach übersehen. 
+It should be noted that the ''onTouch'' method is called in the GUI thread and not in the rendering thread of the GLSurfaceView. Normally we'd have to care about properly synchronizing the member variables we write to. Since those are plain old datatypes in our case we can get away with not doing so as writes are atomic.
 
-Die GameActivity registriert sich selbst als OnTouchListener bei der GLSurfaceView in der ''onCreate'' Methode die wir dementsprechend erweitern.
+The GameActivity simply registers itself as an OnTouchListener for the GLSurfaceView in the ''onCreate'' method.
 
-Der Accelerometer ist ebenfalls wieder über ein Listener Konzept ansprechbar (ja, das zieht sich so ziemlich durch alles durch). Das entsprechende Interface nennt sich [http://developer.android.com/reference/android/hardware/SensorEventListener.html SensorEventListener]. Diesen registriert man aber nicht bei einem View sondern beim [http://developer.android.com/reference/android/hardware/SensorManager.html SensorManager]. Zugriff erhalten wir auf diesen wie folgt:
+To get input from the accelerometer we again have to write a listener. The interface we have to implement is called [http://developer.android.com/reference/android/hardware/SensorEventListener.html SensorEventListener]. We register this interface not with a specific view but with the [http://developer.android.com/reference/android/hardware/SensorManager.html SensorManager]. We get an instance of this manager as follows:
 
  SensorManager manager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
 
-Bevor wir uns dort registrieren können müssen wir aber zuerst einmal schaun ob der Accelerometer überhaupt verfügbar ist. Dies funktioniert so:
+Before we can register we have to check wheter there is an accelerometer installed. The following line of code does exactly this:
 
  boolean accelerometerAvailable = manager.getSensorList(Sensor.TYPE_ACCELEROMETER).size() > 0;
 
-Ist ein Accelerometer vorhanden können wir uns ohne große Umschweife bei diesem registrieren:
+If we found an accelerometer we can register ourself as a listener:
 
  Sensor accelerometer = manager.getSensorList(Sensor.TYPE_ACCELEROMETER).get(0);
  if(!manager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME ) )
     accelerometerAvailable = false;
 
-Vom Manager holen wir uns zuerst den ersten Accelerometer Sensor den wir finden (in der Regel gibt es davon nur einen). Anschließend registrieren wir uns über die [http://developer.android.com/reference/android/hardware/SensorManager.html#registerListener%28android.hardware.SensorEventListener,%20android.hardware.Sensor,%20int,%20android.os.Handler%29 SensorManager.registerListener()] Methode. Dieser Vorgang kann fehlschlagen darum prüfen wir das auch. Der Parameter ''SensorManager.SENSOR_DELAY_GAME'' gibt dabei an wie oft das Betriebssystem den Accelerometer abtasten soll, in diesem Fall oft genug um für ein Spiel zu genügen. 
+At first we get the first accelerometer sensor we can find. Next we register ourself via the [http://developer.android.com/reference/android/hardware/SensorManager.html#registerListener%28android.hardware.SensorEventListener,%20android.hardware.Sensor,%20int,%20android.os.Handler%29 SensorManager.registerListener()] method of the sensor manager. This process can fail so we check that and set a member variable accordingly. The parameter SensorManager.SENSOR_DELAY_GAME tells the manager how often the accelerometer should be checked, in this case as often as is sufficient for a game.
 
-Was noch bleibt ist das verabeiten der Sensor Events. Das machen wir in der [http://developer.android.com/reference/android/hardware/SensorEventListener.html#onSensorChanged%28android.hardware.SensorEvent%29 SensorEventListener.onSensorChanged()] Methode die wir implementieren. 
+What's left is the processing and storage of the accelerometer input values. This is done in the [http://developer.android.com/reference/android/hardware/SensorEventListener.html#onSensorChanged%28android.hardware.SensorEvent%29 SensorEventListener.onSensorChanged()] method we implement:
 
  public abstract void onSensorChanged(SensorEvent event)
 
-Ähnlich wie bei Touch-verarbeiten bekommen wir hier wieder ein Event, in diesem Fall vom Typ [http://developer.android.com/reference/android/hardware/SensorEvent.html SensorEvent]. Diese Klasse besitzt einen public Member namens values der die für uns relevanten Werte enthält. Derer gibt es drei an der Zahl gespeichert an den Indizes 0 bis 2. Diese drei Werte geben dabei die Beschleunigung in Meter pro Sekunde entlang der x, y und z-Achse des Android Devices an. Der maximal Wert beträgt dabei jeweils +-9.81m/s was der Erdbeschleunigung entspricht. Hält man das Android Device im Portrait mode so geht die positive x-Achse nach rechts, die positive y-Achse nach oben und die positive z-Achse gerade aus durch das Device. 
+We receive an event of type [http://developer.android.com/reference/android/hardware/SensorEvent.html SensorEvent] similar to handling touch input. This class has a member called ''values'' which contains the measurements of the accelerometer on its three axis. This values tell us what acceleration is measured in meters per second on each of the three axis. They range from -10 to +10 roughly and coincide with the gravity acceleration we all are affected by. If you hold the device in portrait mode the positive x-axis goes to the right, the positive y-axis goes upwards and the positive z-axis goes through the device:
 
 <gallery perrow=1>
 Datei:Motorola_Milestone_2.jpg|Accelerometer Achsen
 </gallery>
 
-Dies bleibt auch so wenn man das Device im Landscape Modus haltet. Wir werden dann bei der Space Invaders Umsetzung sehen wie wir diese Werte ausnutzen können. 
+This stays the same if you hold the device in landscape mode (different to the screen coordinate system for touch events which changes in this case).
 
-Gleich wie für Touch Events spendieren wir der GameActivity einige neue Dinge. Zu aller erst wäre da eine neue Member Variable vom Typ float array. Diese hält unsere drei Accelerometer Werte. Weiters lassen wir die Activity das SensorEventListener Interface implementieren. Zum Abschluss bauen wir noch drei Methoden die uns jeweils den Accelerometer Wert für eine Achse liefern und wir sind fertig. Gleich wie für TouchEvents können wir damit den Accelerometer Status pollen. 
+To store those values for polling we add a new member to the GameActivity, a float array with 3 elements. The first element holds the current acceleration on the x-axis, the second the acceleration on the y-axis and the third the acceleration on the z-axis. We also add three new getter methods that allow our GameListener to poll the current acceleration on each axis. 
 
-Eine Beispiel-Applikation die den aktuellen Touch- und Accelerometer-Status per LogCat ausgibt findet ihr unter [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/InputSample.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/InputSample.java]. Diese zeigt auch gleich wie wir ab jetzt neue Samples und das eigentlich Spiel aufbauen werden. Wir leiten zuerst von GameActivity ab, registrieren uns in der ''onCreate'' Methode als GameListener bei uns selbst und befüllen dann die ''setup'' und ''render'' Methode mit unserem Applikations-Code. Einfach und elegant.
+A sample application that prints the current touch and acceleration events can be found at [http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/InputSample.java http://code.google.com/p/android-gamedev/source/browse/trunk/src/com/badlogic/gamedev/samples/InputSample.java]. This sample also shows how to setup a new Activity deriving from the GameActivity and how to implement the GameListener interface. 
 
-== Resourcen, Assets und die SD-Karte ==
-Date Ein- und Ausgabe auf Android ist ein weites Land. Mehrere Möglichkeiten stehen uns zur Verfügung. Wir werden kurz auf alle eingehen, kleine Code-Snippets sollen illustrieren wie man die einzelnen Möglichkeiten verwenden kann.
+== Resourcen, Assets and the SD-Card ==
+File in- and output is a wide land on android. There are a couple of options you can chose from to organize and access your files. We will investigate three of those options.
 
 === Resource ===
-Resourcen stellen den von Google gewünschten Weg zur Verwaltung von Dateien dar. Sie werden im Android Projekt in speziel dafür vorgesehene Ordner gespeichert und sind dann im Applikations Code über Identifier direkt ansprechbar. Für die Spieleentwicklung sind sie meiner Ansicht nach nur bedingt von Nutzen da die vorgegebene Verzeichnisstruktur etwas einschränkt. Auf Resourcen gibt es nur Lesezugriff da sie direkt in der Apk-Datei der Applikation abgelegt werden, ähnlich wie Resourcen in normalen Java Jar-Dateien. Einen schönen Überblick bietet folgender [http://developer.android.com/guide/topics/resources/resources-i18n.html Link], wir lassen Resourcen einmal außen vor und wenden uns dem nächsten Kandidaten zu.
+Resources represent the way Google wants you to organize your application files. They are put into a special folder in your Android project and are accessed via an identifier in the application code. For my taste this is a little bit to restrictive for game development as you are forced to use a specific folder structure. You can also only read resources as they are packed into the apk-file of your application, similar to resources in common Java jar-files. A nice overview of resources is given [http://developer.android.com/guide/topics/resources/resources-i18n.html here], we won't discuss them here any further.
 
 === Assets ===
-Assets werden ebenfalls wie Resourcen direkt in der APK-Datei eingepackt. Der Vorteil liegt hier in der freien Wahl der Verzeichnisstruktur. Sie ähneln damit viel mehr dem herkömmlichen Java Resourcen Mechanismus (und sind mir daher auch sympathischer). Im Android Projekt kann man unter dem Assets Verzeichnis seine eigene Struktur beliebig anlegen. Der Zugriff auf ein Asset läuft dabei gewohnt über InputStreams:
+Assets are also stored in the apk-file. The advantage here is that you can organize them in any way you want. They are more similar to standard Java resources. In you Android project you can create your own structure in the assets directory. To get access to a specific asset you do the following
 
  InputStream in = activity.getAssets().open( "path/to/resource" );
 
-Wie Resourcen sind auch Assets nur lesbar.
+Assets are read-only like resources.
 
 === SD Karte ===
-So der Besitzer des Android Devices eine SD-Karte eingelegt hat kann man in der Regel auf dieser schreiben und lesen. Dazu bedarf es im AndroidManifest.xml File des Projektes eines Zusatzes:
+If the device owner inserted an SD-card we can easily read and write to it. We only have to specify a special permission in the AdnroidManifest.xml file like this:
 
  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
-Ein- und Ausgabe funktioniert dann über die herkömmlichen Java Klassen:
+In- and output of files works via the standard Java classes:
 
  FileInputStream in = new FileInputStream( "/sdcard/path/to/file" );
  FileOutputStream out = new FileOutputStream( "/sdcard/path/to/file" );
 
 == OpenGL ES ==
-Jetzt geht's ans Eingemachte. [http://en.wikipedia.org/wiki/OpenGL_ES OpenGL ES] ist eine Schnittstelle die es uns erlaubt direkt mit der Grafikkarte eines mobilen Devices zu sprechen. Der Standard wurde von mehreren Herstellern gemeinsam entworfen und lehnt sich stark an die Variante an die in herkömmlichen PCs aber auch Workstations zum Einsatz kommt (genauer an die Version 1.3). Im Rahmen dieses Artikels werden wir uns die wichtigsten Dinge zu Gemüte führen, verständlicherweise kann ich hier aber nicht auf alles und jedes eingehen. Bevor wir uns in die Untiefen von OpenGL ES stürzen müssen wir uns aber noch ein paar grundlegende Dinge anschaun die allgemein in der Computergrafik gelten.
+Now it's getting interesting. [http://en.wikipedia.org/wiki/OpenGL_ES OpenGL ES] is an API that grants us access to the graphics hardware of our mobile devices. It's a standard developed by multiple vendors and supervised by the Khronos group. The standard is defined relative to the standard desktop OpenGL version 1.3. We will have a look at the most important parts of OpenGL in this article. Before we dive into that topic we have to have a short look on graphics programming in general.
 
 === Grundlegendes zur Grafikprogrammierung ===
-Die Entwicklung im Grafikbereich war in den letzten Jahrzehnten extrem. Viele Dinge haben sich geändert, bei der Programmierung blieb aber auch einiges gleich. Grundlage für so ziemlich jede Art von Grafikprogrammierung ist der sogenannte [http://en.wikipedia.org/wiki/Framebuffer Frame Buffer]. Dieser ist ein Teil des Video-RAM und entspricht in Java Termen einem großen eindimensionalen Array in dem die Farbwerte jedes Pixels für das aktuell am Bildschirm angezeigte Bild gespeichert werden. Wie die Farbwerte codiert werden hängt vom Bildschirmmodus ab. Hier kommt der Begriff der [http://de.wikipedia.org/wiki/Farbtiefe_%28Computergrafik%29 Farbtiefe] ins Spiel. Diese spezifiziert wieviele Bits pro Pixel verwendet werden. Herkömmlicherweise sind das bei Desktop Systemen 24- bzw. 32-Bit. Auf mobilen Devices sind 16-Bit Farbtiefen weit verbreitet. Die Farbe selbst wird als Rot-Grün-Blau Triple bzw. Rot-Grün-Blau-Alpha Quadruple in diesen 16-, 24- oder 32-Bit abgelegt. Je nach Farbtiefe kann für jede der Komponenten natürlich eine größere oder kleinere Reichweite entstehen. Wir müssen uns aber Spaghettimonster sei dank bei OpenGL ES nicht oft und vor allem nicht so intensiv wie zu DOS-Zeiten mit der Thematik auseinandersetzen. Farben werden in OpenGL ES normalerweise normiert, d.h. im Bereich zwischen 0 und 1 für jede der Komponenten der Farbe (rot, grün, blau, alpha=Transparenz) angegeben. 
+The base for nearly every form of graphics programming is the so called [http://en.wikipedia.org/wiki/Framebuffer frame buffer]. It's part of the video RAM on your graphics card and is in essence a onedimensional array in Java terms. Each element in this array holds the color of a pixel on screen. How the pixel colors are encoded depends on the screen mode. Here the term [http://en.wikipedia.org/wiki/Color_depth color depth] comes into play. It specifies how many bits are allocated and used per pixel. Usually 24- or 32-bits are used per pixels on desktop machines. On mobile devices the color depth is often 16-bits. The color itself is given as a red-green-blue triple or a red-green-blue-alpha quadruple. Each component uses specific bits of the pixel value in the frame buffer array. Depending on the color depth we can use more or less colors. In OpenGL we don't have to directly cope with the frame buffer and the color depth. Color components are usually given in the range 0 to 1 and OpenGL translates them to the representation actually used by the frame buffer. 
 
-Wollen wir also die Ausgabe am Bildschirm ändern so müssen wir den Framebuffer, genauer die Pixel im Framebuffer manipulieren. Früher geschah das wirklich quasi noch per Hand, heutzutage wird uns diese direkte Manipulation des Framebuffer von Bibliotheken wie OpenGL abgenommen. Grob gesagt zeichnet OpenGL für uns gefärbte, texturierte Dreiecke in den Framebuffer und das ganze Hardwarebeschleunigt. Wir haben Einfluss darauf wo im Framebuffer diese Dreiecke wie gezeichnet werden, wie wir später noch sehen. 
+If we want to change the contents on the screen we have to change the frame buffer, more precisely the pixels in the frame buffer. In the past this was done manually by accessing the frame buffer memory directly. Nowadays various abstraction layers and APIs do the dirty work for us. In this respect OpenGL is nothing more than a fancy triangle renderer which draws triangles to the frame buffer. 
 
-Pixel müssen natürlich addressiert werden können. Man verwendet dazu ein zweidimensionales Koordinaten-System. Koordinaten in diesem System werden dabei in eine lineare Addresse im Framebuffer umgerechnet mit der einfachen Formel:
+Somehow pixels have to be addressed. Normally one uses a twodimensional coordinate system much like the one used for touch events, with the positive y-axis pointing down and the origin being in the upper left corner of the screen. To get the linear address of a pixel in the frame buffer one uses the following formula:
 
- Adresse = x + y * Breite
+ address = x + y * width
 
-Wobei mit Breite die Breite des Bildschirms in Pixel gemeint ist. Hier erklärt sich auch wieso die y-Achse in diesem Koordinaten-System nach unten zeigt (wie jenes das wir für Touch Events verwenden). Die Adresse 0 im Frame Buffer entspricht dem Pixel in der oberen linken Ecke des Bildschirms und hat die Koordinaten 0,0. Bei CRT-Monitoren fängt der Kathodenstrahl in dieser Ecke an, die Daten für die Intensität die er haben soll bekommt er vereinfacht gesagt aus dem Frame Buffer, wobei natürlich am Anfang dieses Frame Buffers zu lesen begonnen wird (Position 0, Koordinate 0,0).
+Where ''width'' is the width of the screen in pixels. Here we can also see why the positive y-axis is pointing downwards. The first address of the frame buffer is encoding the pixel in the upper left corner of the screen. CRT-monitors start their cathodebeam in this corner of the screen and get the "color" from the first address in the frame buffer moving to the right. 
+ 
+OpenGL works with this coordinate system internally (also called device coordinate system). On the outside, that is the side we are concerned about, it uses a normalized coordinate system when unconfigured. In this system the origin is in the middle of the screen, the positive x-axis points to the right and the positive y-axis points upwards. The x coordinate of the pixels to the left and right are at -1,1 respectively, the same is true for pixels on the top and bottom border of the screen. If we want to work in a pixel perfect 2D coordinate system like in the case of touch events we have to configure OpenGL to use this system. We'll see how to do this later on. 
 
-OpenGL arbeitet intern auch in diesem Koordinaten-System, nach außen aber mit einem anderen. Unkonfiguriert liegt der Ursprung in der Mitte des Bildschirms, die positive x-Achse geht nach rechts und die positive y-Achse geht nach oben. dabei bewegen sich die x und y Koordinaten im Bereich -1, 1, ähnlich zu den Bereichen bei Farben. Wollen wir Pixel-perfekt arbeiten müssen wir das OpenGL erst beibringen. Wir werden später noch sehen wie wir das bewerkstelligen.
+Movement on the screen is achieved in the same way as trick films do it. Different animation phases, also called frames, are written to the frame buffer in sequence. If the frequency of this process is high enough the human eye perceives the image as being in motion. Films usually use 24 frames per second to fool us.
 
-Bewegung am Bildschirm entsteht ähnlich wie bei einem Zeichentrickfilm. Es werden verschiedene Animationsphasen, oder Frames nacheinander in den Framebuffer geschrieben. Ist die Frequenz mit der wir die Frames schreiben hoch genug entsteht beim Betrachter die Illusion von Bewegung. 24 Bilder pro Sekunde werden in der Regel bei Filmen gezeigt. 
+=== The dreaded math chapter ===
+We need a little bit of math to implement our Space Invaders clone. More precisely we need some linear algebra, or vector math. Sounds frightening but it's really simple. We will see how vectors in three dimensions work.
 
-=== Ein wenig Mathematik ===
-Ja, ohne Mathematik kommen wir leider nicht aus. Konkret brauchen wir ein wenig lineare Algebra. Klingt grauslich, ist es aber eigentlich gar nicht. Den Stoff den wir uns hier zu Gemüte führen sollten wir alle schon einmal in der Schule gehört haben. Wir werden uns kurz mit Vektoren in der dritten Dimension beschäftigen.
-
-Definieren wir zuerst das Koordinaten-System von OpenGL in dem wir uns dann bewegen werden. Die positive x-Achse zeigt nach rechts, die positive y-Achse zeigt nach oben und die positive z-Achse zeigt aus der ebene heraus. Siehe dazu die nächste Grafik:
+Let's first define the coordinate system OpenGL uses. The positive x-axis points to the right, the positive y-axis upwards and the positive z-axis points at the viewer in front of the screen:
 
 [[Datei:coordinatesystem.jpg|200px]]
 
-Einen Punkt in diesem System gibt man über die Verschiebung auf den drei Achsen an, d.h. ein Punkt hat 3 Koordinaten, x, y und z. Ein Vektor gibt eine Richtung im Koordinaten-System an und ist nicht mit einem Punkt gleichzusetzen. Vektoren können im System beliebig verschoben werden. Trotzdem werden wir die Termini Vektor und Punkt ein wenig durchmischen da man im Alltag in der Regel mit Vektoren arbeitet. Wir werden im Artikel Vektoren wie folgt anschreiben:
+A point in this coordinate system is given as the translation on each of the three axis. It thus has three coordinates x, y and z. A vector is a direction in the coordinate system and different to a point. You can move vectors around in the system as much as you want their components don't change. If you move a point around it's three components do change. However, as we use vectors to represent the positions of our points we'll use both terms to describe a point in the coordinate system. Confusing isn't it? We'll notate vectors like this:
 
  '''v''' = [vx, vy, vz]
 
-Vektoren werden '''fett''' gedruckt, Skalare (also einfach Zahlen) werden wir normal drucken. 
+Vectors are '''bold''', scalars (simple numbers) are displayed normally.
 
-Mit Vektoren kann man auch wunderbar rechnen. Als erstes wollen wir die Länge eines Vektors bestimmen:
+Of course we can do some nice calculations with vectors. Let's calculate the length of a vector:
 
  |'''v'''| = Math.sqrt( vx * vx + vy * vy + vz * vz );
 
-Das sollte euch bekannt vor kommen: die Länge eines Vektors leitet sich von Pythagoras' Satz ab. Die Notation auf der rechten Seite bedeutet "Länge des Vektors '''v'''". 
+Simple. The notation on the right means "length of vector '''v'''"
 
-Vektoren kann man auch addieren und subtrahieren:
+We can also add and subtract vectors to and from each other:
 
  '''a''' + '''b''' = [ax + bx, ay + by, az + bz]
  '''a''' - '''b''' = [ax - bx, ay - by, az - bz]
 
-Bei der Multiplikation sieht das ganz ähnlich aus:
+Multiplying two vectors is also possible:
 
  '''a''' * '''b''' = ax * bx + ay * by + az * bz
 
-Das nennt man auch das [http://de.wikipedia.org/wiki/Skalarprodukt Skalarprodukt] zweier Vektoren. Mit einem kleinen Kniff kann man mit diesem Skalarprodukt den Winkel zwischen zwei Vektoren messen:
+This is also called the scalar or [http://en.wikipedia.org/wiki/Dot_product dot product]. Using a small trick we can also measure the angle between two vectors:
 
  winkel = Math.acos( '''a''' * '''b''' / ( |'''a'''| * |'''b'''| ) );
 
-Ich mische hier Java und mathematische Notation etwas da mir die Formatierungsmöglichkeiten fehlen und es so etwas verständlicher wird. Der Winkel ist dabei immer <= 180 Grad. ''Math.acos()'' liefert diesen Winkel jedoch nicht in Grad sondern in Bogenmaß welches man recht einfach mit ''Math.toDegrees()'' in Grad umrechnen kann. Alle trigonometrischen Funktionen der Klasse Math arbeiten übrigens mit Bogenmaß, sowohl was Parameter als auch was Rückgabewerte betrifft. Das sorgt oft für schwer zu findende Bugs, also immer daran denken.
+I'm mixing Java and math notation a bit here. The angle between two vectors is always <= 180 degrees. ''Math.acos'' returns the angle in radians which we can convert to degrees simply by using ''Math.toDegrees()''. All trigonometric functions of the class Math expect angles to be given in radians, so watch your angles!
 
-Zu allerletzt wollen wir noch auf Einheitsvektoren eingehen. Dies sind Vektoren die die Länge eins haben. Um einen beliebigen Vektor zu einem Einheitsvektor zu machen müssen wir dessen Komponenten einfach durch seine Länge dividieren.
+To create a unit vector out of an ordinary vector we have to normalize it:
 
   '''a'''' = [ax / |'''a'''|, ay / |'''a'''|, az / |'''a'''|]
 
-Der Apostroph nach dem '''a''' zeigt an dass es sich um einen Einheitsvektor handelt. Wir werden Einheitsvektoren später für ein paar Kleinigkeiten benötigen. 
+The apostrophe to the right indicates that this is a  unit vectors. Unit vectors are vectors of length one. 
 
-Und damit sind wir mit dem Mathematik Kapitel auch schon fertig. Ich hoffe es war nicht gar zu schlimm. Bei Unsicherheiten empfehle ich euch im Netz ein wenig in Material zum Thema zu stöbern. 
+And this is all we have to know about vectors. If you feel uncertain about anything i said above consult google and wikipedia to get a better picture of vectors.
 
-=== Das erste Dreieck ===
-Wie Eingangs schon erwähnt ist OpenGL im Grunde seines Herzens eine Dreieck-Zeichenmaschine. In diesem Abschnitt wollen wir uns dran machen das erste Dreieck auf den Bildschirm zu Zaubern. Dazu erstellen wir eine neue Activity die von GameActivity ableitet und die sich selbst als GameListener in der ''onCreate()'' Methode registriert. 
+=== The first triangle ===
+OpenGL is nothing more than a triangle rendering machine as i mentioned earlier. In this section we want to learn how to draw our first triangle to the screen. For this we have to create a new Activity that derives from GameActivity and let it also implement the GameListener interface so we can set it as a listener of the GameActivity.
 
-Wie wir schon Eingangs erwähnt haben nennen sich die Dinge die wir zeichnen Meshes. Ein solches Mesh wird durch sogenannte Vertices definiert. Ein Vertex entspricht dabei einem Punkt des Meshes mit verschiedenen Attributen. Anfangs wollen wir uns nur um die wichtigste Komponente kümmern, der Position. Die Position eines Vertex wird, ihr habt es erraten, als dreidimensionaler Vektor angegeben. Ein Punkt alleine macht noch kein Mesh, darum brauchen wir mindestens drei. Mehrere Dreiecke sind natürlich auch kein Problem, wir wollen aber klein anfangen. 
+The things we want to render are called meshes as we've heard earlier. A mesh is defined by so called vertices. A vertex is a point in space that has different attributes. Its most important attribute is its position which is a point in our threedimensional space. Three vertices define a triangle. A mesh is composed of one or more triangles. We'll start with one triangle.
 
-OpenGL ES erwartet in seiner Basisversion 1.1 die Vertex Positionen in einem [http://java.sun.com/j2se/1.4.2/docs/api/java/nio/ByteBuffer.html direct ByteBuffer]. Definieren wir zur Übung einmal ein Dreieck in der x-y-Ebene mit Hilfe so eines ByteBuffers:
+OpenGL ES in version 1.1 needs the vertex position in form of a  [http://java.sun.com/j2se/1.4.2/docs/api/java/nio/ByteBuffer.html direct ByteBuffer]. Each vertex position consists of 3 floats that we simply put into such a ByteBuffer: Let's start with 3 vertices of a triangle in the x-y plane:
 
  ByteBuffer buffer = ByteBuffer.allocateDirect( 3 * 3 * 4 );
  buffer.order(ByteBuffer.nativeOrder());
@@ -269,20 +269,20 @@ OpenGL ES erwartet in seiner Basisversion 1.1 die Vertex Positionen in einem [ht
  vertices.put( 0.5f );
  vertices.put( 0 );
 
-Ganz schön viel Code für so ein kleines Dreieck. Als erstes erstellen wir einen direct ByteBuffer der 3 * 3 * 4 Bytes groß ist. Die Zahl ergibt sich da wir 3 Vertices haben zu je 3 Komponenten (x, y, z) die jeweils 4 Byte Speicher brauchen (float -> 32-bit). Anschließend sagen wir dem ByteBuffer, dass er bitte alles in nativer Ordnung speichern soll, d.h. in Big- oder Little-Endian. Den fertig initialisierten ByteBuffer wandeln wir dann in einen FloatBuffer um den wir mit der Methode ''FloatBuffer.put()'' befüllen können. Jeweils 3 Aufrufe definieren die Koordinaten eines Vertex' unseres Dreiecks. Der erste Vertex liegt links unter dem Ursprung, der zweite Vertex rechts unter dem Ursprung und der dritte Vertex direkt über dem Ursprung: 
+A lot of code for such a small triangle. We start by allocating a ByteBuffer that is 3 * 3 * 4 bytes long. 3 vertices each having 3 coordinates (x,y,z) an each coordinate needs 4 bytes (float). Next we tell the buffer that it should use native byte order. Finally we convert it to a FloatBuffer so we can easily specify the coordinates of the three vertices. We fill the buffer via ''FloatBuffer.put''. The first three calls to ''put'' define the x,y and z coordinate of the first vertex and so on. Here's how that triangle looks in the coordinate system.
 
 [[Datei:dreieck.jpg|200px]]
 
-Damit haben wir OpenGL aber noch immer nicht wirklich etwas verraten. Das machen wir doch gleich und veranlassen das Zeichnen unseres Dreiecks:
+We haven't told OpenGL anything yet. So let's command it to draw our mighty triangle:
 
  gl.glViewport(0, 0, activity.getViewportWidth(), activity.getViewportHeight());
  gl.glEnableClientState(GL10.GL_VERTEX_ARRAY );    
  gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertices);
  gl.glDrawArrays(GL10.GL_TRIANGLES, 0, 3);
 
-Im ersten Methoden Aufruf teilen wir OpenGL mit welcher Bereich des Bildschirms bezeichnet werden soll. Die ersten beiden Parameter geben dabei die Startkoordinaten des zu bezeichnenden Bereichs an, die nächsten beiden seine Größe. Beide angaben werden in Pixeln gemacht, hier sagen wir konkret dass der ganze Bildschirm ausgenutzt werden soll. 
+The first call tells OpenGL the area on the screen where it should draw everything. We tell it to use the entire screen. The width and height of screen is provided by the getter methods of the GameActivity. 
 
-'''Achtung:''' der Emulator benötigt unbedingt den Aufruf von ''glViewport''. Auf Devices ist der Viewport bereits auf den gesamten Bildschirm gesetzt, im Emulator hat der Viewport am Anfang die Größe 0,0. Nicht vergessen da sonst nichts am Bildschirm gezeichnet wird und man stundenlang sucht (ja, ist mir auch schon passiert...)!
+'''Attention:''' when using the emulator you have to call ''glViewport'' otherwise you don't see anything. On devices the viewport is most often set to the entire screen automatically after the GLSurfaceView is setup. This is not true for the emulator.
 
 Im nächsten Aufruf sagen wir OpenGL dass wir ihm jetzt gleich Vertex Positionen übergeben werden und er fortan beim Zeichnen immer den Übergebenen FloatBuffer verwenden soll. Im dritten Aufruf teilen wir OpenGL mit wo er die Positionensdaten findet. Der erste Parameter gibt dabei die Anzahl der Vertices an, der zweite gibt den Typen der Komponenten jeder Position an, in diesem Fall floats. Der dritte Parameter nennt sich stride und ist für uns ohne Belang, wir setzen ihn einfach auf 0. Der letzte Parameter ist der FloatBuffer den wir zuvor mit den Positionen der 3 Vertices befüllt haben. Als letztes befehlen wir OpenGL die eben definierten Vertices zu zeichnen. Der erste Parameter gibt dabei an was wir zeichnen wollen, und zwar Dreiecke. Der zweite Parameter gibt an ab welcher Position im FloatBuffer OpenGL beginnen soll die Positionsdaten zu holen. Der letzte Parameter sagt OpenGL noch wieviele Vertices wir gezeichnet haben wollen. Zeichnen wir Dreiecke muss dieser Parameter immer ein Vielfaches von 3 sein. Und schon haben wir das erste Dreieck mit OpenGL gezeichnet! Zur Entspannung hier der gesamte Code dieses Beispiels:
 
