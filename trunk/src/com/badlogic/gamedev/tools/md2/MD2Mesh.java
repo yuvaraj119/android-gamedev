@@ -14,8 +14,8 @@ public class MD2Mesh
 	public final int numVertices;	
 	
 	public MD2Mesh( GL10 gl, MD2Frame[] frames, short[] indices, float texCoords[], float normals[] )
-	{				
-		this.mesh = new IndexedMesh(gl, frames[0].vertices.length / 3, false, false, true, true, indices.length, false );
+	{		
+		this.mesh = new IndexedMesh( gl, frames[0].vertices.length / 3, false, false, true, true, indices.length, false );
 		this.frames = frames;
 		this.indices = indices;
 		this.texCoords = texCoords;
@@ -26,10 +26,10 @@ public class MD2Mesh
 		System.arraycopy( frames[0].vertices, 0, mesh.getVertices(), 0, frames[0].vertices.length );
 	}			
 
-	public void render(int frameIdx, float alpha) 
+	public void render(int startIdx, int endIdx, float alpha) 
 	{
 		mesh.reset();		
-		interpolateFrame( frameIdx, alpha );				
+		interpolateFrame( startIdx, endIdx, alpha );				
 		mesh.setDirty();		
 		mesh.render( PrimitiveType.Triangles, indices.length, 0 );	
 	}
@@ -39,11 +39,11 @@ public class MD2Mesh
 		mesh.dispose();
 	}
 
-	private void interpolateFrame(int frameIdx, float alpha) 
+	private void interpolateFrame(int startIdx, int endIdx, float alpha) 
 	{	
 		float[] frame = mesh.getVertices();
-		float[] src = frames[frameIdx].vertices;
-		float[] dst = frames[frameIdx+1].vertices;
+		float[] src = frames[startIdx].vertices;
+		float[] dst = frames[endIdx].vertices;
 		for( int i = 0; i < frame.length; i++ )
 		{
 			float d = dst[i];

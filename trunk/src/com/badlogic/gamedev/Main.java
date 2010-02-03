@@ -12,6 +12,7 @@ import com.badlogic.gamedev.samples.ColorSample;
 import com.badlogic.gamedev.samples.ColorSample2;
 import com.badlogic.gamedev.samples.InputSample;
 import com.badlogic.gamedev.samples.LightSample;
+import com.badlogic.gamedev.samples.MD2Sample;
 import com.badlogic.gamedev.samples.MeshSample;
 import com.badlogic.gamedev.samples.MultipleObjectsSample;
 import com.badlogic.gamedev.samples.MusicSample;
@@ -37,7 +38,7 @@ public class Main extends ListActivity
 		String[] items = new String[]{"Space Invaders", "GameActivity", "Input Sample", "Triangle Sample",  "Color Sample",
 									  "Color Sample 2","Texture Sample", "Mesh Sample", "Texture & Mesh Sample",
 									  "Ortho Sample", "Camera Sample", "Z-Buffer Sample", "Light Sample",
-									  "Transformation Sample", "Obj Sample", "Multiple Objects Sample", "Text Sample", "Sound Sample", "Music Sample"
+									  "Transformation Sample", "Obj Sample", "Multiple Objects Sample", "Text Sample", "Sound Sample", "Music Sample", "MD2 Sample"
 									 };
 		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));        
 	}
@@ -90,6 +91,8 @@ public class Main extends ListActivity
 			intent = new Intent( this, SoundSample.class );
 		if( keyword.equals( "Music Sample" ) )
 			intent = new Intent( this, MusicSample.class );
+		if( keyword.equals( "MD2 Sample" ) )
+			intent = new Intent( this, MD2Sample.class );
 			
 		startActivity( intent );
 	}
