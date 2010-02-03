@@ -1,5 +1,6 @@
 package com.badlogic.gamedev.tools.md2;
 
+
 public class MD2Instance 
 {
 	public MD2Mesh mesh;	
@@ -20,6 +21,7 @@ public class MD2Instance
 	public void setFrameRange( int startIdx, int endIdx )
 	{
 		this.startIdx = startIdx;
+		this.frameIdx = startIdx;
 		this.endIdx = endIdx;
 	}
 	
@@ -31,11 +33,15 @@ public class MD2Instance
 		{
 			accumulator -= frameDuration;
 			frameIdx++;
-			if( frameIdx == endIdx )
+			if( frameIdx > endIdx )
 				frameIdx = startIdx;
 		}		
 		
+		int endIdx = frameIdx +1;
+		if( endIdx > this.endIdx )
+			endIdx = startIdx;
+		
 		float alpha = accumulator / frameDuration;		
-		mesh.render( frameIdx, alpha );
+		mesh.render( frameIdx, endIdx, alpha );
 	}
 }
