@@ -6,7 +6,7 @@ public class Ship implements Serializable
 {
 	public static final float SHIP_RADIUS = 1;
 	public static final float SHIP_VELOCITY = 20;
-	public final Vector position = new Vector( );
+	public final Vector position = new Vector( 0, 0, - 16 );
 	public int lives = 3;
 	public boolean isExploding = false;
 	public float explodeTime = 0;		
