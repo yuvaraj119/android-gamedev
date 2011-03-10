@@ -33,12 +33,12 @@ public class SoundSample extends GameActivity implements GameListener
 		
 		try
 		{
-			AssetFileDescriptor descriptor = getAssets().openFd( "shot.wav" );
+			AssetFileDescriptor descriptor = getAssets().openFd( "shot.ogg" );
 			soundId = soundPool.load( descriptor, 1 );
 		}
 		catch( Exception ex )
 		{
-			Log.d( "Sound Sample", "couldn't load sound 'shot.wav'" );
+			Log.d( "Sound Sample", "couldn't load sound 'shot.ogg'" );
 			throw new RuntimeException( ex );
 		}
 	}
