@@ -69,6 +69,7 @@ public class ColorSample2 extends GameActivity implements GameListener
 	public void mainLoopIteration(GameActivity activity, GL10 gl) 
 	{	
 		gl.glViewport( 0, 0, activity.getViewportWidth(), activity.getViewportHeight() );
+		gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
 		
 		gl.glEnableClientState(GL10.GL_VERTEX_ARRAY );    
 		gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertices);
