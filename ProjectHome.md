@@ -1,0 +1,1 @@
+This is the code to a german tutorial on Android game development. It shows how to setup a basic Activity with OpenGL ES Capability, render meshes using textures and OpenGL ES fixed pipeline lighting, process input from the touch screen and the accelerometer, play sound effects and stream music and combines all this into a simple Space Invaders clone.
